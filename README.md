@@ -36,11 +36,15 @@ python -m streamlit run streamlit_app.py
 
 로컬에 커밋된 상태입니다. **원격 저장소를 만든 뒤** (GitHub에서 New repository, README 없이 생성 권장):
 
+원격 저장소: **https://github.com/skkuaws0215/20260330_pre_project_4w_test-1**
+
 ```powershell
 cd C:\Users\biso8\dev\20260330_pre_project_4w_test-1
-git remote add origin https://github.com/<사용자명>/<저장소명>.git
+git remote add origin https://github.com/skkuaws0215/20260330_pre_project_4w_test-1.git
 git push -u origin main
 ```
+
+(이미 `origin`이 있으면 `git remote set-url origin https://github.com/skkuaws0215/20260330_pre_project_4w_test-1.git`)
 
 `.aws/credentials` 는 `.gitignore`에 있어 **커밋되지 않습니다.**
 
