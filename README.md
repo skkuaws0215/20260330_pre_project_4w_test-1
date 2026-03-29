@@ -30,7 +30,19 @@ python -m streamlit run streamlit_app.py
 
 `streamlit` 명령을 찾지 못한다면(`CommandNotFoundException`), 위처럼 **`python -m streamlit`** 을 사용하세요. Windows에서 pip가 사용자 폴더에만 설치하면 `Scripts` 경로가 PATH에 없는 경우가 많습니다.
 
-브라우저에서 사이드바로 **핵심 용어**, **§2 플로우**, **Pre-Project 체크리스트**, **`pipeline_overview.html` 전체** 등을 전환해 확인합니다.
+브라우저에서 사이드바로 **전체 요약·현황**, **핵심 용어**, **§2 플로우**, **Pre-Project 체크리스트**, **`pipeline_overview.html` 전체** 등을 전환해 확인합니다.
+
+## Git / GitHub
+
+로컬에 커밋된 상태입니다. **원격 저장소를 만든 뒤** (GitHub에서 New repository, README 없이 생성 권장):
+
+```powershell
+cd C:\Users\biso8\dev\20260330_pre_project_4w_test-1
+git remote add origin https://github.com/<사용자명>/<저장소명>.git
+git push -u origin main
+```
+
+`.aws/credentials` 는 `.gitignore`에 있어 **커밋되지 않습니다.**
 
 ## 개인 계정 vs 팀 계정
 
