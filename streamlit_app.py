@@ -68,7 +68,7 @@ def page_home():
 | `model_selection_strategy.md` | ML/DL/Graph 후보·우선순위 (PPTX) |
 | `admet_postprocessing_strategy.md` | ADMET 예측 도구 + 후처리 필터 + 컷오프 참고 |
 | `pipeline_sections_detail.md` | HTML §1–2 상세 + 계획 보강 |
-| `templates/s3_features_nextflow_team4_README.txt` | S3 prefix 안내 업로드용 초안 |
+| `nextflow/s3_features_nextflow_team4_README.txt` | S3 prefix 안내 업로드용 초안 |
         """
     )
     c1, c2, c3 = st.columns(3)
@@ -98,7 +98,7 @@ def page_status():
         "파일럿 학습 (예: LightGBM) 및 모델 랭킹 확장",
         "`25_admet_results.parquet` 컬럼 ↔ 컷오프 매핑 및 Pandas/Athena 필터 스크립트",
         "METABRIC 외부 검증 · Bedrock RAG",
-        "선택: S3에 `README.txt` 업로드 (`templates/...` 참고)",
+        "선택: S3에 `README.txt` 업로드 (`nextflow/README.md` 참고)",
     ]
 
     c1, c2 = st.columns(2)

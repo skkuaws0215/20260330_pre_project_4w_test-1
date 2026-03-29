@@ -14,7 +14,7 @@
 | `pipeline_overview.html` | 파이프라인 개요 보고서 — §2에 Nextflow·Batch·METABRIC·ADMET·Bedrock 플로우, §18~§19에 4주 산출물·Final 로드맵 반영 |
 | `streamlit_app.py` | 진행용 **Streamlit 대시보드** (용어·체크리스트·HTML 보고서·README 뷰어) |
 | `requirements.txt` | `streamlit` 등 Python 의존성 |
-| `templates/s3_features_nextflow_team4_README.txt` | S3 prefix 안내용 README 초안 (업로드용) |
+| `nextflow/` | Nextflow용 폴더 — S3 prefix 안내 `s3_features_nextflow_team4_README.txt`, 업로드 방법 `README.md` |
 | `model_selection_strategy.md` | PPTX 기반 ML/DL/Graph 후보·우선순위·확장 규모(4~5 / 3~4 / 3~4) |
 | `admet_postprocessing_strategy.md` | ADMET **후처리 필터** (예측 도구 / 실행 도구 / 컷오프 참고) |
 
@@ -113,7 +113,7 @@ aws s3 ls "s3://drug-discovery-joe-raw-data-team4/results/" --recursive | findst
 | `cross_platform/11_intersection.parquet`, `id_mapping/55_harmonized.parquet`, `admet/25_admet_results.parquet` | |
 | `opentargets/26_associations.parquet`, `pubmed/23_corpus.parquet` | |
 
-첫 Nextflow 업로드 시 **`results/features_nextflow_team4/`** 아래에 `README.txt` 등을 두어 팀에 prefix를 알리는 것을 권장. 로컬 초안: `templates/s3_features_nextflow_team4_README.txt` → `aws s3 cp` 로 업로드 가능.
+첫 Nextflow 업로드 시 **`results/features_nextflow_team4/`** 아래에 `README.txt` 를 두어 팀에 prefix를 알리는 것을 권장. 로컬 초안: `nextflow/s3_features_nextflow_team4_README.txt` → `nextflow/README.md` 의 `aws s3 cp` 예시 참고.
 
 ## Pre-Project 목표 워크플로 (계획 확인용)
 
@@ -168,6 +168,12 @@ aws s3 ls "s3://drug-discovery-joe-raw-data-team4/results/" --recursive | findst
 - **단일 대형 EC2/SageMaker 노트북**: 파일럿·디버깅에는 좋고, **전체 확장·재현성**은 Batch+Nextflow 쪽이 유리.
 
 이 저장소에는 아직 Nextflow·Batch 템플릿이 없음. 확정되면 `nextflow.config`(awsbatch 프로필)와 **IAM·큐 이름**만 README에 링크 형태로 추가하는 것을 권장.
+
+## 모델 학습·튜닝 (SageMaker)
+
+계획상 **학습·하이퍼파라미터 튜닝**은 주로 **Amazon SageMaker**(노트북/Studio, Training Job, 내장 알고리즘 또는 커스텀 스크립트·컨테이너, GPU 예: `ml.g4dn.*`)에서 진행하는 흐름을 전제로 합니다. PPTX에서도 LightGBM/XGB 등 **SageMaker built-in** 언급이 이에 해당합니다.
+
+**AWS Batch**는 Nextflow **피처 엔지니어링** 병렬화에 두는 그림이 자연스럽고, 학습 잡을 Batch GPU 큐에 올리는 것은 **팀 선택**(동일 컨테이너를 ECR에 두고 Batch에서 실행)으로 가능합니다.
 
 ## `credentials` 작성 시 주의
 
