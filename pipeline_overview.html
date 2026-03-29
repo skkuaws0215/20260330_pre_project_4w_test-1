@@ -520,7 +520,7 @@ s3://drug-discovery-joe-raw-data-team4/
 ├── tcga/, metabric/, drugbank/, chembl/, lincs/, string/
 ├── msigdb/, gdsc/, opentargets/, depmap/
 ├── results/                    # 전처리 완료 (소스별 하위 폴더 + parquet)
-│   └── features_nextflow_team4/  # Nextflow 피처 엔지니어링 산출 (팀4 전용 prefix)
+│   └── features_nextflow_team4/  # Nextflow FE 산출 (팀4) + README.txt 팀 안내
 └── ml_ready/                   # ML 통합 데이터셋
     ├── 01~10 parquet
     ├── features_table.parquet  (7,200 × 2,006+)
@@ -528,8 +528,8 @@ s3://drug-discovery-joe-raw-data-team4/
     └── metadata.parquet
 </pre>
 
-<h3>Nextflow + AWS Batch</h3>
-<p><strong>Nextflow</strong>로 S3에 있는 raw·<code>results/</code>를 읽어 피처 단계를 재현 가능하게 실행. 작업 단위가 많고 용량이 크므로 <strong>AWS Batch</strong>(<code>awsbatch</code> executor)로 프로세스별 컨테이너 병렬 권장. <strong>CPU 큐</strong>(피처·전처리)와 <strong>GPU 큐</strong>(DL/GNN 학습) 분리, Spot/온디맨드 프로필 분리로 파일럿→전체 확장 비용 통제. 반복 I/O 시 FSx for Lustre 등 스테이징 검토.</p>
+<h3>Nextflow + AWS Batch (피처) · SageMaker (학습·튜닝)</h3>
+<p><strong>Nextflow</strong>로 S3 raw·<code>results/</code>를 읽어 <strong>피처 엔지니어링</strong>을 재현 가능하게 실행. 병렬·대량 I/O는 <strong>AWS Batch</strong>(<code>awsbatch</code> executor) 권장. <strong>학습·하이퍼파라미터 튜닝</strong>은 주로 <strong>Amazon SageMaker</strong>; 동일 Docker를 Batch GPU에 올려 학습만 돌리는 것은 선택. CPU 큐(FE)와 GPU 큐 분리, Spot/온디맨드 프로필 분리. 반복 I/O 시 FSx for Lustre 등 검토.</p>
 
 <h3>학습 환경 (예정)</h3>
 <div class="tw"><table>

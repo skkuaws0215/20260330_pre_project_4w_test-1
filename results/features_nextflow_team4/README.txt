@@ -7,4 +7,4 @@ Prefix: results/features_nextflow_team4/
 
 Agreed: 2026-03-29 (update if changed)
 
-Repo copy: nextflow/s3_features_nextflow_team4_README.txt — upload to S3 as README.txt under the prefix above.
+This file in Git: results/features_nextflow_team4/README.txt — upload to the same S3 key to mark the prefix for the team.

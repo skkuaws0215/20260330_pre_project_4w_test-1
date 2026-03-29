@@ -56,7 +56,7 @@ def page_home():
     )
     st.info(
         "사이드바 **「전체 요약·현황」** 에 완료/예정 작업과 문서 목록이 정리되어 있습니다. "
-        "실행 코드(Nextflow·Batch·학습)는 **내일 이후** 착수 예정."
+        "**아키텍처:** FE = Nextflow+Batch / 학습·튜닝 = 주로 SageMaker (동일 Docker를 Batch GPU에 올리는 것은 선택)."
     )
     st.subheader("문서 바로가기 (요약)")
     st.markdown(
@@ -68,7 +68,7 @@ def page_home():
 | `model_selection_strategy.md` | ML/DL/Graph 후보·우선순위 (PPTX) |
 | `admet_postprocessing_strategy.md` | ADMET 예측 도구 + 후처리 필터 + 컷오프 참고 |
 | `pipeline_sections_detail.md` | HTML §1–2 상세 + 계획 보강 |
-| `nextflow/s3_features_nextflow_team4_README.txt` | S3 prefix 안내 업로드용 초안 |
+| `results/features_nextflow_team4/README.txt` | S3 동일 키 — prefix 팀 안내 |
         """
     )
     c1, c2, c3 = st.columns(3)
@@ -86,11 +86,12 @@ def page_status():
 
     done = [
         "팀 AWS: 프로젝트 `.aws/` + `use-team-aws.ps1` (개인 프로필과 분리)",
-        "S3: `results/` 구조·parquet 스냅샷 README 기록, prefix `results/features_nextflow_team4/` 합의",
+        "S3: prefix `results/features_nextflow_team4/` — 안내 README는 Git 경로 `results/features_nextflow_team4/README.txt` = S3 동일 키",
+        "아키텍처: FE Nextflow+Batch / 학습·튜닝 SageMaker (Batch GPU 선택)",
         "`pipeline_overview.html`: Nextflow·Batch·METABRIC·ADMET·Bedrock·§18~19·용어 ref",
         "`README.md` / `pipeline_sections_detail.md` / 모델·ADMET 전략 MD",
         "Streamlit 대시보드 (용어·모델·ADMET·플로우·체크리스트·HTML·AWS)",
-        "`requirements.txt` · `run_dashboard.ps1` · S3 README 템플릿",
+        "`requirements.txt` · `run_dashboard.ps1`",
     ]
     nxt = [
         "Nextflow `main.nf` / `nextflow.config` (S3 in → `features_nextflow_team4/` out)",
@@ -98,7 +99,7 @@ def page_status():
         "파일럿 학습 (예: LightGBM) 및 모델 랭킹 확장",
         "`25_admet_results.parquet` 컬럼 ↔ 컷오프 매핑 및 Pandas/Athena 필터 스크립트",
         "METABRIC 외부 검증 · Bedrock RAG",
-        "선택: S3에 `README.txt` 업로드 (`nextflow/README.md` 참고)",
+        "선택: `results/features_nextflow_team4/README.txt` → S3 동일 경로 업로드",
     ]
 
     c1, c2 = st.columns(2)
