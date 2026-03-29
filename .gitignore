@@ -1,0 +1,13 @@
+# 팀 키가 들어가는 파일은 저장소에 올리지 않음
+.aws/credentials
+
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.streamlit/secrets.toml
+.idea/
+.vscode/
+*.log
+_pptx_extract.txt

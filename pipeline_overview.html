@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Drug Discovery — 전체 파이프라인 보고서</title>
+<style>
+:root{--bg:#121212;--panel:#1b1b1b;--panel2:#202020;--line:#3a3a3a;--text:#f3f4f6;--muted:#b6bac3;--accent:#ff6b6b;--accent2:#3ddc97;--chip:#2a2a2a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Pretendard","Apple SD Gothic Neo","Segoe UI",sans-serif;background:radial-gradient(circle at top right,rgba(255,107,107,.14),transparent 30%),linear-gradient(180deg,#111 0%,#151515 100%);color:var(--text);line-height:1.6}
+.page{max-width:1500px;margin:0 auto;padding:40px 36px 72px}
+h1{font-size:48px;font-weight:800;letter-spacing:-.03em;margin-bottom:8px}
+.subtitle{color:var(--muted);font-size:17px;margin-bottom:28px}
+.section{margin-top:32px;padding:28px;background:rgba(27,27,27,.92);border:1px solid var(--line);border-radius:22px}
+.section h2{margin:0 0 18px;font-size:26px;letter-spacing:-.02em}
+.section h3{margin:28px 0 12px;font-size:18px;color:var(--accent2)}
+.section p,.section li{color:var(--muted);font-size:15px;margin-bottom:8px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin:20px 0}
+.card{padding:18px;background:var(--panel2);border:1px solid var(--line);border-radius:18px;text-align:center}
+.card .v{font-size:30px;font-weight:800;letter-spacing:-.03em}
+.card .l{color:var(--muted);font-size:13px;margin-top:4px}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+th{background:#202020;color:#fff;padding:12px 14px;text-align:left;position:sticky;top:0;z-index:1;font-weight:700;border-bottom:2px solid var(--accent)}
+td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.5}
+tr:hover td{background:rgba(255,255,255,.03)}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:18px;background:var(--panel);margin:16px 0}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.done{background:rgba(61,220,151,.16);color:#7bf0bc;border:1px solid rgba(61,220,151,.32)}
+.wait{background:rgba(255,187,51,.14);color:#ffc966;border:1px solid rgba(255,187,51,.28)}
+.chip{display:inline-block;padding:5px 11px;border-radius:12px;background:var(--chip);color:var(--accent);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;font-size:13px}
+pre{background:#1a1a1a;padding:14px;border-radius:10px;overflow-x:auto;font-size:13px;line-height:1.5;color:#c9d1d9;border:1px solid var(--line)}
+code{background:#2a2a2a;padding:2px 6px;border-radius:4px;font-size:13px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.flow{display:flex;flex-direction:column;align-items:center;gap:4px;margin:16px 0}
+.flow-box{width:100%;max-width:100%;border:2px solid var(--line);border-radius:12px;padding:14px 20px;background:var(--panel2);text-align:center;font-size:14px;line-height:1.6}
+.flow-arrow{color:var(--accent);font-size:22px}
+.ref{font-size:12px;color:#888;margin-top:2px}
+footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);color:#666;font-size:13px}
+@media(max-width:900px){.page{padding:20px 14px 40px}h1{font-size:32px}.cards{grid-template-columns:repeat(2,1fr)}}
+</style></head><body>
+<div class="page">
+
+<header>
+<h1>AI Drug Discovery</h1>
+<p class="subtitle">유방암(BRCA) 약물 재창출 — 전체 파이프라인 구축 보고서 (2026-03-27)</p>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════ 1 ═══ -->
+<section class="section" id="s1">
+<h2>1. 한눈에 보기</h2>
+<div class="cards">
+<div class="card"><div class="v">11</div><div class="l">데이터 소스</div></div>
+<div class="card"><div class="v">56</div><div class="l">Snakemake Rules</div></div>
+<div class="card"><div class="v">10</div><div class="l">ML 데이터셋</div></div>
+<div class="card"><div class="v">12</div><div class="l">ML 모델</div></div>
+<div class="card"><div class="v">~2,064</div><div class="l">피처 수</div></div>
+<div class="card"><div class="v">7,200+</div><div class="l">학습 샘플 (매칭 보강 후 증가 예상)</div></div>
+<div class="card"><div class="v">14</div><div class="l">QC3 체크포인트</div></div>
+<div class="card"><div class="v">14</div><div class="l">전처리 모듈</div></div>
+</div>
+<p>환경: <code>SageMaker(ml.m5.xlarge)</code> <code>Snakemake</code>(전처리) → S3 <code>raw</code>+<code>results/</code> 입력 → <strong><code>Nextflow</code></strong> 피처 엔지니어링(<strong><code>AWS Batch</code></strong> 병렬) → <code>Python</code>(통합·레거시 <code>features.py</code> 호환) → 팀 <code>AWS Glue/EMR</code> → 학습 <code>SageMaker(ml.g4dn.12xlarge)</code> 또는 Batch GPU 큐</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ 2 ═══ -->
+<section class="section" id="s2">
+<h2>2. 전체 파이프라인 흐름</h2>
+<p>각 단계에서 <strong>무엇이 잘리고, 무엇이 남는지</strong> 숫자로 표시. <strong class="chip">보강</strong> Pre-Project에서는 S3·Nextflow·Batch·<strong>METABRIC</strong>·<strong>ADMET</strong>·<strong>Bedrock</strong> 단계를 플로우에 명시.</p>
+<div class="flow">
+<div class="flow-box">📦 <strong>11개 데이터 소스</strong><br>TCGA(60,660 genes) · METABRIC(25K genes) · DrugBank(19,842 drugs) · ChEMBL(~300K activities)<br>GDSC(~1M IC50) · STRING(~1.4M edges) · MSigDB(7,900 sets) · LINCS(473K sigs) · OpenTargets(50M assoc) · DepMap(CRISPR+PRISM)</div>
+<div class="flow-arrow">▼ QC1: Raw Schema Validation (10개 소스 스키마 검증)</div>
+<div class="flow-box">⚙️ <strong>전처리 — SageMaker(ml.m5.xlarge)에서 Snakemake 56 rules 실행</strong><br>
+protein_coding 필터: 60,660 → ~20,000 유전자<br>
+low expression 필터: ~20,000 → ~15,000 유전자<br>
+PPI score≥700: 1.4M → 380K 엣지<br>
+GDSC breast cancer: 1M → 12K IC50<br>
+withdrawn/illicit 약물 제거: ~2-3%</div>
+<div class="flow-arrow">▼ QC2: Pandera 35개 + Final 16-point</div>
+<div class="flow-box">🔗 <strong>ML 통합 (integrate.py)</strong><br>14개 전처리 산출물 → 10개 ML-ready parquet<br>TCGA∩METABRIC 공통 유전자: ~14,000<br>DrugBank+ChEMBL 통합: ~140K drug-target pairs</div>
+<div class="flow-arrow">▼ <strong>Nextflow</strong> 피처 엔지니어링 — 입력: S3 <code>raw</code> + <code>results/</code> · 실행: <strong>AWS Batch</strong>(Nextflow <code>awsbatch</code> executor, 대량 파일·병렬)</div>
+<div class="flow-box">🧬 <strong>피처 산출</strong><br>Drug-level ~2,011 + Cell-line 53 (기존 <code>features.py</code> 스키마·품질 목표와 정렬)<br>약물 매칭: 26% → 90%+ (<code>drug_harmonize.py</code> 4단계)<br>산출: <code>results/features_nextflow_team4/</code> (팀4 합의 · 타 트랙 FE와 구분)</div>
+<div class="flow-arrow">▼ 파일럿 → 전체 확장 (Pre-Project 전략)</div>
+<div class="flow-box">🧪 <strong>소수 테이블·부분 샘플</strong>로 ML·DL·Graph 스모크 테스트 → 통과 시 <strong>전 데이터 학습</strong> · <strong>모델별 벤치마크·랭킹</strong> · <strong>최고 모델</strong>로 후속 단계 고정</div>
+<div class="flow-arrow">▼</div>
+<div class="flow-box">🤖 <strong>12 모델 학습 (3-Track)</strong> — 전체 확장 시<br>Track A: ElasticNet·RF·XGB·LGBM·MLP·TabNet (nested CV)<br>Track B: AE·VAE(bio-informed)·GNN(GATv2+attention)<br>Track C: Signature Reversal·Network Proximity·Pathway Overlap</div>
+<div class="flow-arrow">▼ 앙상블 (RRF 7-ranking) — Week3 Stage1</div>
+<div class="flow-box">✅ <strong>QC3: 14-point 검증</strong> (LODO/LOCO 포함) — Week3 Stage2 엄격 통계·내부 게이트</div>
+<div class="flow-arrow">▼ <strong>METABRIC</strong> 독립 코호트 일반화 — Week3 Stage3</div>
+<div class="flow-box">🎯 <strong>외부 검증</strong><br>TCGA(또는 동일 설계 훈련셋) 대비 <strong>METABRIC</strong>에서 AUROC·성능 감쇠(transfer degradation) 확인<br>§10 체크 3.5~3.6과 연계 · 최종 <strong>Top 10~30</strong> 후보 정제 입력</div>
+<div class="flow-arrow">▼ <strong>ADMET</strong> 임상 진입 생물학적 필터 — Week4 Part A</div>
+<div class="flow-box">💊 <strong>4 Gate</strong><br>① 용해도(Solubility) ② CYP 효소 대사 ③ hERG 심독성 ④ 간독성(Hepatotoxicity)<br>통과 후보만 Bedrock·최종 리스트로 — 피처 단계 ADMET 컬럼과 정책 일치 유지</div>
+<div class="flow-arrow">▼ <strong>AWS Bedrock</strong> + RAG 검증·XAI — Week4 Part B</div>
+<div class="flow-box">📄 <strong>LLM 후단</strong><br>문헌·지식 그래프 <strong>RAG</strong>로 근거 검색 · 기전 설명 · 타겟 환자군 리스크 · <strong>모순 탐지</strong> → <strong>임상 문서</strong>형 산출<br>기존 에이전트(Claude+MCP)와 병행 가능</div>
+<div class="flow-arrow">▼ 최종 산출</div>
+<div class="flow-box">🏁 <strong>검증된 Shortlist + QC4 Guardrails</strong><br>외부검증(METABRIC) + 생물학 필터(ADMET) + 문헌검증(Bedrock)을 거친 후보 리스트</div>
+</div>
+<p class="ref">Week3 퍼널: 앙상블·통계적 엄밀성·METABRIC 일반화 / Week4: ADMET → Bedrock XAI / 4주 산출물·Final 로드맵은 §18~§19 참고.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ 3 ═══ -->
+<section class="section" id="s3">
+<h2>3. 데이터 수집 + QC1</h2>
+<div class="tw"><table>
+<tr><th>소스</th><th>원본 크기</th><th>주요 컬럼</th><th>용도</th><th>QC1</th></tr>
+<tr><td><span class="chip">TCGA-BRCA</span></td><td>60,660 genes × 1,095 tumor</td><td>gene_id, gene_name, gene_type, sample UUIDs (TPM)</td><td>RNA-seq 발현</td><td><span class="badge done">PASS</span></td></tr>
+<tr><td><span class="chip">METABRIC</span></td><td>~25K genes × 2,509 samples</td><td>Hugo_Symbol, Entrez_Gene_Id, sample columns (log2)</td><td>Microarray 발현</td><td><span class="badge done">PASS</span></td></tr>
+<tr><td><span class="chip">DrugBank</span></td><td>19,842 drugs XML</td><td>DrugBank_ID, Drug_Name, UniProt_ID, SMILES, ATC</td><td>Drug-Target 매핑</td><td><span class="badge done">PASS</span></td></tr>
+<tr><td><span class="chip">ChEMBL</span></td><td>~300K activities</td><td>molecule_chembl_id, target_chembl_id, pchembl_value, canonical_smiles</td><td>약물 활성</td><td><span class="badge done">PASS</span></td></tr>
+<tr><td><span class="chip">LINCS L1000</span></td><td>12,328 genes × 473K sigs</td><td>sig_id, gene columns (z-score), pert_iname, cell_id</td><td>약물 처리 발현 변화</td><td><span class="badge done">PASS</span></td></tr>
+<tr><td><span class="chip">STRING</span></td><td>~1.4M edges (human)</td><td>protein1, protein2, combined_score</td><td>PPI 네트워크</td><td><span class="badge done">PASS</span></td></tr>
+<tr><td><span class="chip">MSigDB</span></td><td>7,900 gene sets</td><td>gene_set_name, genes (pipe-delimited), collection</td><td>Pathway gene sets</td><td><span class="badge done">PASS</span></td></tr>
+<tr><td><span class="chip">GDSC</span></td><td>~1M dose-response</td><td>DRUG_NAME, CELL_LINE_NAME, LN_IC50, AUC</td><td>약물 감수성 (ML label)</td><td><span class="badge done">PASS</span></td></tr>
+<tr><td><span class="chip">Open Targets</span></td><td>~50M associations</td><td>targetId, diseaseId, score, datasourceId</td><td>Disease-Gene association</td><td><span class="badge done">PASS</span></td></tr>
+<tr><td><span class="chip">DepMap</span></td><td>CRISPR 19K genes × 500 CL; PRISM 4K × 500</td><td>depmap_id, gene_name, dependency; broad_id, sensitivity</td><td>유전자 필수성 + 약물 감수성</td><td><span class="badge done">PASS</span></td></tr>
+<tr><td><span class="chip">PubMed</span></td><td>~200MB</td><td>title, abstract, doi</td><td>문헌 (에이전트용)</td><td><span class="badge wait">optional</span></td></tr>
+</table></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ 4 ═══ -->
+<section class="section" id="s4">
+<h2>4. 전처리 컬럼 변환 상세</h2>
+<p>각 모듈에서 컬럼이 <strong>어떻게 삭제·병합·생성</strong>되는지, <strong>왜 그렇게 하는지</strong>.</p>
+
+<h3>4-1. TCGA (R001→R007)</h3>
+<div class="tw"><table>
+<tr><th>단계</th><th>입력</th><th>조작</th><th>잘린 것 + 이유</th><th>출력 shape</th></tr>
+<tr><td>R001 Load</td><td>gene_id, gene_name, gene_type, sample UUIDs (TPM)</td><td>STAR counts 파싱, 메타행(N_unmapped 등) 제거</td><td>비-BRCA 샘플 제거 (11K→1,095)</td><td>60,660 × 1,095</td></tr>
+<tr><td>R002 protein_coding</td><td>gene_type 컬럼</td><td>gene_type == 'protein_coding' 필터</td><td><strong>비-단백질 코딩 유전자 40K 제거</strong> — lncRNA, miRNA 등은 약물 타겟 아님</td><td>~20,000 × 1,095</td></tr>
+<tr><td>R003 Low expr</td><td>샘플별 count 값</td><td>count≥10인 샘플 비율 < 20% 유전자 제거</td><td><strong>저발현 유전자 ~5K 제거</strong> — 신호 대 잡음비 낮음</td><td>~15,000 × 1,095</td></tr>
+<tr><td>R004 log2</td><td>TPM 값</td><td>NaN→0, log2(x+1) 변환</td><td>없음 (값 변환만)</td><td>~15,000 × 1,095</td></tr>
+<tr><td>R007 QC</td><td>전체 행렬</td><td>zero-variance 유전자 제거, NaN<1% 검증</td><td><strong>분산=0 유전자 제거</strong> — 분류 기여 불가</td><td>~15,000 × 1,095</td></tr>
+</table></div>
+<p class="ref">출력: <code>07_qc_passed.parquet</code> — gene_id, gene_name, gene_type, sample UUIDs (log2 TPM+1)</p>
+
+<h3>4-2. METABRIC (R008→R054)</h3>
+<div class="tw"><table>
+<tr><th>단계</th><th>조작</th><th>잘린 것 + 이유</th><th>출력 shape</th></tr>
+<tr><td>R008 Load</td><td>cBioPortal TSV 파싱, Hugo_Symbol 없으면 mygene API로 Entrez→HUGO 매핑</td><td>매핑 불가 유전자 (ENTREZ_ prefix) 제거</td><td>~25,000 × ~2,509</td></tr>
+<tr><td>R054 Filter</td><td>정상조직 제거, NaN→0, zero-variance 제거</td><td><strong>정상조직 샘플 + 분산=0 유전자</strong></td><td>~19,000 × ~1,904</td></tr>
+</table></div>
+
+<h3>4-3. Cross-Platform (R011→R013)</h3>
+<div class="tw"><table>
+<tr><th>단계</th><th>조작</th><th>결과</th></tr>
+<tr><td>R011 Gene intersection</td><td>TCGA hugo_symbol ∩ METABRIC Hugo_Symbol</td><td><strong>~14,000 공통 유전자</strong> (TCGA 15K ∩ MB 19K)</td></tr>
+<tr><td>R012 Quantile Normalize</td><td>TCGA 값을 METABRIC 분위수에 맞춤 + concat + <code>platform</code> 컬럼 추가</td><td>~14,000 × ~3,000 (TCGA+METABRIC 통합)</td></tr>
+</table></div>
+
+<h3>4-4. DrugBank (R014, R027→R030)</h3>
+<div class="tw"><table>
+<tr><th>단계</th><th>조작</th><th>잘린 것 + 이유</th></tr>
+<tr><td>R014 XML Parse</td><td>drug×target 추출: DrugBank_ID, Drug_Name, UniProt_ID, Action, SMILES, ATC_Code, Drug_Group</td><td>—</td></tr>
+<tr><td>R027 Filter</td><td>Drug_Group에 "withdrawn"/"illicit" 포함 시 제거</td><td><strong>회수/불법 약물 ~2-3%</strong> — 안전성 문제</td></tr>
+<tr><td>R028 Dedup</td><td>(DrugBank_ID, UniProt_ID, Action) 중복 제거</td><td><strong>동일 약물-타겟-작용 중복</strong></td></tr>
+<tr><td>R029 SMILES</td><td>RDKit 파싱 검증, 실패 시 None</td><td><strong>파싱 불가 SMILES</strong></td></tr>
+</table></div>
+<p class="ref">출력: <code>14_drug_targets.parquet</code> — ~95K drug-target pairs, 7 columns</p>
+
+<h3>4-5. ChEMBL (R015, R031→R034)</h3>
+<div class="tw"><table>
+<tr><th>단계</th><th>조작</th><th>잘린 것 + 이유</th></tr>
+<tr><td>R015 API Fetch</td><td>pChEMBL≥5, Homo sapiens, SINGLE_PROTEIN, standard_type IN {IC50,Ki,EC50,Kd,...}</td><td>비-인간, 비-단백질, 비-binding 제외</td></tr>
+<tr><td>R032 Assay type</td><td>assay_type IN {"B","F"} (Binding, Functional)</td><td><strong>기타 assay 유형</strong> — 결합/기능 외 무관</td></tr>
+<tr><td>R031 Dedup</td><td>(compound, target, assay_type) 그룹 → pchembl median</td><td><strong>다중 측정 → 중앙값 집계</strong></td></tr>
+<tr><td>R033 UniProt</td><td>target_chembl_id → UniProt ID (API)</td><td><code>uniprot_id</code> 컬럼 추가 (~70% 매핑)</td></tr>
+</table></div>
+<p class="ref">출력: <code>15_activities.parquet</code> — ~70K activity records</p>
+
+<h3>4-6. GDSC (R021-R022, R040→R042)</h3>
+<div class="tw"><table>
+<tr><th>단계</th><th>조작</th><th>잘린 것 + 이유</th></tr>
+<tr><td>R021 Load</td><td>GDSC2 + GDSC1 concat, GDSC2 우선 (중복 시 GDSC1 제거)</td><td>GDSC1 중복 ~150K</td></tr>
+<tr><td>R040 Breast filter</td><td>Cell Model Passports disease="Breast"</td><td><strong>비-유방암 세포주 (1.1M→15K)</strong></td></tr>
+<tr><td>R041 Valid IC50</td><td>약물별 유효 IC50 ≥ 6개</td><td><strong>측정 부족 약물</strong></td></tr>
+<tr><td>R022 Binary label</td><td>drug-wise median 기준 이진화: IC50 &lt; median → sensitive(1)</td><td><code>label</code> 컬럼 추가</td></tr>
+</table></div>
+<p class="ref">근거: Garnett et al. 2012 (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3531057/">PMC3531057</a>) — IC50 binary thresholding<br>
+출력: <code>22_binary_labels.parquet</code> — ~12K drug-cell pairs</p>
+
+<h3>4-7. STRING PPI (R019, R035→R037)</h3>
+<div class="tw"><table>
+<tr><th>단계</th><th>조작</th><th>잘린 것 + 이유</th></tr>
+<tr><td>R019 Load+Filter</td><td>combined_score ≥ 700 (high confidence)</td><td><strong>저신뢰 엣지 1M+ 제거</strong> — STRING FAQ 권장</td></tr>
+<tr><td>R035 Self-loop</td><td>protein1 ≠ protein2</td><td><strong>자기 상호작용</strong> — 생물학적 무의미</td></tr>
+<tr><td>ENSP→HUGO</td><td>mygene API: Ensembl protein → HUGO symbol</td><td>매핑 불가 ~5%</td></tr>
+</table></div>
+<p class="ref">근거: <a href="https://string-db.org/help/scores/">STRING scoring</a> — combined_score ≥ 700 = high confidence<br>
+출력: <code>19_ppi_filtered.parquet</code> — ~380K edges (HUGO)</p>
+
+<h3>4-8. MSigDB (R020, R038→R039)</h3>
+<div class="tw"><table>
+<tr><th>단계</th><th>조작</th><th>잘린 것 + 이유</th></tr>
+<tr><td>R020 GMT Parse</td><td>H(50)+C2(7,670)+C6(189) 파싱</td><td>—</td></tr>
+<tr><td>R038 Size filter</td><td>15 ≤ gene_count ≤ 500</td><td><strong>극소/극대 세트</strong> — 통계적 파워 부족 or 과도 일반화</td></tr>
+<tr><td>R039 Overlap</td><td>expression genes와 ≥15개 겹치는 세트만</td><td><strong>발현 데이터에 없는 세트</strong></td></tr>
+</table></div>
+<p class="ref">근거: <a href="https://www.gsea-msigdb.org/gsea/doc/subramanian_tamayo_gsea_pnas.pdf">Subramanian et al. 2005 PNAS</a> — GSEA 원론<br>
+출력: <code>20_gene_sets.parquet</code> — ~7,600 gene sets</p>
+
+<h3>4-9. LINCS (R016→R018)</h3>
+<div class="tw"><table>
+<tr><th>단계</th><th>조작</th><th>잘린 것 + 이유</th></tr>
+<tr><td>R016 GCTx</td><td>Level 5 MODZ 파싱 (12,328 genes × sigs)</td><td>—</td></tr>
+<tr><td>R017 MCF7</td><td>cell_id == "MCF7" 필터</td><td><strong>비-MCF7 시그니처</strong> — 유방암 세포주만</td></tr>
+<tr><td>R051 NaN</td><td>NaN > 50% 시그니처 제거, 나머지 NaN→0</td><td><strong>고결측 시그니처</strong></td></tr>
+<tr><td>R018 Entrez→HUGO</td><td>mygene: numeric Entrez → HUGO symbol</td><td>컬럼명 변환 (~99% 매핑)</td></tr>
+</table></div>
+<p class="ref">근거: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5990023/">Subramanian et al. 2017 Cell</a> — "Negative tau = reversal"<br>
+출력: <code>16_mcf7_processed.parquet</code> — ~1,900 MCF7 sigs × ~12K genes</p>
+
+<h3>4-10. DepMap (R057→R060)</h3>
+<div class="tw"><table>
+<tr><th>단계</th><th>조작</th><th>잘린 것 + 이유</th></tr>
+<tr><td>R057 CRISPR</td><td>Wide→Long melt: depmap_id, gene_name, dependency</td><td>—</td></tr>
+<tr><td>R059 Breast</td><td>OncotreeLineage="Breast" 필터</td><td><strong>비-유방암 세포주</strong></td></tr>
+<tr><td>R058 PRISM</td><td>Wide→Long: broad_id, depmap_id, sensitivity</td><td>—</td></tr>
+<tr><td>R060 Binary</td><td>sensitivity &lt; -0.5 → sensitive(1)</td><td><code>label</code> 컬럼 추가</td></tr>
+</table></div>
+
+<h3>4-11. ADMET (R025, R046→R048)</h3>
+<div class="tw"><table>
+<tr><th>단계</th><th>조작</th><th>결과</th></tr>
+<tr><td>R046 Canonicalize</td><td>RDKit: SaltRemover → LargestFragment → canonical SMILES</td><td>무효 SMILES → None</td></tr>
+<tr><td>R047 InChIKey</td><td>SMILES → InChI → InChIKey, InChIKey dedup</td><td><code>inchikey</code> 컬럼 추가</td></tr>
+<tr><td>R025 ADMETlab</td><td>4-Gate: Druglikeness(Ro5), Solubility(LogS), Permeability(Caco-2), Toxicity(hERG)</td><td>gate1~4 + <code>all_pass</code> 컬럼</td></tr>
+</table></div>
+
+<h3>4-12. ID Mapping (R055)</h3>
+<p>mygene + UniProt API → <code>hugo_symbol</code>, <code>ensembl_gene_id</code>, <code>entrez_gene_id</code>, <code>uniprot_id</code>, <code>hgnc_id</code></p>
+<p class="ref">출력: <code>55_harmonized.parquet</code> — ~25K–30K HUGO symbols</p>
+
+<h3>핵심 병합 키</h3>
+<div class="tw"><table>
+<tr><th>병합</th><th>키</th><th>설명</th></tr>
+<tr><td>TCGA × METABRIC</td><td><code>hugo_symbol</code></td><td>QN + concat → 통합 발현</td></tr>
+<tr><td>DrugBank × ChEMBL</td><td><code>uniprot_id</code> → <code>hugo_symbol</code></td><td>id_mapping 경유</td></tr>
+<tr><td>GDSC × cell metadata</td><td><code>cell_line_name</code></td><td>PAM50 subtype 부착</td></tr>
+<tr><td>Drug-response × Drug-target</td><td><code>drug_name</code> → <code>drug_id</code></td><td>4단계 harmonize</td></tr>
+<tr><td>DepMap × cell metadata</td><td><code>depmap_id</code></td><td>cell_line_name 부착</td></tr>
+</table></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ 5 ═══ -->
+<section class="section" id="s5">
+<h2>5. ML 통합 (14 산출물 → 10 데이터셋)</h2>
+<p><code>src/ml/integrate.py</code></p>
+<div class="tw"><table>
+<tr><th>#</th><th>파일</th><th>소스</th><th>주요 컬럼</th><th>Shape</th></tr>
+<tr><td>01</td><td>gene_expression_matrix</td><td>TCGA+METABRIC</td><td>hugo_symbol, sample cols, platform</td><td>~14K genes × ~3K samples</td></tr>
+<tr><td>02</td><td>drug_response_labels</td><td>GDSC</td><td>drug_name, cell_line_name, label, ln_IC50, pam50_subtype</td><td>~12K rows</td></tr>
+<tr><td>03</td><td>drug_target_network</td><td>DrugBank+ChEMBL</td><td>drug_id, drug_name, target_hugo_symbol, source, pchembl_value, canonical_smiles, admet_all_pass</td><td>~140K pairs</td></tr>
+<tr><td>04</td><td>ppi_subnetwork</td><td>STRING</td><td>protein1, protein2, combined_score</td><td>~380K edges</td></tr>
+<tr><td>05</td><td>pathway_activity_scores</td><td>MSigDB+Expression</td><td>pathway_name, collection, sample scores</td><td>~7.6K × ~3K</td></tr>
+<tr><td>06</td><td>drug_admet_profile</td><td>ADMET</td><td>drug_id, canonical_smiles, gate1-4, all_pass</td><td>~95K compounds</td></tr>
+<tr><td>07</td><td>repurposing_candidates</td><td>OpenTargets</td><td>drug_id, target_hugo_symbol, breast_cancer_association_score</td><td>varies</td></tr>
+<tr><td>08</td><td>depmap_crispr</td><td>DepMap</td><td>depmap_id, gene_name, dependency, cell_line_name</td><td>~2M rows (breast)</td></tr>
+<tr><td>09</td><td>depmap_drug_labels</td><td>DepMap PRISM</td><td>broad_id, depmap_id, sensitivity, label</td><td>~500K rows (breast)</td></tr>
+<tr><td>10</td><td>id_harmonization_table</td><td>mygene+UniProt</td><td>hugo_symbol, ensembl, entrez, uniprot, hgnc</td><td>~25K-30K genes</td></tr>
+</table></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ 6 ═══ -->
+<section class="section" id="s6">
+<h2>6. 피처 엔지니어링 — 뭐가, 어떻게, 왜</h2>
+<p><code>src/ml/features.py</code> — (drug, cell_line) 쌍별 피처 매트릭스 구축</p>
+
+<h3>Drug-level 피처 (2,011개)</h3>
+<div class="tw"><table>
+<tr><th>피처</th><th>개수</th><th>어떻게</th><th>왜</th><th>공식 근거</th></tr>
+<tr><td>타겟 유전자 이진</td><td>~2,000</td><td>drug_target에서 pivot (drug × gene = 0/1)</td><td>약물이 어떤 유전자를 타겟하는지 — 감수성 예측의 핵심</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3531057/">Garnett 2012</a></td></tr>
+<tr><td>pChEMBL mean</td><td>1</td><td>drug_target groupby drug → mean(pchembl_value)</td><td>약물-타겟 결합 강도 — 강할수록 효과 높음</td><td><a href="https://www.ebi.ac.uk/chembl/faq">ChEMBL FAQ</a></td></tr>
+<tr><td>ADMET gates</td><td>5</td><td>gate1_druglikeness~gate4_toxicity + all_pass (0/1)</td><td>약물이 인체에 도달 가능한지 — ADMET 실패 시 무의미</td><td>ADMETlab 3.0</td></tr>
+<tr><td>Pathway overlap</td><td>2</td><td>타겟 유전자가 속한 MSigDB 경로 수/비율</td><td>약물이 얼마나 많은 생물학적 경로에 영향 — 다경로 약물이 효과적</td><td><a href="https://www.gsea-msigdb.org/">MSigDB</a></td></tr>
+<tr><td>Target expression</td><td>3</td><td>타겟 유전자의 암 샘플 발현 mean/std/max</td><td>타겟이 암에서 실제로 발현되는지 — 미발현 타겟은 무의미</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5728678/">Way&amp;Greene 2018</a></td></tr>
+</table></div>
+
+<h3>Cell-line-level 피처 (53개)</h3>
+<div class="tw"><table>
+<tr><th>피처</th><th>개수</th><th>어떻게</th><th>왜</th><th>공식 근거</th></tr>
+<tr><td>CRISPR dependency</td><td>50</td><td>DepMap CRISPR top-50 유전자 dependency score pivot</td><td>세포주마다 필수 유전자가 다름 — 동일 약물도 세포주별 반응 다름</td><td><a href="https://depmap.org/">DepMap</a></td></tr>
+<tr><td>PRISM sensitivity</td><td>3</td><td>PRISM AUC의 mean/std/count per cell line</td><td>세포주의 전반적 약물 감수성 프로필</td><td><a href="https://depmap.org/">DepMap PRISM</a></td></tr>
+</table></div>
+
+<div style="background:var(--panel2);border:1px solid var(--accent2);border-radius:14px;padding:16px;margin:14px 0">
+<strong>핵심 변경</strong>: 이전에는 동일 약물의 다른 cell line이 <strong>동일한 X</strong>를 가졌음 (drug features only).<br>
+Cell-line 피처 추가 후 → 모델이 <strong>세포주 이질성</strong>을 학습 가능.
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ 7 ═══ -->
+<section class="section" id="s7">
+<h2>7. 모델별 구체적 피처 — "어떤 컬럼을 왜 쓰는가"</h2>
+
+<h3>7-1. Track A 공통 피처 (6개 모델: ElasticNet, RF, XGB, LGBM, MLP, TabNet)</h3>
+<p>모두 동일한 (drug, cell_line) 쌍별 피처 매트릭스 X를 입력받음. <code>features.py build_feature_matrix()</code></p>
+<div class="tw"><table>
+<tr><th>그룹</th><th>컬럼 예시</th><th>개수</th><th>타입</th><th>값 범위</th><th>왜 필요한가</th></tr>
+<tr><td>타겟 유전자 이진</td><td><code>BRCA1</code>=1, <code>TP53</code>=0, <code>EGFR</code>=1, <code>ERBB2</code>=1, ...</td><td>~2,000</td><td>int 0/1</td><td>{0, 1}</td><td>약물이 타겟하는 유전자 = 감수성 예측의 핵심. L1(ElasticNet)이 자동 선택, RF가 중요도 산출</td></tr>
+<tr><td>pChEMBL mean</td><td><code>pchembl_mean</code></td><td>1</td><td>float</td><td>5.0~10.0</td><td>약물-타겟 결합 강도. 높을수록 potent → 감수성 확률 높음</td></tr>
+<tr><td>ADMET gates</td><td><code>gate1_druglikeness</code>, <code>gate2_solubility</code>, <code>gate3_permeability</code>, <code>gate4_toxicity</code>, <code>all_pass</code></td><td>5</td><td>int 0/1</td><td>{0, 1}</td><td>약물이 인체에 도달 가능한지. ADMET 실패 약물은 아무리 IC50 좋아도 무의미</td></tr>
+<tr><td>Pathway overlap</td><td><code>pw_overlap_count</code>, <code>pw_overlap_ratio</code></td><td>2</td><td>int/float</td><td>0~7600 / 0~1</td><td>타겟이 속한 생물학적 경로 수. 다경로 약물이 단일경로보다 효과적 (Subramanian 2005)</td></tr>
+<tr><td>Target expression</td><td><code>target_expr_mean</code>, <code>target_expr_std</code>, <code>target_expr_max</code></td><td>3</td><td>float</td><td>0~15 (log2)</td><td>타겟 유전자가 암에서 실제 발현되는지. 미발현 타겟은 약물이 작용할 수 없음</td></tr>
+<tr><td>CRISPR dependency</td><td><code>dep_BRCA1</code>, <code>dep_TP53</code>, <code>dep_MYC</code>, ... (top-50)</td><td>50</td><td>float</td><td>-2.0~0.5 (Chronos)</td><td>세포주별 필수 유전자가 다름. 동일 약물도 세포주마다 반응 다름 (DepMap)</td></tr>
+<tr><td>PRISM sensitivity</td><td><code>prism_mean_auc</code>, <code>prism_std_auc</code>, <code>prism_n_drugs</code></td><td>3</td><td>float</td><td>0.3~1.0 / 0~100</td><td>세포주의 전반적 약물 감수성 프로필. 민감 세포주는 대부분의 약물에 민감</td></tr>
+</table></div>
+<p class="ref">합계: ~2,064 피처 × 7,200 샘플. Label: GDSC binary (0=resistant, 1=sensitive)</p>
+
+<p><strong>모델별 차이점</strong>:</p>
+<div class="tw"><table>
+<tr><th>모델</th><th>피처 처리 방식</th><th>왜 이 모델?</th><th>근거</th></tr>
+<tr><td>Elastic Net</td><td>StandardScaler → L1+L2 정규화. L1이 ~2,000개 중 수십 개만 선택</td><td>고차원에서 sparse solution → 중요 유전자 자동 식별</td><td><a href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.ElasticNet.html">sklearn</a></td></tr>
+<tr><td>Random Forest</td><td>StandardScaler → 500 trees, max_features=sqrt(~45)</td><td>비선형 + feature_importances_ → 생물학 검증 가능</td><td><a href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html">sklearn</a></td></tr>
+<tr><td>XGBoost</td><td>StandardScaler → depth=6, early stopping 20 rounds</td><td>gradient boosting이 tabular 데이터에서 SOTA</td><td><a href="https://xgboost.readthedocs.io/en/stable/python/callbacks.html">XGBoost</a></td></tr>
+<tr><td>LightGBM</td><td>StandardScaler → leaf-wise 31 leaves, is_unbalance</td><td>불균형 데이터 처리 + 대규모 피처에 효율적</td><td><a href="https://lightgbm.readthedocs.io/en/latest/">LightGBM</a></td></tr>
+<tr><td>MLP</td><td>StandardScaler → 256→128→64 ReLU, early stopping</td><td>피처 간 조합(interaction) 학습 가능</td><td><a href="https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html">sklearn</a></td></tr>
+<tr><td>TabNet</td><td>StandardScaler → attention mask가 매 step마다 피처 선택</td><td>어떤 피처를 봤는지 해석 가능한 DL</td><td><a href="https://arxiv.org/abs/1908.07442">Arik 2021</a></td></tr>
+</table></div>
+
+<h3>7-2. Track B: Autoencoder 피처</h3>
+<p><code>track_b_autoencoder.py train_autoencoder()</code></p>
+<div class="tw"><table>
+<tr><th>입력</th><th>구체적 컬럼</th><th>차원</th><th>값</th><th>왜</th></tr>
+<tr><td>Gene expression matrix (전치)</td><td>유전자별 컬럼: <code>A1BG</code>, <code>A1CF</code>, <code>A2M</code>, ... (전체 ~14K HUGO symbols)</td><td>~50 samples × ~14,000 genes</td><td>log2(TPM+1), 범위 0~15</td><td>전체 유전자 발현 패턴을 128차원으로 압축. PCA보다 비선형 패턴 포착 (Way&amp;Greene 2018)</td></tr>
+</table></div>
+<p class="ref">출력: 128차원 latent features → 앙상블에서 target gene norm으로 drug score 변환</p>
+
+<h3>7-3. Track B: VAE (Bio-informed) 피처</h3>
+<p><code>track_b_autoencoder.py train_vae()</code></p>
+<div class="tw"><table>
+<tr><th>입력</th><th>구체적 컬럼</th><th>추가 입력</th><th>왜</th></tr>
+<tr><td>AE와 동일 (gene expression)</td><td>~14K HUGO symbol 컬럼</td><td><code>pathway_mask</code>: MSigDB 50 Hallmark 경로 × latent_dim 바이너리 매트릭스 (파라미터 준비됨, 실제 mask 데이터는 학습 시 MSigDB에서 생성 예정)</td><td>decoder가 실제 생물학적 경로 구조를 따르도록 강제 → latent 해석 가능. 현재 pathway_mask=None이면 표준 VAE로 동작 (Bio-VAE, btad387)</td></tr>
+</table></div>
+<p class="ref">출력: 128차원 latent (mu) + KL divergence. pathway_mask=None이면 표준 VAE</p>
+
+<h3>7-4. Track B: GNN (GATv2) 피처</h3>
+<p><code>track_b_gnn.py build_graph_data()</code></p>
+<div class="tw"><table>
+<tr><th>노드 타입</th><th>피처</th><th>차원</th><th>값</th><th>왜</th></tr>
+<tr><td>Drug 노드</td><td>Morgan Fingerprint (ECFP4): SMILES → <code>rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=64)</code></td><td>64-bit</td><td>{0, 1} per bit</td><td>약물의 화학 구조 인코딩. 구조 유사 약물 → 유사 임베딩 (Rogers&amp;Hahn 2010)</td></tr>
+<tr><td>Protein 노드</td><td>gene expression z-score: <code>(mean_expr - μ) / σ</code></td><td>64-dim (dim[0]만 사용)</td><td>z-score, 범위 -3~3</td><td>단백질이 암에서 얼마나 비정상 발현되는지</td></tr>
+</table></div>
+<div class="tw"><table>
+<tr><th>엣지 타입</th><th>소스</th><th>수</th><th>의미</th></tr>
+<tr><td>Drug → Protein</td><td><code>03_drug_target_network</code> (drug_id, target_hugo_symbol)</td><td>~140K (양방향)</td><td>약물이 이 단백질을 타겟함</td></tr>
+<tr><td>Protein ↔ Protein</td><td><code>04_ppi_subnetwork</code> (protein1, protein2, score≥700)</td><td>~380K (양방향)</td><td>두 단백질이 물리적으로 상호작용</td></tr>
+</table></div>
+<p class="ref">출력: 64차원 drug/protein embedding + top-20 attention edges. GATv2 attention이 중요 PPI 식별 (Brody 2022)</p>
+
+<h3>7-5. Track C: Signature Reversal 피처</h3>
+<p><code>track_c.py compute_signature_reversal()</code></p>
+<div class="tw"><table>
+<tr><th>입력</th><th>구체적 데이터</th><th>계산</th><th>왜</th></tr>
+<tr><td>Disease signature</td><td>유전자 발현에서 z-score 상위 150개(과발현) + 하위 150개(저발현)</td><td><code>compute_disease_signature(expr_df, n_top=150)</code></td><td>유방암의 유전자 발현 특성을 정의</td></tr>
+<tr><td>Drug signatures</td><td>LINCS MCF7 z-scores (<code>16_mcf7_processed.parquet</code>), ~1,900 시그니처 × ~12K 유전자</td><td>disease와 겹치는 유전자만 추출</td><td>약물이 유전자 발현을 어떻게 바꾸는지</td></tr>
+<tr><td>Score</td><td>—</td><td><code>-Pearson(drug_vec, disease_vec)</code> → 높을수록 역전</td><td>음의 상관 = 약물이 질병 발현을 되돌림 (Subramanian 2017)</td></tr>
+</table></div>
+
+<h3>7-6. Track C: Network Proximity 피처</h3>
+<p><code>track_c.py compute_network_proximity()</code></p>
+<div class="tw"><table>
+<tr><th>입력</th><th>구체적 데이터</th><th>계산</th><th>왜</th></tr>
+<tr><td>PPI graph</td><td><code>04_ppi_subnetwork</code> → NetworkX graph (~380K edges)</td><td>모든 노드 쌍의 shortest path</td><td>네트워크 거리 계산 기반</td></tr>
+<tr><td>Drug targets</td><td><code>{drug_id: [BRCA1, TP53, ...]}</code> from drug_target_network</td><td>—</td><td>각 약물의 타겟 유전자 세트</td></tr>
+<tr><td>Disease genes</td><td>disease signature에서 추출한 질병 유전자 리스트</td><td>—</td><td>유방암 핵심 유전자 세트</td></tr>
+<tr><td>Score</td><td>—</td><td><code>d_c = (1/|T|) × Σ min d(s,t)</code>, z-score 정규화 (n_random=1000)</td><td>음의 z = 타겟이 질병 유전자보다 가까움 = 치료 가능 (Guney 2016)</td></tr>
+</table></div>
+
+<h3>7-7. Track C: Pathway Overlap 피처</h3>
+<p><code>track_c.py compute_pathway_overlap()</code></p>
+<div class="tw"><table>
+<tr><th>입력</th><th>구체적 데이터</th><th>계산</th><th>왜</th></tr>
+<tr><td>Drug target pathways</td><td><code>{drug_id: set(PW_1, PW_3, ...)}</code> — 약물 타겟이 속한 MSigDB 경로 집합</td><td>pathway_df의 genes 필드와 drug targets 교집합</td><td>약물이 어떤 생물학적 경로에 영향</td></tr>
+<tr><td>Disease pathways</td><td>질병 유전자가 속한 경로 집합</td><td>disease_genes ∩ pathway_genes</td><td>유방암이 관여하는 경로</td></tr>
+<tr><td>Score</td><td>—</td><td>Fisher exact test → <code>-log10(p-value)</code></td><td>약물 경로와 질병 경로가 우연 이상으로 겹치는지 (Subramanian 2005)</td></tr>
+</table></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ 8 ═══ -->
+<section class="section" id="s8">
+<h2>8. 팀 공유 Pair Feature 컬럼 상세 (48개)</h2>
+<p>팀원이 AWS Glue/EMR에서 생성한 <code>subtype_drug_pair_feature_table</code> (3,834 × 48)의 컬럼 정의.<br>
+<span class="ref">우리 파이프라인(섹션 6)의 ~2,064 피처와 별도. 팀 전체 산출물 이해를 위해 참고용으로 기재.</span></p>
+
+<h3>A. 식별자 (5개)</h3>
+<div class="tw"><table>
+<tr><th>#</th><th>컬럼</th><th>타입</th><th>의미</th><th>어떻게</th><th>출처</th></tr>
+<tr><td>1</td><td>subtype</td><td>str</td><td>PAM50 유방암 subtype</td><td>TCGA 임상 메타에서 추출 (HER2+ HR-, HR+, Basal, LumA, LumB)</td><td>02_tcga_brca_meta</td></tr>
+<tr><td>2</td><td>drugbank_id</td><td>str</td><td>DrugBank 고유 약물 ID (DB00001 형식)</td><td>DrugBank XML 파싱 → primary drugbank-id 추출</td><td>04_drugbank_local</td></tr>
+<tr><td>3</td><td>drug_name</td><td>str</td><td>약물 일반명 (Difenoxin, Paclitaxel 등)</td><td>DrugBank name 필드</td><td>04_drugbank_local</td></tr>
+<tr><td>4</td><td>drug_norm_name</td><td>str</td><td>정규화 약물명 (소문자, 하이픈 제거)</td><td>drug_harmonize.py normalize_drug_name()</td><td>전처리</td></tr>
+<tr><td>5</td><td>representative_drug_id</td><td>str</td><td>GDSC 매칭용 대표 약물 ID</td><td>drug_harmonize 4단계 매칭 결과</td><td>drug_harmonize.py</td></tr>
+</table></div>
+
+<h3>B. 타겟 피처 (10개) — 약물이 질병 유전자에 어떻게 작용하는가</h3>
+<div class="tw"><table>
+<tr><th>#</th><th>컬럼</th><th>타입</th><th>의미</th><th>어떻게 계산</th><th>출처</th></tr>
+<tr><td>6</td><td>matched_target_count</td><td>int</td><td>약물의 DrugBank direct target 수</td><td>DrugBank drug_targets에서 해당 약물 행 수</td><td>04_drugbank</td></tr>
+<tr><td>7</td><td>directional_target_count</td><td>int</td><td>방향성(activating/inhibiting) 관계가 있는 타겟 수</td><td>DrugBank Action 필드가 inhibitor/agonist 등인 타겟만 카운트</td><td>04_drugbank</td></tr>
+<tr><td>8</td><td>significant_directional_target_count</td><td>int</td><td>DEG 유의성 통과한 방향성 타겟 수</td><td>directional_target 중 subtype DEG(FDR&lt;0.05)와 겹치는 것</td><td>03_tcga_brca_deg + 04_drugbank</td></tr>
+<tr><td>9</td><td>positive_reversal_target_count</td><td>int</td><td>질병 저발현 유전자를 상향 복원하는 타겟 수</td><td>subtype에서 하향 발현 유전자 중 약물이 activating하는 타겟</td><td>07_candidate_scoring</td></tr>
+<tr><td>10</td><td>negative_reversal_target_count</td><td>int</td><td>질병 과발현 유전자를 하향 억제하는 타겟 수</td><td>subtype에서 상향 발현 유전자 중 약물이 inhibiting하는 타겟</td><td>07_candidate_scoring</td></tr>
+<tr><td>11</td><td>target_score_sum</td><td>float</td><td>모든 타겟의 DEG 효과크기 합</td><td>Σ |log2FC| for matched targets</td><td>07_candidate_scoring</td></tr>
+<tr><td>12</td><td>target_score_weighted</td><td>float</td><td>신뢰도 가중 타겟 점수</td><td>target_score × known_action_fraction × direction_match</td><td>07_candidate_scoring</td></tr>
+<tr><td>13</td><td>target_score_mean</td><td>float</td><td>타겟당 평균 점수</td><td>target_score_sum / matched_target_count</td><td>계산</td></tr>
+<tr><td>14</td><td>activating_restoration_score_sum</td><td>float</td><td>활성화 복원 점수 합</td><td>저발현 유전자를 activating하는 타겟의 효과크기 합</td><td>07_candidate_scoring</td></tr>
+<tr><td>15</td><td>known_action_fraction</td><td>float</td><td>작용 메커니즘이 알려진 타겟 비율 (0~1)</td><td>DrugBank에 Action이 명시된 타겟 수 / 전체 타겟 수</td><td>04_drugbank</td></tr>
+</table></div>
+
+<h3>C. 타겟 관계 상세 (4개) — 어떤 유전자가 관여하는가</h3>
+<div class="tw"><table>
+<tr><th>#</th><th>컬럼</th><th>타입</th><th>의미</th><th>예시</th></tr>
+<tr><td>16</td><td>supporting_target_genes</td><td>str</td><td>질병 특성 감소를 지지하는 타겟 유전자 목록</td><td>"OPRM1, EGFR"</td></tr>
+<tr><td>17</td><td>conflicting_target_genes</td><td>str</td><td>질병 특성 증가를 야기하는 타겟 유전자 목록</td><td>"" (없으면 빈 문자열)</td></tr>
+<tr><td>18</td><td>top_supporting_relations</td><td>str</td><td>상위 지지 관계 (유전자[작용] 형태)</td><td>"OPRM1[antagonist]"</td></tr>
+<tr><td>19</td><td>top_conflicting_relations</td><td>str</td><td>상위 갈등 관계</td><td>"BCL2[agonist]"</td></tr>
+</table></div>
+
+<h3>D. GDSC 약물 반응 (9개) — 실험적 근거</h3>
+<div class="tw"><table>
+<tr><th>#</th><th>컬럼</th><th>타입</th><th>의미</th><th>어떻게</th></tr>
+<tr><td>20</td><td>DRUG_NAME</td><td>str</td><td>GDSC2 데이터베이스의 약물명</td><td>GDSC2 fitted_dose_response에서 매칭</td></tr>
+<tr><td>21</td><td>gdsc_norm_name</td><td>str</td><td>GDSC 정규화 약물명</td><td>소문자 + 특수문자 제거</td></tr>
+<tr><td>22</td><td>n_measurements</td><td>int</td><td>GDSC2 dose-response 측정 수</td><td>해당 약물의 전체 측정 행 수</td></tr>
+<tr><td>23</td><td>n_cell_lines</td><td>int</td><td>테스트된 세포주 수</td><td>unique cell_line_name count</td></tr>
+<tr><td>24</td><td>mean_ln_ic50</td><td>float</td><td>평균 자연로그 IC50</td><td>mean(LN_IC50) across BRCA cell lines</td></tr>
+<tr><td>25</td><td>mean_auc</td><td>float</td><td>평균 AUC (dose-response curve 아래 면적)</td><td>mean(AUC) across BRCA cell lines</td></tr>
+<tr><td>26</td><td>gdsc_ln_ic50_support</td><td>float</td><td>IC50 기반 지지도 (낮을수록 감수성)</td><td>1 - percentile(mean_ln_ic50)</td></tr>
+<tr><td>27</td><td>gdsc_auc_support</td><td>float</td><td>AUC 기반 지지도 (낮을수록 감수성)</td><td>1 - percentile(mean_auc)</td></tr>
+<tr><td>28</td><td>gdsc_support_score</td><td>float</td><td>IC50+AUC 통합 지지도</td><td>(gdsc_ln_ic50_support + gdsc_auc_support) / 2</td></tr>
+</table></div>
+
+<h3>E. 약물 플래그 + 분류 (8개)</h3>
+<div class="tw"><table>
+<tr><th>#</th><th>컬럼</th><th>타입</th><th>의미</th><th>어떻게</th></tr>
+<tr><td>29</td><td>has_gdsc2_brca_support</td><td>bool</td><td>GDSC2 BRCA 세포주에서 실험 근거 있음</td><td>BRCA cell line에서 IC50 측정 존재 여부</td></tr>
+<tr><td>30</td><td>subtype_score_rank</td><td>int</td><td>subtype 내 점수 순위</td><td>target_score_weighted 기준 내림차순</td></tr>
+<tr><td>31</td><td>is_focused_candidate</td><td>bool</td><td>집중 후보 여부 (top 50)</td><td>subtype별 상위 50위 이내</td></tr>
+<tr><td>32</td><td>approved_small_molecule_flag</td><td>int</td><td>FDA 승인 소분자 약물 여부</td><td>DrugBank Drug_Group에 "approved" 포함</td></tr>
+<tr><td>33</td><td>direct_target_count</td><td>int</td><td>Direct target 총 수</td><td>DrugBank target polypeptide에서 direct 관계만</td></tr>
+<tr><td>34</td><td>unique_target_gene_count</td><td>int</td><td>Unique target 유전자 수</td><td>nunique(target_hugo_symbol)</td></tr>
+<tr><td>35</td><td>oncology_indication_flag</td><td>int</td><td>종양학 적응증 여부</td><td>DrugBank indication에 "cancer/tumor/neoplasm" 포함</td></tr>
+<tr><td>36</td><td>breast_cancer_mention_flag</td><td>int</td><td>유방암 적응증 여부</td><td>DrugBank indication에 "breast" 포함</td></tr>
+</table></div>
+
+<h3>F. 문헌 + 최종 점수 (11개)</h3>
+<div class="tw"><table>
+<tr><th>#</th><th>컬럼</th><th>타입</th><th>의미</th><th>어떻게</th></tr>
+<tr><td>37</td><td>has_gdsc2_brca_support_drug</td><td>int</td><td>약물 자체 GDSC BRCA 지지</td><td>drug_name 기준 GDSC 매칭 존재</td></tr>
+<tr><td>38</td><td>literature_decision</td><td>str</td><td>문헌 검토 결정</td><td>"unreviewed"/"supported"/"conflicting"</td></tr>
+<tr><td>39</td><td>literature_category</td><td>str</td><td>문헌 분류 카테고리</td><td>manual/automated tagging</td></tr>
+<tr><td>40</td><td>positive_target_fraction</td><td>float</td><td>지지 타겟 비율</td><td>positive_reversal / matched_target_count</td></tr>
+<tr><td>41</td><td>significant_target_fraction</td><td>float</td><td>유의 타겟 비율</td><td>significant_directional / matched_target_count</td></tr>
+<tr><td>42</td><td>target_coverage_fraction</td><td>float</td><td>질병 유전자 커버리지</td><td>(targets ∩ disease_genes) / disease_genes</td></tr>
+<tr><td>43</td><td>decision_weight</td><td>float</td><td>의사결정 가중치 (0~1)</td><td>literature_decision → 수치 매핑</td></tr>
+<tr><td>44</td><td>category_weight</td><td>float</td><td>카테고리 가중치 (0~1)</td><td>literature_category → 수치 매핑</td></tr>
+<tr><td>45</td><td>rank_score</td><td>float</td><td>통합 순위 점수</td><td>target_score_weighted × known_action × direction_match</td></tr>
+<tr><td>46</td><td>target_score_weighted_pct</td><td>float</td><td>가중 점수 백분위 (0~1)</td><td>percentile_rank(target_score_weighted)</td></tr>
+<tr><td>47</td><td>gdsc_support_score_filled</td><td>float</td><td>GDSC 지지도 (결측 보간)</td><td>NaN → 0.0 (GDSC 미매칭 약물)</td></tr>
+<tr><td>48</td><td>fast_priority_score</td><td>float</td><td>최종 우선순위 점수</td><td>0.3×target_score_weighted_pct + 0.3×gdsc_support_score_filled + 0.4×rank_score</td></tr>
+</table></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ 9 ═══ -->
+<section class="section" id="s9">
+<h2>9. 앙상블 (RRF 7-ranking)</h2>
+<p><code>src/ml/ensemble.py</code> — RRF(d) = Σ 1/(k + rank(d)), k=60<br>
+<span class="ref">근거: <a href="https://dl.acm.org/doi/10.1145/1571941.1572114">Cormack et al. 2009 SIGIR</a> — 스케일 무관 순위 통합</span></p>
+<pre>
+Track A: best model OOF predictions → drug별 평균  ──┐
+Track B: AE latent → target gene norm → drug 점수   ──┤
+Track B: VAE latent → target gene norm → drug 점수  ──┤
+Track B: GNN embedding → cosine similarity           ──┼──▶ RRF ──▶ Final Ranking
+Track C: Network Proximity z-score                    ──┤
+Track C: Signature Reversal score                     ──┤
+Track C: Pathway Overlap score                        ──┘
+</pre>
+<p><strong>후처리</strong>: 피처 단계 ADMET 컬럼 + Open Targets association score 부착. <strong>최종 임상 진입 ADMET 4 Gate</strong>는 §2 Bedrock 이전 별도 박스에서 수행.<br>
+<strong>신뢰도</strong>: 2+ Track에서 top-20 → "high", 1 Track → "medium"</p>
+<p class="ref"><strong>ADMET을 “두 번” 돌린다는 뜻이 아님.</strong> (1) <em>피처 단계</em>: ADMET 예측값을 테이블 컬럼으로 넣어 모델이 학습·랭킹에 활용. (2) <em>최종 게이트</em>: 숏리스트에 대해 임상·개발 관점에서 통과/탈락을 정하는 정책 단계. 동일 예측을 앞에서는 입력 신호로, 뒤에서는 컷오프로 재사용할 수 있어 <strong>계산은 한 번·역할은 두 층</strong>일 수 있음. Gate 전용 도구를 따로 두면 계산 파이프가 둘로 갈라질 수 있음.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ 10 ═══ -->
+<section class="section" id="s10">
+<h2>10. QC3 검증 (14-point)</h2>
+<p><code>src/ml/validate.py</code> — <strong>Week3 Stage2</strong> 성능·통계 게이트. <strong>§2 플로우상 METABRIC(Stage3)</strong>는 훈련 분포 밖 코호트 일반화 전용 단계로 분리(체크 3.5~3.6과 연동).</p>
+<div class="tw"><table>
+<tr><th>#</th><th>체크</th><th>기준</th><th>Gate</th><th>근거</th></tr>
+<tr><td>3.1</td><td>K-fold CV AUROC</td><td>≥ 0.70</td><td><strong>HARD</strong></td><td><a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html">sklearn</a></td></tr>
+<tr><td>3.2</td><td>AUPRC above random</td><td>&gt; 0</td><td><strong>HARD</strong></td><td>sklearn</td></tr>
+<tr><td>3.3</td><td>F1 macro</td><td>≥ 0.50</td><td>soft</td><td>sklearn</td></tr>
+<tr><td>3.4</td><td>AE reconstruction loss</td><td>≤ 0.05</td><td><strong>HARD</strong></td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5728678/">Way&amp;Greene 2018</a></td></tr>
+<tr><td>3.4b</td><td>VAE reconstruction loss</td><td>≤ 0.05</td><td><strong>HARD</strong></td><td><a href="https://arxiv.org/abs/1312.6114">Kingma 2014</a></td></tr>
+<tr><td>3.4c</td><td>VAE KL divergence</td><td>&gt; 0</td><td>info</td><td>Kingma 2014</td></tr>
+<tr><td>3.5</td><td>External AUROC (METABRIC)</td><td>≥ 0.60</td><td>soft</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8769697/">Cross-study 2022</a></td></tr>
+<tr><td>3.6</td><td>Transfer degradation</td><td>≤ 0.10</td><td>soft</td><td>Cross-study 2022</td></tr>
+<tr><td>3.7</td><td>NDCG@20</td><td>≥ 0.50</td><td>soft</td><td>IR metrics</td></tr>
+<tr><td>3.8</td><td>Track agreement</td><td>≥ 30%</td><td>soft</td><td>RRF 논문</td></tr>
+<tr><td>3.9</td><td>Data leakage</td><td>= 0</td><td><strong>HARD</strong></td><td><a href="https://scikit-learn.org/stable/common_pitfalls.html">sklearn pitfalls</a></td></tr>
+<tr><td>3.10</td><td>Early stopping</td><td>triggered</td><td>info</td><td><a href="https://xgboost.readthedocs.io/en/stable/python/callbacks.html">XGBoost</a></td></tr>
+<tr><td>3.11</td><td>LODO AUROC</td><td>≥ 0.55</td><td>soft</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8575017/">PMC8575017</a></td></tr>
+<tr><td>3.12</td><td>LOCO AUROC</td><td>≥ 0.55</td><td>soft</td><td>PMC8575017</td></tr>
+</table></div>
+<p class="ref"><strong>Week3 Stage2 vs Stage3 “분리”의 의미.</strong> <em>Stage2(≈QC3)</em>: TCGA·GDSC 등 <strong>같은 데이터 체계 안</strong>에서 CV·누수·LODO/LOCO 등으로 <strong>모델링 절차가 타당한지</strong> 검증. <em>Stage3(≈METABRIC)</em>: <strong>독립 코호트·다른 플랫폼</strong>에서 <strong>외부 일반화</strong>(§10 체크 3.5~3.6)를 검증하는 단계로, k-fold를 한 번 더 하는 것과 질문이 다름. QC3만 통과했다고 METABRIC에서 자동 보장되지 않음.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ 11 ═══ -->
+<section class="section" id="s11">
+<h2>11. AWS 환경</h2>
+
+<h3>로컬 vs AWS 비교</h3>
+<div class="tw"><table>
+<tr><th>항목</th><th>우리 파이프라인 (SageMaker+Snakemake)</th><th>팀 AWS (Glue/EMR)</th></tr>
+<tr><td>Drug count</td><td>~540 GDSC (매칭 후 ~486)</td><td>2,371</td></tr>
+<tr><td>Sample count</td><td>7,200 (drug×cell pairs)</td><td>2,910</td></tr>
+<tr><td>Feature columns</td><td>~2,064 (drug 2,011 + cell 53)</td><td>48</td></tr>
+<tr><td>Label</td><td>GDSC binary (sensitive/resistant)</td><td>subtype-drug pair score</td></tr>
+</table></div>
+
+<h3>S3 구조</h3>
+<pre>
+s3://drug-discovery-joe-raw-data-team4/
+├── tcga/, metabric/, drugbank/, chembl/, lincs/, string/
+├── msigdb/, gdsc/, opentargets/, depmap/
+├── results/                    # 전처리 완료 (소스별 하위 폴더 + parquet)
+│   └── features_nextflow_team4/  # Nextflow 피처 엔지니어링 산출 (팀4 전용 prefix)
+└── ml_ready/                   # ML 통합 데이터셋
+    ├── 01~10 parquet
+    ├── features_table.parquet  (7,200 × 2,006+)
+    ├── labels.parquet
+    └── metadata.parquet
+</pre>
+
+<h3>Nextflow + AWS Batch</h3>
+<p><strong>Nextflow</strong>로 S3에 있는 raw·<code>results/</code>를 읽어 피처 단계를 재현 가능하게 실행. 작업 단위가 많고 용량이 크므로 <strong>AWS Batch</strong>(<code>awsbatch</code> executor)로 프로세스별 컨테이너 병렬 권장. <strong>CPU 큐</strong>(피처·전처리)와 <strong>GPU 큐</strong>(DL/GNN 학습) 분리, Spot/온디맨드 프로필 분리로 파일럿→전체 확장 비용 통제. 반복 I/O 시 FSx for Lustre 등 스테이징 검토.</p>
+
+<h3>학습 환경 (예정)</h3>
+<div class="tw"><table>
+<tr><th>항목</th><th>값</th></tr>
+<tr><td>인스턴스</td><td>ml.g4dn.12xlarge (48 vCPU, 192GB RAM, T4×4)</td></tr>
+<tr><td>디스크</td><td>500GB EBS (gp3, 3000 IOPS)</td></tr>
+<tr><td>시간당 / 총 비용</td><td>$4.89/h / ~$22 예상</td></tr>
+</table></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ 12 ═══ -->
+<section class="section" id="s12">
+<h2>12. 공식 문서 레퍼런스</h2>
+<div class="tw"><table>
+<tr><th>분야</th><th>문서</th><th>파이프라인 적용</th></tr>
+<tr><td>CV 전략</td><td><a href="https://scikit-learn.org/stable/modules/cross_validation.html">scikit-learn CV Guide</a></td><td>StratifiedKFold, nested CV</td></tr>
+<tr><td>CV 가이드라인</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8575017/">PMC8575017</a> — Drug sensitivity CV guidelines</td><td>LODO/LOCO 검증</td></tr>
+<tr><td>Cross-study</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8769697/">PMC8769697</a> — Cross-study analysis</td><td>Nested CV, external validation</td></tr>
+<tr><td>XGBoost</td><td><a href="https://xgboost.readthedocs.io/en/stable/python/callbacks.html">XGBoost Callbacks</a></td><td>Early stopping</td></tr>
+<tr><td>LightGBM</td><td><a href="https://lightgbm.readthedocs.io/en/latest/pythonapi/lightgbm.early_stopping.html">LightGBM early_stopping</a></td><td>Early stopping + min_delta</td></tr>
+<tr><td>VAE</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5728678/">Way &amp; Greene 2018 (Tybalt)</a></td><td>유전자 발현 latent 표현</td></tr>
+<tr><td>Bio-VAE</td><td><a href="https://academic.oup.com/bioinformatics/article/39/6/btad387/7199588">Bioinformatics 2023 btad387</a></td><td>Decoder에 pathway 구조 반영</td></tr>
+<tr><td>GNN</td><td><a href="https://pytorch-geometric.readthedocs.io/en/latest/generated/torch_geometric.nn.conv.GATv2Conv.html">PyG GATv2Conv</a></td><td>동적 attention + 해석성</td></tr>
+<tr><td>GNN 리뷰</td><td><a href="https://pubs.acs.org/doi/10.1021/acs.chemrev.5c00461">Chemical Reviews 2025</a></td><td>Drug repurposing에서 GNN 핵심</td></tr>
+<tr><td>GDSC</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3531057/">Garnett et al. 2012</a></td><td>IC50 이진화 방법론</td></tr>
+<tr><td>LINCS</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5990023/">Subramanian et al. 2017 Cell</a></td><td>Tau 연결성 점수, signature reversal</td></tr>
+<tr><td>Network Proximity</td><td><a href="https://www.nature.com/articles/ncomms10331">Guney et al. 2016 Nat Comms</a></td><td>d_c(S,T) 공식, z-score 정규화</td></tr>
+<tr><td>GSEA</td><td><a href="https://www.gsea-msigdb.org/gsea/doc/subramanian_tamayo_gsea_pnas.pdf">Subramanian et al. 2005 PNAS</a></td><td>Pathway overlap scoring</td></tr>
+<tr><td>TabNet</td><td><a href="https://arxiv.org/abs/1908.07442">Arik &amp; Pfister 2021</a></td><td>Attention-based tabular DL</td></tr>
+<tr><td>STRING</td><td><a href="https://string-db.org/help/scores/">STRING Scoring Help</a></td><td>combined_score ≥ 700 기준</td></tr>
+<tr><td>Drug Repurposing 리뷰</td><td><a href="https://www.nature.com/articles/s41392-022-00994-0">Nature STTT 2025</a></td><td>3-track 앙상블 설계 정당화</td></tr>
+<tr><td>Nextflow</td><td><a href="https://www.nextflow.io/docs/latest/aws.html">Nextflow AWS</a></td><td>Batch / awsbatch executor, S3 workdir</td></tr>
+<tr><td>AWS Batch</td><td><a href="https://docs.aws.amazon.com/batch/">AWS Batch User Guide</a></td><td>컴퓨트 환경, GPU/CPU 큐, Spot</td></tr>
+<tr><td>Bedrock RAG</td><td><a href="https://docs.aws.amazon.com/bedrock/">Amazon Bedrock</a></td><td>문헌·지식 기반 검증·리포트</td></tr>
+</table></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ 13 ═══ -->
+<section class="section" id="s13">
+<h2>13. 남은 작업</h2>
+<div class="tw"><table>
+<tr><th>#</th><th>작업</th><th>위치</th><th>상태</th></tr>
+<tr><td>1</td><td>Nextflow 피처 파이프라인 초안 + S3 in/out 경로 합의</td><td>Git + Batch</td><td><span class="badge wait">대기</span></td></tr>
+<tr><td>2</td><td>AWS Batch 컴퓨트 환경·Job 정의·IAM(ECR/S3) — CPU/GPU 큐 분리</td><td>AWS</td><td><span class="badge wait">대기</span></td></tr>
+<tr><td>3</td><td>파일럿: 소수 parquet로 ML/DL/Graph 스모크 → 전체 확장·모델 랭킹</td><td>Batch/SageMaker</td><td><span class="badge wait">대기</span></td></tr>
+<tr><td>4</td><td>SageMaker git pull → 최신 코드 반영</td><td>SageMaker</td><td><span class="badge wait">대기</span></td></tr>
+<tr><td>5</td><td>top_variance_genes 실험 (500/1K/2K/5K)</td><td>SageMaker</td><td><span class="badge wait">대기</span></td></tr>
+<tr><td>6</td><td>E2E ML 학습 (12 모델 + RRF + QC3 14-point)</td><td>SageMaker/Batch</td><td><span class="badge wait">대기</span></td></tr>
+<tr><td>7</td><td><strong>METABRIC</strong> 독립 코호트 일반화 리포트 (§2 Stage3)</td><td>Python/Batch</td><td><span class="badge wait">대기</span></td></tr>
+<tr><td>8</td><td><strong>ADMET</strong> 4 Gate 필터 파이프라인·후보 테이블</td><td>Python/Batch</td><td><span class="badge wait">대기</span></td></tr>
+<tr><td>9</td><td><strong>Bedrock</strong> RAG·임상 문서·모순 탐지 (ADMET 이후 입력)</td><td>AWS Bedrock</td><td><span class="badge wait">대기</span></td></tr>
+<tr><td>10</td><td>벤치마크 보고서 + 에이전트(Claude+MCP) 병행 테스트</td><td>SageMaker</td><td><span class="badge wait">대기</span></td></tr>
+</table></div>
+<pre>
+# SageMaker / 로컬 예시 (기존)
+git pull origin main
+python scripts/experiment_top_genes.py --datasets-dir results/ml_ready
+python -c "from src.ml.train import run_ml_training; from pathlib import Path; run_ml_training(Path('results/ml_ready'), Path('results/ml_models'))"
+python scripts/generate_report.py --models-dir results/ml_models
+aws s3 sync results/ml_models/ s3://drug-discovery-joe-raw-data-team4/results/ml_models/
+
+# Nextflow + Batch (예시 — 실제 프로파일명은 합의 후)
+# nextflow run main.nf -profile awsbatch --input s3://drug-discovery-joe-raw-data-team4/results/
+</pre>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ 14 ═══ -->
+<section class="section" id="s14">
+<h2>14. 제한사항 (Limitations)</h2>
+<div class="tw"><table>
+<tr><th>분류</th><th>제한사항</th><th>영향</th><th>완화 방안</th></tr>
+<tr><td rowspan="3">데이터</td><td>TCGA/METABRIC만 사용 → GDSC 세포주와 환자 샘플은 다른 entity</td><td>세포주 아티팩트가 환자에 적용 안 될 수 있음</td><td>CCLE 추가 외부 검증</td></tr>
+<tr><td>IC50 = in vitro 측정 → in vivo 약효 미보장</td><td>실험실 결과 ≠ 임상 결과</td><td>Phase I/II 임상 데이터 연계 필요</td></tr>
+<tr><td>METABRIC = 유럽 코호트 → 인종 편향 가능</td><td>아시아/아프리카 인구에 일반화 불확실</td><td>다인종 코호트 추가</td></tr>
+<tr><td rowspan="2">모델</td><td>Feature-to-sample ratio = 2,064/7,200 = 0.29</td><td>피처가 샘플 대비 많음 → 과적합 위험</td><td>L1 정규화, early stopping, nested CV</td></tr>
+<tr><td>단일세포 이질성 미고려 (bulk RNA-seq)</td><td>종양 내 세포 간 약물 반응 차이 무시</td><td>ASGARD (Nature Comms 2023) 참고</td></tr>
+<tr><td>임상</td><td>약물 수송(pharmacokinetics) 미고려</td><td>BBB 투과, 간 대사 등 미반영</td><td>ADMET 4-gate가 부분 보완</td></tr>
+</table></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ 15 ═══ -->
+<section class="section" id="s15">
+<h2>15. 데이터 출처 (Data Provenance)</h2>
+<div class="tw"><table>
+<tr><th>소스</th><th>버전/릴리즈</th><th>다운로드 시점</th><th>라이선스</th><th>URL</th></tr>
+<tr><td>TCGA-BRCA</td><td>GDC Data Release 39</td><td>2026-03</td><td>NIH Genomic Data Sharing</td><td>portal.gdc.cancer.gov</td></tr>
+<tr><td>METABRIC</td><td>cBioPortal 2024</td><td>2026-03</td><td>CC BY 4.0</td><td>cbioportal.org</td></tr>
+<tr><td>DrugBank</td><td>5.1.12</td><td>2026-03</td><td>CC BY-NC 4.0 (학술 무료)</td><td>go.drugbank.com</td></tr>
+<tr><td>ChEMBL</td><td>ChEMBL 34</td><td>2026-03</td><td>CC BY-SA 3.0</td><td>ebi.ac.uk/chembl</td></tr>
+<tr><td>LINCS L1000</td><td>Phase II (GSE92742)</td><td>2026-03</td><td>CC0 Public Domain</td><td>clue.io/lincs</td></tr>
+<tr><td>STRING</td><td>v12.0</td><td>2026-03</td><td>CC BY 4.0</td><td>string-db.org</td></tr>
+<tr><td>MSigDB</td><td>2024.1.Hs</td><td>2026-03</td><td>CC BY 4.0</td><td>gsea-msigdb.org</td></tr>
+<tr><td>GDSC</td><td>Release 8.5 (Oct 2023)</td><td>2026-03</td><td>학술 무료 (Sanger)</td><td>cancerrxgene.org</td></tr>
+<tr><td>Open Targets</td><td>Latest (2026-03)</td><td>2026-03</td><td>CC0 Public Domain</td><td>platform.opentargets.org</td></tr>
+<tr><td>DepMap</td><td>24Q4 (2024)</td><td>2026-03</td><td>CC BY 4.0</td><td>depmap.org</td></tr>
+</table></div>
+<p class="ref">코드: <code>src/ml/data_provenance.py</code> (예정) — 각 소스의 버전/날짜/checksum 자동 기록</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ 16 ═══ -->
+<section class="section" id="s16">
+<h2>16. 절제 연구 설계 (Ablation Study)</h2>
+<p>각 피처 그룹/데이터 소스/모델의 기여도를 분리하여 측정. <code>scripts/experiment_ablation.py</code> (예정)</p>
+
+<h3>피처 그룹별 절제</h3>
+<div class="tw"><table>
+<tr><th>실험</th><th>제거할 피처</th><th>비교 기준</th><th>기대 결과</th></tr>
+<tr><td>A1</td><td>drug target binary (2,000개)</td><td>전체 AUROC vs A1 AUROC</td><td>가장 큰 성능 하락 예상</td></tr>
+<tr><td>A2</td><td>ADMET gates (5개)</td><td>전체 vs A2</td><td>소폭 하락 (필터 역할)</td></tr>
+<tr><td>A3</td><td>Pathway overlap (2개)</td><td>전체 vs A3</td><td>소폭 하락</td></tr>
+<tr><td>A4</td><td>Target expression (3개)</td><td>전체 vs A4</td><td>중간 하락</td></tr>
+<tr><td>A5</td><td>DepMap CRISPR (50개)</td><td>전체 vs A5</td><td>cell-line 구분 능력 감소</td></tr>
+<tr><td>A6</td><td>DepMap PRISM (3개)</td><td>전체 vs A6</td><td>소폭 하락</td></tr>
+</table></div>
+
+<h3>데이터 소스별 절제</h3>
+<div class="tw"><table>
+<tr><th>실험</th><th>제거할 소스</th><th>영향 범위</th></tr>
+<tr><td>B1</td><td>LINCS (Track C reversal 불가)</td><td>앙상블 6→5 ranking</td></tr>
+<tr><td>B2</td><td>DepMap (cell-line 피처 제거)</td><td>피처 2,064→2,011</td></tr>
+<tr><td>B3</td><td>STRING PPI (GNN + proximity 불가)</td><td>앙상블 7→5 ranking</td></tr>
+<tr><td>B4</td><td>MSigDB (pathway 피처 + overlap 불가)</td><td>피처 -2, 앙상블 -1</td></tr>
+</table></div>
+
+<h3>앙상블 절제</h3>
+<div class="tw"><table>
+<tr><th>실험</th><th>구성</th><th>비교</th></tr>
+<tr><td>C1</td><td>7-track RRF (전체)</td><td>기준선</td></tr>
+<tr><td>C2</td><td>Track A만 (best ML model)</td><td>앙상블 효과 측정</td></tr>
+<tr><td>C3</td><td>Track A + C만 (ML + 지식)</td><td>DL 기여도 측정</td></tr>
+<tr><td>C4</td><td>Top 3 track만</td><td>최소 효과적 앙상블</td></tr>
+</table></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ 17 ═══ -->
+<section class="section" id="s17">
+<h2>17. 윤리 + 라이선스</h2>
+
+<h3>임상 적용 면책</h3>
+<div style="background:#2a1a1a;border:1px solid #ff6b6b;border-radius:12px;padding:16px;margin:12px 0">
+⚠️ 본 파이프라인은 <strong>연구 목적의 in silico 분석</strong>입니다.<br>
+• 임상 사용 전 <strong>IRB(기관윤리위원회) 승인 필수</strong><br>
+• FDA/EMA 규제 승인 전 환자 투약 불가<br>
+• 오프라벨 사용 시 <strong>해당 기관의 약사위원회 검토 필요</strong><br>
+• IC50 기반 예측은 in vitro → in vivo 효능을 보장하지 않음
+</div>
+
+<h3>데이터 라이선스 준수</h3>
+<div class="tw"><table>
+<tr><th>소스</th><th>라이선스</th><th>상업적 사용</th><th>주의사항</th></tr>
+<tr><td>DrugBank</td><td>CC BY-NC 4.0</td><td>❌ 불가</td><td>학술/비상업적 용도만. 상업화 시 별도 계약</td></tr>
+<tr><td>GDSC</td><td>학술 무료 (Sanger)</td><td>⚠️ 문의 필요</td><td>Wellcome Sanger Institute 이용약관 준수</td></tr>
+<tr><td>ChEMBL</td><td>CC BY-SA 3.0</td><td>✅ 가능</td><td>파생물도 동일 라이선스 적용</td></tr>
+<tr><td>TCGA</td><td>NIH GDS Policy</td><td>✅ 가능</td><td>개인식별정보 재식별 금지</td></tr>
+<tr><td>DepMap</td><td>CC BY 4.0</td><td>✅ 가능</td><td>출처 표시 필수</td></tr>
+<tr><td>LINCS</td><td>CC0</td><td>✅ 가능</td><td>제한 없음</td></tr>
+</table></div>
+
+<h3>인종/성별 편향</h3>
+<p>TCGA-BRCA 코호트: 백인 ~75%, 흑인 ~15%, 아시아 ~5%. 모델 성능이 인종에 따라 다를 수 있음.<br>
+<span class="ref">"Model accuracy may vary by ancestry group" — 다인종 코호트 추가 검증 권장</span></p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ 18 ═══ -->
+<section class="section" id="s18">
+<h2>18. Pre-Project 기대 산출물 (4주)</h2>
+<p>단계별 진행으로 아래 네 가지를 목표로 함. 기술 스택 예시: 공통 파이프라인에 <strong>AWS Glue / Athena / Nextflow</strong>, 벤치마크는 <strong>ML vs DL vs Graph</strong>, 후보 리스트는 <strong>METABRIC 외부 검증 + ADMET</strong> 통과분, 설명은 <strong>Bedrock</strong> 기반 XAI.</p>
+<div class="cards" style="grid-template-columns:repeat(2,minmax(280px,1fr))">
+<div class="card" style="text-align:left;padding:20px"><div class="v" style="font-size:20px;margin-bottom:8px">① 공통 데이터 파이프라인</div><div class="l" style="text-align:left;line-height:1.55">S3 raw·<code>results/</code> 기반 재현 가능 전처리·피처. <strong>Nextflow</strong> + <strong>AWS Batch</strong> 병렬. (팀 Glue/Athena와 경로·스키마 합의.)</div></div>
+<div class="card" style="text-align:left;padding:20px"><div class="v" style="font-size:20px;margin-bottom:8px">② 모델 성능 비교표</div><div class="l" style="text-align:left;line-height:1.55">Subtype 기반 유방암 분석 결과로 <strong>ML·DL·Graph</strong> 알고리즘 심층 비교. 파일럿 소수 데이터 → 전체 확장 후 <strong>랭킹·최고 모델</strong> 도출.</div></div>
+<div class="card" style="text-align:left;padding:20px"><div class="v" style="font-size:20px;margin-bottom:8px">③ 최종 후보 약물 리스트</div><div class="l" style="text-align:left;line-height:1.55"><strong>외부 검증(METABRIC)</strong> 및 <strong>생물학적 필터(ADMET 4 Gate)</strong>를 통과한 랭킹 기반 Shortlist (Top 10~30 목표).</div></div>
+<div class="card" style="text-align:left;padding:20px"><div class="v" style="font-size:20px;margin-bottom:8px">④ 검증 및 설명 보고서 (XAI)</div><div class="l" style="text-align:left;line-height:1.55"><strong>Bedrock</strong>으로 논문 근거·기전·모순 탐지. 임상 문서형 산출 + 경영/발표용 요약 자료.</div></div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ 19 ═══ -->
+<section class="section" id="s19">
+<h2>19. Final-Project 확장 로드맵 (요약)</h2>
+<p>Pre-Project 코어에서 출발해 단일 질환 파이프라인을 <strong>초정밀 통합 플랫폼</strong>으로 확장하는 방향.</p>
+<div class="tw"><table>
+<tr><th>단계</th><th>확장 내용</th><th>예시 기술·데이터</th></tr>
+<tr><td>Stage 1</td><td>고급 멀티오믹스·생물 네트워크</td><td>CPTAC(프로테오믹스), CNV, 돌연변이 통합 · GraphSAGE, GAT, 이종 GNN, 지식 그래프</td></tr>
+<tr><td>Stage 2</td><td>멀티모달·구조 검증</td><td>병리/MRI/CT(TCIA) 융합 · 분자 도킹, MD 시뮬레이션</td></tr>
+<tr><td>Stage 3</td><td>AI 자동 운영·고급 ADMET</td><td>자체/ML 기반 ADMET 예측, GNN 분자 모델링 · <strong>Bedrock</strong> 실시간 Q&amp;A·자동 인사이트 리포트</td></tr>
+</table></div>
+<p class="ref">METABRIC·멀티오믹스는 Stage 1 정합. Pre-Project에서 확보한 Batch·Nextflow·Bedrock 패턴을 Final에서 재사용·고도화.</p>
+</section>
+
+<footer>
+AI Drug Discovery — Pipeline Report · 2026-03-27 · <strong>19 sections</strong> (§2·§9~§13·§11 보강 + §18~§19 신규) ·
+<a href="https://github.com/chochanghyeon188-oss/AI-Drug-Discovery">GitHub</a>
+</footer>
+
+</div></body></html>
