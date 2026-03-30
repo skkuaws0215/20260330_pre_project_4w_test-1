@@ -93,14 +93,17 @@ def page_status():
         "`README.md` / `pipeline_sections_detail.md` / 모델·ADMET 전략 MD",
         "Streamlit 대시보드 (용어·모델·ADMET·플로우·체크리스트·HTML·AWS)",
         "`requirements.txt` · `run_dashboard.ps1`",
+        "브리지 전처리 스크립트 추가: `nextflow/scripts/prepare_fe_inputs.py`",
+        "팀4 전용 입력 스냅샷 생성: `results/features_nextflow_team4/source_snapshot/{gdsc,depmap,chembl}/...`",
+        "브리지 표준 입력 생성: `results/features_nextflow_team4/input/20260330_bridge_v1/{sample_features,drug_features,labels}.parquet`",
     ]
     nxt = [
-        "Nextflow `main.nf` / `nextflow.config` (`results/<소스>/` in, `ml_ready/` 비입력 → `features_nextflow_team4/` out)",
-        "AWS Batch 컴퓨트 환경·ECR·Nextflow `awsbatch` 연결",
+        "브리지 입력 기준 Batch 실행 모니터링 (`20260330_batch_bridge_v1` RUNNABLE -> RUNNING -> SUCCEEDED 확인)",
+        "완료 후 `features.parquet` / `labels.parquet` / `feature_manifest.json` 산출 검증",
         "파일럿 학습 (예: LightGBM) 및 모델 랭킹 확장",
         "`25_admet_results.parquet` 컬럼 ↔ 컷오프 매핑 및 Pandas/Athena 필터 스크립트",
         "METABRIC 외부 검증 · Bedrock RAG",
-        "선택: `results/features_nextflow_team4/README.txt` → S3 동일 경로 업로드",
+        "필요 시 새 브리지 run_id(`input/YYYYMMDD_bridge_vN`) 롤링",
     ]
 
     c1, c2 = st.columns(2)
@@ -213,6 +216,8 @@ def page_aws():
 | 공유 전처리 (**읽기만**, 4인 공용) | `s3://.../results/<소스>/…` — **본인 산출 업로드 금지** |
 | 통합 테이블 | `ml_ready/` — **FE 입력으로 사용하지 않음** |
 | **본인 전용 FE·ML 데이터** | `s3://.../results/features_nextflow_team4/` — **신규 FE·실험 산출 전부 여기** |
+| 팀4 입력 스냅샷 | `s3://.../results/features_nextflow_team4/source_snapshot/...` |
+| 팀4 브리지 입력 | `s3://.../results/features_nextflow_team4/input/<run_id>/` |
 
 **목록 확인**
 
@@ -220,6 +225,7 @@ def page_aws():
 . .\\use-team-aws.ps1
 aws s3 ls "s3://drug-discovery-joe-raw-data-team4/results/"
 aws s3 ls "s3://drug-discovery-joe-raw-data-team4/results/" --recursive | findstr /i ".parquet"
+aws s3 ls "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/" --recursive
 ```
 
 **자격 증명은 대시보드에 넣지 마세요.** `.aws/credentials` 로컬만 사용.

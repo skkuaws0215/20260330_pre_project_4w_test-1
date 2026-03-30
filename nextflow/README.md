@@ -49,17 +49,40 @@ aws s3 cp .\results\features_nextflow_team4\README.txt "s3://drug-discovery-joe-
 | `nextflow/main.nf` | FE workflow (회귀 메인 + 이진 보조 라벨 생성) |
 | `nextflow/nextflow.config` | `local` / `awsbatch` 프로필 |
 | `nextflow/scripts/build_features.py` | join, imputation, variance filtering, leakage 제거 |
+| `nextflow/scripts/prepare_fe_inputs.py` | 브리지 전처리: `sample_features` / `drug_features` / `labels` + mapping/QC/manifest 생성 |
 | `nextflow/Dockerfile` | Batch 실행용 컨테이너 이미지 빌드 |
 
 ## 실행 예시
+
+### 0) 브리지 전처리 (권장)
+
+`results/<소스>/` 전처리 산출을 Nextflow FE 입력 계약 스키마로 맞춘다.
+
+```powershell
+python nextflow/scripts/prepare_fe_inputs.py `
+  --run-id "20260330_bridge_v1" `
+  --output-prefix "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/input/20260330_bridge_v1" `
+  --label-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/source_snapshot/gdsc/21_ic50.parquet" `
+  --sample-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/source_snapshot/depmap/57_crispr.parquet" `
+  --drug-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/source_snapshot/chembl/15_activities.parquet"
+```
+
+산출:
+
+- `sample_features.parquet` (`sample_id` key)
+- `drug_features.parquet` (`canonical_drug_id` key, `smiles`/`has_smiles` 포함)
+- `labels.parquet` (`sample_id`, `canonical_drug_id`, `ic50`, `binary_label`)
+- `mapping_table.parquet`
+- `join_qc_report.json`
+- `bridge_manifest.json`
 
 ### 1) 로컬 검증
 
 ```powershell
 nextflow run nextflow/main.nf -profile local `
-  --sample_feature_uri "s3://drug-discovery-joe-raw-data-team4/results/cross_platform/11_intersection.parquet" `
-  --drug_feature_uri "s3://drug-discovery-joe-raw-data-team4/results/chembl/15_activities.parquet" `
-  --label_uri "s3://drug-discovery-joe-raw-data-team4/results/gdsc/21_ic50.parquet" `
+  --sample_feature_uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/input/20260330_bridge_v1/sample_features.parquet" `
+  --drug_feature_uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/input/20260330_bridge_v1/drug_features.parquet" `
+  --label_uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/input/20260330_bridge_v1/labels.parquet" `
   --run_id "20260330_local_reg_main"
 ```
 
@@ -70,9 +93,9 @@ nextflow run nextflow/main.nf -profile local `
 
 ```powershell
 nextflow run nextflow/main.nf -profile awsbatch `
-  --sample_feature_uri "s3://drug-discovery-joe-raw-data-team4/results/cross_platform/11_intersection.parquet" `
-  --drug_feature_uri "s3://drug-discovery-joe-raw-data-team4/results/chembl/15_activities.parquet" `
-  --label_uri "s3://drug-discovery-joe-raw-data-team4/results/gdsc/21_ic50.parquet" `
+  --sample_feature_uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/input/20260330_bridge_v1/sample_features.parquet" `
+  --drug_feature_uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/input/20260330_bridge_v1/drug_features.parquet" `
+  --label_uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/input/20260330_bridge_v1/labels.parquet" `
   --run_id "20260330_batch_reg_main"
 ```
 
