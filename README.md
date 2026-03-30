@@ -15,7 +15,7 @@
 | `streamlit_app.py` | 진행용 **Streamlit 대시보드** (용어·체크리스트·HTML 보고서·README 뷰어) |
 | `requirements.txt` | `streamlit` 등 Python 의존성 |
 | `nextflow/` | Nextflow 코드 예정 (`main.nf` 등) · 업로드 방법 `nextflow/README.md` |
-| `results/features_nextflow_team4/README.txt` | S3 **`results/features_nextflow_team4/README.txt`** 와 동일 키 — 팀 prefix 안내 (로컬 경로 = S3 구조) |
+| `results/features_nextflow_team4/README.txt` | S3 동일 키 — **본인 전용** FE·ML 산출 prefix 안내 (공유 `results/<소스>/` 와 구분, 로컬=S3 구조) |
 | `model_selection_strategy.md` | PPTX 기반 ML/DL/Graph 후보·우선순위·확장 규모(4~5 / 3~4 / 3~4) |
 | `admet_postprocessing_strategy.md` | ADMET **후처리 필터** (예측 도구 / 실행 도구 / 컷오프 참고) |
 
@@ -87,8 +87,32 @@ git push -u origin main
 |------|------|
 | 버킷 ARN | `arn:aws:s3:::drug-discovery-joe-raw-data-team4` |
 | Raw(원본) | `s3://drug-discovery-joe-raw-data-team4/` — **`results/` 바깥** 상위 접두사에 원본 데이터 |
-| 전처리 완료 | `s3://drug-discovery-joe-raw-data-team4/results/` |
-| **Nextflow 피처 산출 (팀4 합의)** | `s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/` — 전처리 `results/<소스>/` 와 구분, 다른 팀원 FE 경로와 충돌 방지 |
+| 전처리 완료 (팀 **공유**) | `s3://drug-discovery-joe-raw-data-team4/results/<소스>/` 등 — **팀원 4인이 함께 쓰는 구역**. 여기에 본인 FE 산출을 올리지 말 것(경로·권한 혼선 방지). |
+| **본인 전용 FE + ML 입력** | `s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/` — **앞으로 본인이 만든 FE·실험 산출은 전부 이 prefix 아래**에 업로드. 이 폴더에서 나온 데이터셋으로 ML 모델 테스트·학습. |
+
+**폴더 헷갈리지 않기:** `results/` = 공유 전처리만 참고(읽기 입력). **쓰기(본인 작업물)** 는 **`results/features_nextflow_team4/`** 만 사용.
+
+**팀4 Nextflow 입력·산출 정책**
+
+- **입력:** **raw에서 파이프라인으로 이미 만들어 둔 `s3://…/results/<소스>/…`** 전처리 산출(parquet 등)을 Nextflow가 읽어 **피처 엔지니어링·조인**을 수행한다. (README § Parquet 표 경로·용량 참고.)
+- **사용하지 않음(입력):** **`ml_ready/`** — 이미 통합된 ML-ready 테이블이 아니라, **`results/` 소스별 산출**에서 Nextflow가 조합한다.
+- **산출:** 모델 학습용 피처 테이블·메타·중간 산출은 **`results/features_nextflow_team4/<run_id>/`** 등에만 둔다. **S3에 FE 관련 신규 데이터를 올릴 때도 이 prefix 하위로** 올려 팀 공유 `results/<소스>/` 와 섞이지 않게 한다. 학습(SageMaker 등) 입력은 이 산출을 사용.
+
+### FE contract (2026-03-30 합의)
+
+- **Target unit:** `sample-drug pair`
+- **Main label:** 회귀(`IC50/AUC/response score`)
+- **Aux label:** 이진(`sensitive/resistant`)
+- **Feature rules:** high-missing 제거, median/UNK imputation, variance filtering, leakage 컬럼 제거
+- **Branch:** tree용 기본 피처 + DL용 정규화 브랜치 분리
+- **Run outputs:** `features.parquet`, `labels.parquet`, `feature_manifest.json` (옵션: `features_dl.parquet`)
+
+### 구현 파일 (nextflow/)
+
+- `nextflow/main.nf`: FE workflow
+- `nextflow/nextflow.config`: `local`/`awsbatch` 프로필
+- `nextflow/scripts/build_features.py`: join + FE 규칙 구현
+- `nextflow/Dockerfile`, `nextflow/requirements-fe.txt`: Batch 컨테이너 빌드용
 
 CLI 예시(`use-team-aws.ps1` 실행 후):
 
@@ -102,7 +126,7 @@ aws s3 ls "s3://drug-discovery-joe-raw-data-team4/results/" --recursive | findst
 
 **1단계 prefix** (`aws s3 ls …/results/`): `admet/`, `chembl/`, `cross_platform/`, `depmap/`, `drugbank/`, `gdsc/`, `id_mapping/`, `lincs/`, `metabric/`, `msigdb/`, `opentargets/`, `pubmed/`, `string/`, `tcga/` 및 루트 `final_qc.csv`.
 
-**Parquet 22개** (Nextflow 입력 설계 시 경로 참고 — 용량 큰 파일 주의):
+**Parquet 22개** (**팀4 Nextflow FE 입력** 후보 — `results/<소스>/`; raw 기반 전처리 산출. 용량 큰 파일 주의):
 
 | 경로 (버킷 내 `results/` 기준) | 비고 |
 |--------------------------------|------|
@@ -129,12 +153,12 @@ aws s3 ls "s3://drug-discovery-joe-raw-data-team4/results/" --recursive | findst
 | **Bedrock (LLM) 추가 검증·XAI** | 원시/모델 점수에 **문헌·지식 그래프 RAG**를 붙여 근거 수집, 기전 설명, 리스크, **모순 탐지** → 임상 문서형 산출 | ADMET·METABRIC 결과를 **설명·교차검증**하는 층으로 두는 것이 목표. |
 
 **권장 순서(요약):**  
-데이터(S3 raw + `results/`) → **Nextflow 피처 엔지니어링** → (파일럿) ML / DL / Graph 학습·비교 → 확장·**모델 랭킹**·최적 모델 선정 → **METABRIC 일반화 검증** → **ADMET Gate** → **Bedrock 기반 검증·설명 보고서**.
+데이터(raw → **`results/`** 전처리) → **Nextflow가 `results/`를 읽어 피처 엔지니어링** (`ml_ready/`는 입력으로 쓰지 않음) → (파일럿) ML / DL / Graph 학습·비교 → 확장·**모델 랭킹**·최적 모델 선정 → **METABRIC 일반화 검증** → **ADMET Gate** → **Bedrock 기반 검증·설명 보고서**.
 
 ### 2) 데이터 소스 (S3)와 Nextflow
 
-- 버킷에는 **raw**와 전처리 완료 **`results/`** 가 함께 있음(상표 참고).
-- **Nextflow**로 `results/`(및 필요 시 raw)를 입력으로 **피처 엔지니어링**을 하고, 산출은 **`results/features_nextflow_team4/`** 에 쓰는 구성(팀4 합의).
+- 버킷에는 **raw**, 전처리 **`results/`**, 통합 **`ml_ready/`** 가 함께 있을 수 있음(상표 참고).
+- **Nextflow(팀4)** 는 **`results/<소스>/`** 전처리 산출을 **입력**으로 쓰고, **피처·조인·학습용 테이블**은 **`results/features_nextflow_team4/`** 에 새로 쓴다. **`ml_ready/`는 FE 입력으로 사용하지 않는다.** (통합은 Nextflow 그래프에서 수행.)
 
 ### 3) 모델 전략: 소수 파일럿 → 전체 확장 → 랭킹
 
@@ -168,7 +192,7 @@ aws s3 ls "s3://drug-discovery-joe-raw-data-team4/results/" --recursive | findst
 - **SageMaker Processing / Training**: ML/DL에 맞춘 관리형이지만, 범용 배치·Nextflow와의 궁합은 Batch가 더 직관적인 경우가 많음.
 - **단일 대형 EC2/SageMaker 노트북**: 파일럿·디버깅에는 좋고, **전체 확장·재현성**은 Batch+Nextflow 쪽이 유리.
 
-이 저장소에는 아직 Nextflow·Batch 템플릿이 없음. 확정되면 `nextflow.config`(awsbatch 프로필)와 **IAM·큐 이름**만 README에 링크 형태로 추가하는 것을 권장.
+이 저장소에는 Nextflow FE 뼈대(`main.nf`, `nextflow.config`, `build_features.py`)가 추가되어 있음. Batch 적용 시 `nextflow.config`의 `awsbatch` 프로필에 **실제 큐 이름·ECR 이미지**를 반영해 실행.
 
 ## 아키텍처 합의 (Batch vs SageMaker)
 

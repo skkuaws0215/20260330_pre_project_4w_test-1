@@ -30,8 +30,8 @@ def show_html_report():
 
 
 TASK_LABELS = [
-    "[Day1] S3 prefix 합의 results/features_nextflow_team4/ + README 스냅샷",
-    "Nextflow 피처 파이프라인 초안 + S3 경로 합의",
+    "[Day1] 본인 전용 prefix results/features_nextflow_team4/ + README (공유 results/ 와 구분)",
+    "Nextflow 피처 파이프라인 초안 (`results/` 입력, `ml_ready/` 비입력) + S3 경로 합의",
     "AWS Batch CPU/GPU 큐·Job 정의·IAM",
     "파일럿 ML/DL/Graph → 전체 확장·모델 랭킹",
     "SageMaker git pull · 최신 코드 반영",
@@ -47,12 +47,13 @@ TASK_LABELS = [
 def page_home():
     st.title("AI Drug Discovery — 진행 대시보드")
     st.success(
-        "**팀4 S3 합의** — Nextflow 피처 산출: "
-        "`s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/`"
+        "**본인 전용 FE·ML 입력 prefix** — 업로드·산출: "
+        "`s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/` "
+        "(공유 `results/<소스>/` 와 혼동 금지)"
     )
     st.markdown(
-        "팀4 Pre-Project: **S3 → Nextflow·Batch 피처 → 파일럿/확장 학습 → "
-        "QC3 → METABRIC → ADMET(후처리) → Bedrock** 순으로 산출물을 맞춥니다."
+        "팀4 Pre-Project: **S3 `results/`(raw 기반 전처리) → Nextflow·Batch 피처**(`ml_ready/`는 FE 입력으로 사용하지 않음) "
+        "→ 이 폴더 FE 데이터셋으로 ML 테스트·학습 → QC3 → METABRIC → ADMET(후처리) → Bedrock 순으로 산출물을 맞춥니다."
     )
     st.info(
         "사이드바 **「전체 요약·현황」** 에 완료/예정 작업과 문서 목록이 정리되어 있습니다. "
@@ -68,7 +69,7 @@ def page_home():
 | `model_selection_strategy.md` | ML/DL/Graph 후보·우선순위 (PPTX) |
 | `admet_postprocessing_strategy.md` | ADMET 예측 도구 + 후처리 필터 + 컷오프 참고 |
 | `pipeline_sections_detail.md` | HTML §1–2 상세 + 계획 보강 |
-| `results/features_nextflow_team4/README.txt` | S3 동일 키 — prefix 팀 안내 |
+| `results/features_nextflow_team4/README.txt` | S3 동일 키 — **본인 전용** FE prefix 안내 (공유 `results/` 와 구분) |
         """
     )
     c1, c2, c3 = st.columns(3)
@@ -86,7 +87,7 @@ def page_status():
 
     done = [
         "팀 AWS: 프로젝트 `.aws/` + `use-team-aws.ps1` (개인 프로필과 분리)",
-        "S3: prefix `results/features_nextflow_team4/` — 안내 README는 Git 경로 `results/features_nextflow_team4/README.txt` = S3 동일 키",
+        "S3: **본인 전용** `results/features_nextflow_team4/` — FE·ML용 신규 업로드는 이 prefix만 사용 (공유 `results/<소스>/` 비업로드)",
         "아키텍처: FE Nextflow+Batch / 학습·튜닝 SageMaker (Batch GPU 선택)",
         "`pipeline_overview.html`: Nextflow·Batch·METABRIC·ADMET·Bedrock·§18~19·용어 ref",
         "`README.md` / `pipeline_sections_detail.md` / 모델·ADMET 전략 MD",
@@ -94,7 +95,7 @@ def page_status():
         "`requirements.txt` · `run_dashboard.ps1`",
     ]
     nxt = [
-        "Nextflow `main.nf` / `nextflow.config` (S3 in → `features_nextflow_team4/` out)",
+        "Nextflow `main.nf` / `nextflow.config` (`results/<소스>/` in, `ml_ready/` 비입력 → `features_nextflow_team4/` out)",
         "AWS Batch 컴퓨트 환경·ECR·Nextflow `awsbatch` 연결",
         "파일럿 학습 (예: LightGBM) 및 모델 랭킹 확장",
         "`25_admet_results.parquet` 컬럼 ↔ 컷오프 매핑 및 Pandas/Athena 필터 스크립트",
@@ -208,9 +209,10 @@ def page_aws():
 | 항목 | 값 |
 |------|-----|
 | 버킷 ARN | `arn:aws:s3:::drug-discovery-joe-raw-data-team4` |
-| Raw | `s3://.../` 에서 `results/` **바깥** 접두사 |
-| 전처리 완료 | `s3://.../results/<소스>/` + `final_qc.csv` (스냅샷은 README) |
-| **Nextflow FE 산출 (팀4)** | `s3://.../results/features_nextflow_team4/` |
+| Raw | `s3://.../` 에서 **`results/` 바깥** 상위 접두사 (원본) |
+| 공유 전처리 (**읽기만**, 4인 공용) | `s3://.../results/<소스>/…` — **본인 산출 업로드 금지** |
+| 통합 테이블 | `ml_ready/` — **FE 입력으로 사용하지 않음** |
+| **본인 전용 FE·ML 데이터** | `s3://.../results/features_nextflow_team4/` — **신규 FE·실험 산출 전부 여기** |
 
 **목록 확인**
 
@@ -227,11 +229,14 @@ aws s3 ls "s3://drug-discovery-joe-raw-data-team4/results/" --recursive | findst
 
 def page_flow():
     st.header("§2 플로우 요약 (체크용)")
+    st.caption(
+        "팀4 Nextflow·Batch 피처: 입력은 **`results/<소스>/`**(raw 기반 전처리); **`ml_ready/`는 사용하지 않음.**"
+    )
     steps = [
         "11 소스 → QC1",
         "Snakemake 전처리 → QC2",
         "integrate.py → ML-ready",
-        "Nextflow + Batch 피처",
+        "Nextflow + Batch 피처 (팀4: results/ → features_nextflow_team4/)",
         "파일럿 → 전체 확장 · 모델 랭킹",
         "12 모델 3-Track",
         "RRF 앙상블",
