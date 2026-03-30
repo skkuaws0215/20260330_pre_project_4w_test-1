@@ -1,0 +1,21 @@
+{
+  "aws_region": "ap-northeast-2",
+  "run_id": "20260330_batch_reg_main",
+  "out_prefix": "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4",
+
+  "sample_feature_uri": "s3://drug-discovery-joe-raw-data-team4/results/cross_platform/11_intersection.parquet",
+  "drug_feature_uri": "s3://drug-discovery-joe-raw-data-team4/results/chembl/15_activities.parquet",
+  "label_uri": "s3://drug-discovery-joe-raw-data-team4/results/gdsc/21_ic50.parquet",
+
+  "sample_id_col": "sample_id",
+  "drug_id_col": "canonical_drug_id",
+  "drug_fallback_col": "inchikey",
+  "regression_label_col": "ic50",
+  "binary_label_col": "binary_label",
+
+  "missing_threshold": 0.7,
+  "variance_threshold": 0.0,
+  "leakage_cols": "",
+  "normalization_branch": "both",
+  "binary_from_quantile": 0.3
+}

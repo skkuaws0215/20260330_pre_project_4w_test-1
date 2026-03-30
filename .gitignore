@@ -13,3 +13,4 @@ venv/
 _pptx_extract.txt
 .nextflow/
 work/
+.nextflow.log*

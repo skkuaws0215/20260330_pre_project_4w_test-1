@@ -10,4 +10,4 @@ RUN pip install --no-cache-dir -r /tmp/requirements-fe.txt
 
 COPY nextflow /workspace/nextflow
 
-ENTRYPOINT ["python", "--version"]
+ENTRYPOINT ["python"]

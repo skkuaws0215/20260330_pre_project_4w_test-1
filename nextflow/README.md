@@ -76,6 +76,28 @@ nextflow run nextflow/main.nf -profile awsbatch `
   --run_id "20260330_batch_reg_main"
 ```
 
+## 지금 바로 할 일 (Batch 본 실행)
+
+현재 구성 기준(예시):
+
+- Compute environment: `team4-fe-ce-cpu`
+- Job queue: `team4-fe-queue-cpu`
+- Job definition: `team4-fe-jobdef:1`
+- ECR image: `666803869796.dkr.ecr.ap-northeast-2.amazonaws.com/skku-project/pre-4team:fe-latest`
+
+아래 순서로 실행:
+
+1. **Batch 리소스 생성**
+   - Compute environment
+   - Job queue
+2. **ECR 이미지 빌드/푸시**
+   - `./nextflow/build_and_push_ecr.ps1 -ImageTag fe-latest`
+3. **Nextflow config 반영**
+   - `nextflow/nextflow.config`의 `awsbatch` 프로필에서 `process.queue`, `process.container` 실제 값으로 교체
+4. **파라미터 파일 실행**
+   - `nextflow/params/team4.awsbatch.example.json` 값을 실제 입력 경로/컬럼으로 수정
+   - `./nextflow/run_fe_batch.ps1 -ParamsFile nextflow/params/team4.awsbatch.example.json`
+
 ## 아키텍처 (합의)
 
 | 구간 | 권장 |
