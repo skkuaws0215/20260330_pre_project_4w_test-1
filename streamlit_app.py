@@ -46,6 +46,20 @@ TASK_LABELS = [
 
 def page_home():
     st.title("AI Drug Discovery — 진행 대시보드")
+    st.subheader("현재 실행 워크플로우 (팀4 기준)")
+    st.markdown(
+        """
+1. 공유 전처리 입력 확인: `results/<소스>/...` (읽기 전용)
+2. 팀4 스냅샷 생성: `results/features_nextflow_team4/source_snapshot/...`
+3. 브리지 전처리: `prepare_fe_inputs.py` -> `input/<run_id>/{sample_features,drug_features,labels}.parquet`
+4. Nextflow + AWS Batch FE 실행: `main.nf -profile awsbatch`
+5. FE 산출 확인: `results/features_nextflow_team4/<run_id>/features.parquet`, `labels.parquet`, `feature_manifest.json`
+6. 후속 단계: SageMaker 학습/튜닝 -> METABRIC 검증 -> ADMET 필터 -> Bedrock 리포트
+        """
+    )
+    st.caption(
+        "핵심: 공유 `results/<소스>/` 는 읽기만 사용하고, 팀4 작업물은 `features_nextflow_team4/` 아래에서만 생성/관리"
+    )
     st.success(
         "**본인 전용 FE·ML 입력 prefix** — 업로드·산출: "
         "`s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/` "
@@ -59,6 +73,18 @@ def page_home():
         "사이드바 **「전체 요약·현황」** 에 완료/예정 작업과 문서 목록이 정리되어 있습니다. "
         "**아키텍처:** FE = Nextflow+Batch / 학습·튜닝 = 주로 SageMaker (동일 Docker를 Batch GPU에 올리는 것은 선택)."
     )
+    st.subheader("결측 임계값 비교 (팀4 FE v2)")
+    st.markdown(
+        """
+| 실험 run | missing threshold | rows | feature cols | 비고 |
+|----------|-------------------|------|--------------|------|
+| `20260330_batch_miss70_v2` | 0.7 | 14,497 | 17,922 | 느슨한 결측 기준 |
+| `20260330_batch_miss30_v2` | 0.3 | 14,497 | 17,920 | 엄격한 결측 기준 |
+
+차이 컬럼: `drug__smiles`, `drug__canonical_smiles_raw` (30%에서 제거)
+        """
+    )
+    st.caption("모델 비교는 A(엄격), B(느슨), C(SMILES 수치화 추가) 프레임으로 진행")
     st.subheader("문서 바로가기 (요약)")
     st.markdown(
         """
@@ -96,10 +122,12 @@ def page_status():
         "브리지 전처리 스크립트 추가: `nextflow/scripts/prepare_fe_inputs.py`",
         "팀4 전용 입력 스냅샷 생성: `results/features_nextflow_team4/source_snapshot/{gdsc,depmap,chembl}/...`",
         "브리지 표준 입력 생성: `results/features_nextflow_team4/input/20260330_bridge_v1/{sample_features,drug_features,labels}.parquet`",
+        "결측 임계값 비교 run 완료: `20260330_batch_miss70_v2`, `20260330_batch_miss30_v2`",
+        "A/B/C 실험 프로토콜 문서화: `model_selection_strategy.md`",
     ]
     nxt = [
-        "브리지 입력 기준 Batch 실행 모니터링 (`20260330_batch_bridge_v1` RUNNABLE -> RUNNING -> SUCCEEDED 확인)",
-        "완료 후 `features.parquet` / `labels.parquet` / `feature_manifest.json` 산출 검증",
+        "A/B/C 벤치마크 시작: A=miss30, B=miss70(문자열 SMILES 제외), C=miss70+SMILES 수치화",
+        "LightGBM 파일럿 + 동일 split/seed/fold로 성능 비교 (RMSE/MAE/Spearman)",
         "파일럿 학습 (예: LightGBM) 및 모델 랭킹 확장",
         "`25_admet_results.parquet` 컬럼 ↔ 컷오프 매핑 및 Pandas/Athena 필터 스크립트",
         "METABRIC 외부 검증 · Bedrock RAG",

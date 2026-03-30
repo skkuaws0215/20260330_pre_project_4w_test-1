@@ -107,6 +107,28 @@ git push -u origin main
 - **Branch:** tree용 기본 피처 + DL용 정규화 브랜치 분리
 - **Run outputs:** `features.parquet`, `labels.parquet`, `feature_manifest.json` (옵션: `features_dl.parquet`)
 
+### 결측 임계값 비교 실험 (70% vs 30%)
+
+팀4 FE 산출 기준으로 결측 임계값 비교용 run을 분리 저장:
+
+- **느슨한 결측(70%)**: `s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/20260330_batch_miss70_v2/`
+- **엄격한 결측(30%)**: `s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/20260330_batch_miss30_v2/`
+
+비교 결과 요약:
+
+- 두 run 모두 행 수 동일 (`14,497`)
+- 70%: feature `17,922` cols
+- 30%: feature `17,920` cols
+- 차이 컬럼(30%에서 제거): `drug__smiles`, `drug__canonical_smiles_raw`
+
+권장 실험 프레임(A/B/C):
+
+1. **A (엄격 baseline)**: miss30_v2 그대로 사용
+2. **B (느슨 baseline)**: miss70_v2 사용, 문자열 SMILES는 학습 입력에서 제외
+3. **C (SMILES+)**: miss70_v2 사용, SMILES를 descriptor/fingerprint로 수치화 후 추가
+
+상세 프로토콜은 `model_selection_strategy.md`의 “결측 임계값 A/B/C 실험 프로토콜” 절을 따른다.
+
 ### 구현 파일 (nextflow/)
 
 - `nextflow/main.nf`: FE workflow

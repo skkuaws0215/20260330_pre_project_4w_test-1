@@ -31,7 +31,7 @@ if (!params.sample_feature_uri || !params.drug_feature_uri || !params.label_uri)
 
 workflow {
     Channel
-        .of(tuple(params.sample_feature_uri, params.drug_feature_uri, params.label_uri))
+        .of(tuple(params.sample_feature_uri, params.drug_feature_uri, params.label_uri, file("${projectDir}/scripts/build_features.py")))
         | BUILD_FEATURE_TABLE
 }
 
@@ -41,7 +41,7 @@ process BUILD_FEATURE_TABLE {
     publishDir "${params.out_prefix}/${params.run_id}", mode: "copy", overwrite: true
 
     input:
-    tuple val(sample_feature_uri), val(drug_feature_uri), val(label_uri)
+    tuple val(sample_feature_uri), val(drug_feature_uri), val(label_uri), path(build_script)
 
     output:
     path("features.parquet"), emit: features
@@ -51,7 +51,7 @@ process BUILD_FEATURE_TABLE {
 
     script:
     """
-    python nextflow/scripts/build_features.py \
+    python3 "${build_script}" \
       --sample-feature-uri "${sample_feature_uri}" \
       --drug-feature-uri "${drug_feature_uri}" \
       --label-uri "${label_uri}" \

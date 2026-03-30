@@ -22,8 +22,8 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--drug-uri",
-        default="s3://drug-discovery-joe-raw-data-team4/results/chembl/15_activities.parquet",
-        help="ChEMBL activities parquet URI.",
+        default="s3://drug-discovery-joe-raw-data-team4/results/features_glue/feature/model_input/elasticnet/elasticnet_drug_dataset.parquet",
+        help="Drug-level feature table URI with canonical_smiles (recommended: elasticnet_drug_dataset).",
     )
     p.add_argument(
         "--sample-uri",
@@ -128,20 +128,29 @@ def build_labels(label_df: pd.DataFrame, q: float) -> tuple[pd.DataFrame, pd.Dat
     return labels, mapping_table, qc
 
 
+def _norm_name(s: pd.Series) -> pd.Series:
+    return (
+        s.astype(str)
+        .str.lower()
+        .str.replace(r"[^a-z0-9]+", "", regex=True)
+        .str.strip()
+    )
+
+
 def build_sample_features(sample_df: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, Any]]:
-    required = ["depmap_id", "gene_name", "dependency"]
+    required = ["cell_line_name", "gene_name", "dependency"]
     missing = [c for c in required if c not in sample_df.columns]
     if missing:
         raise ValueError(f"sample source missing required columns: {missing}")
 
     wide = sample_df.pivot_table(
-        index="depmap_id",
+        index="cell_line_name",
         columns="gene_name",
         values="dependency",
         aggfunc="mean",
     )
     wide.columns = [f"crispr__{str(c)}" for c in wide.columns]
-    wide = wide.reset_index().rename(columns={"depmap_id": "sample_id"})
+    wide = wide.reset_index().rename(columns={"cell_line_name": "sample_id"})
     wide["sample_id"] = wide["sample_id"].astype(str).str.strip()
     wide = wide.fillna(wide.median(numeric_only=True))
 
@@ -152,26 +161,38 @@ def build_sample_features(sample_df: pd.DataFrame) -> tuple[pd.DataFrame, dict[s
     return wide, qc
 
 
-def build_drug_features(drug_df: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, Any]]:
-    required = ["molecule_chembl_id", "pchembl_value", "canonical_smiles"]
+def build_drug_features(drug_df: pd.DataFrame, label_df: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, Any]]:
+    required = ["drug_name_norm", "canonical_smiles"]
     missing = [c for c in required if c not in drug_df.columns]
     if missing:
         raise ValueError(f"drug source missing required columns: {missing}")
 
-    out = drug_df.copy()
-    out = out.rename(columns={"molecule_chembl_id": "canonical_drug_id"})
-    out["canonical_drug_id"] = out["canonical_drug_id"].astype(str).str.strip()
-    out["canonical_smiles_raw"] = out["canonical_smiles"]
-    out["smiles"] = out["canonical_smiles"].astype(str).str.strip()
-    out.loc[out["smiles"].isin(["", "nan", "None"]), "smiles"] = pd.NA
+    if "DRUG_ID" not in label_df.columns or "drug_name" not in label_df.columns:
+        raise ValueError("label source must include DRUG_ID and drug_name for drug mapping.")
+
+    label_drug = label_df[["DRUG_ID", "drug_name"]].dropna().copy()
+    label_drug["canonical_drug_id"] = label_drug["DRUG_ID"].astype(int).astype(str)
+    label_drug["drug_name_norm"] = _norm_name(label_drug["drug_name"])
+    label_drug = label_drug.drop_duplicates(subset=["canonical_drug_id", "drug_name_norm"])
+
+    src = drug_df.copy()
+    src["drug_name_norm"] = _norm_name(src["drug_name_norm"])
+    src["canonical_smiles_raw"] = src["canonical_smiles"]
+    src["smiles"] = src["canonical_smiles"].astype(str).str.strip()
+    src.loc[src["smiles"].isin(["", "nan", "None"]), "smiles"] = pd.NA
+
+    merged = label_drug.merge(
+        src[["drug_name_norm", "smiles", "canonical_smiles_raw"]].drop_duplicates("drug_name_norm"),
+        on="drug_name_norm",
+        how="left",
+    )
 
     grouped = (
-        out.groupby("canonical_drug_id", as_index=False)
+        merged.groupby("canonical_drug_id", as_index=False)
         .agg(
-            pchembl_mean=("pchembl_value", "mean"),
-            pchembl_std=("pchembl_value", "std"),
             smiles=("smiles", "first"),
             canonical_smiles_raw=("canonical_smiles_raw", "first"),
+            drug_name_norm=("drug_name_norm", "first"),
         )
         .reset_index(drop=True)
     )
@@ -196,7 +217,7 @@ def main() -> None:
 
     labels, mapping_table, labels_qc = build_labels(label_src, args.binary_quantile)
     sample_features, sample_qc = build_sample_features(sample_src)
-    drug_features, drug_qc = build_drug_features(drug_src)
+    drug_features, drug_qc = build_drug_features(drug_src, label_src)
 
     labels_key = labels[["sample_id", "canonical_drug_id"]].drop_duplicates()
     sample_key = sample_features[["sample_id"]].drop_duplicates()
