@@ -129,6 +129,63 @@ git push -u origin main
 
 상세 프로토콜은 `model_selection_strategy.md`의 “결측 임계값 A/B/C 실험 프로토콜” 절을 따른다.
 
+### A/B/C 입력셋 (팀4 FE 폴더에 고정)
+
+아래 입력셋은 모두 **팀4 FE 생성 폴더**에 생성/정리:
+`s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/abc_inputs/20260330_abc_v1/`
+
+| 순서 | 실험군 | 설명 | features URI | labels URI |
+|------|--------|------|--------------|------------|
+| 1 | A | 엄격 결측 baseline (**결측치 30%**, miss30) | `.../A/features.parquet` | `.../A/labels.parquet` |
+| 2 | B | 느슨 기준 (**결측치 70%**) + 문자열 SMILES 제외 | `.../B/features_b.parquet` | `.../B/labels.parquet` |
+| 3 | C | 느슨 기준 (**결측치 70%**) + SMILES 확장용 원본 | `.../C/features.parquet` | `.../C/labels.parquet` |
+
+전체 인덱스(혼선 방지):  
+`s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/abc_inputs/20260330_abc_v1/abc_index.json`
+
+### A/B/C 보조 스크립트 (템플릿)
+
+- B 입력 생성(문자열 SMILES 제외):
+  - `nextflow/scripts/prepare_b_input.py`
+- A/B/C 공통 학습 템플릿(회귀 baseline):
+  - `nextflow/scripts/train_abc_template.py`
+
+예시:
+
+```bash
+python3 nextflow/scripts/prepare_b_input.py \
+  --features-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/20260330_batch_miss70_v2/features.parquet" \
+  --labels-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/20260330_batch_miss70_v2/labels.parquet" \
+  --output-prefix "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/ab_tests/b_input_v1"
+
+python3 nextflow/scripts/train_abc_template.py \
+  --features-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/20260330_batch_miss30_v2/features.parquet" \
+  --labels-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/20260330_batch_miss30_v2/labels.parquet" \
+  --output-prefix "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/ab_tests/train_v1" \
+  --experiment-tag "A_miss30_seed42"
+```
+
+### FE 데이터셋 산출물 구조 (무엇이 몇 개 생기나?)
+
+기본 FE run(`nextflow/main.nf`) 1회당 핵심 산출은 보통 **3~4개**:
+
+1. `features.parquet`  
+   - 학습 입력 피처 테이블 (키 포함: `sample_id`, `canonical_drug_id`)
+2. `labels.parquet`  
+   - 정답값 테이블 (`label_regression`, `label_binary` 등)
+3. `feature_manifest.json`  
+   - 전처리/필터링/행열 수/입출력 경로 메타데이터
+4. `features_dl.parquet` *(옵션)*  
+   - DL용 정규화 브랜치(`normalization_branch`가 `dl`/`both`일 때)
+
+즉 FE 단계는 **학습값(피처)**·**정답값(라벨)**·**실험 메타**를 만든다.  
+**예측값은 FE 단계에서 생성되지 않고**, 모델 학습/추론 단계에서 별도 생성한다.
+
+A/B/C 학습 템플릿 기준 예측 산출은 run당 보통 **2개**:
+
+- `<experiment_tag>_predictions.parquet` (예측값 + 정답 + split)
+- `<experiment_tag>_metrics.json` (RMSE/MAE/Spearman 등)
+
 ### 구현 파일 (nextflow/)
 
 - `nextflow/main.nf`: FE workflow

@@ -84,7 +84,21 @@ def page_home():
 차이 컬럼: `drug__smiles`, `drug__canonical_smiles_raw` (30%에서 제거)
         """
     )
-    st.caption("모델 비교는 A(엄격), B(느슨), C(SMILES 수치화 추가) 프레임으로 진행")
+    st.caption("모델 비교는 A(엄격=결측치 30%), B(느슨=결측치 70%), C(SMILES 수치화 추가, 70% 기반) 프레임으로 진행")
+    st.subheader("A/B/C 입력셋 경로 (고정)")
+    st.markdown(
+        """
+공통 베이스: `s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/abc_inputs/20260330_abc_v1/`
+
+| 순서 | 실험군 | features | labels |
+|------|--------|----------|--------|
+| 1 | A (결측치 30%, 엄격) | `.../A/features.parquet` | `.../A/labels.parquet` |
+| 2 | B (결측치 70%, 느슨) | `.../B/features_b.parquet` | `.../B/labels.parquet` |
+| 3 | C (결측치 70%, 느슨+SMILES) | `.../C/features.parquet` | `.../C/labels.parquet` |
+
+인덱스: `.../abc_index.json`
+        """
+    )
     st.subheader("문서 바로가기 (요약)")
     st.markdown(
         """
