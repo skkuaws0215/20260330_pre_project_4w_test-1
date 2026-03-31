@@ -65,19 +65,6 @@
     </section>
 
     <section>
-      <h2>13) 최종 비교표 (동일 조건, 4개 모델)</h2>
-      <p class="muted">출력 파일: <code>xgb_mlp_vae_tabnet_final_comparison.csv</code>, <code>xgb_mlp_vae_tabnet_final_comparison.md</code></p>
-      <table>
-        <tr><th>model</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th><th>comment</th></tr>
-        <tr><td>XGBoost</td><td>2.107257</td><td>1.584793</td><td>0.445384</td><td>0.835994</td><td>1.000000</td><td>best</td></tr>
-        <tr><td>MLP</td><td>2.112787</td><td>1.598048</td><td>0.440021</td><td>0.836289</td><td>1.000000</td><td>competitive</td></tr>
-        <tr><td>VAE</td><td>2.153212</td><td>1.610322</td><td>0.367956</td><td>0.840474</td><td>1.000000</td><td>weak (ranking drop)</td></tr>
-        <tr><td>TabNet</td><td>2.537977</td><td>1.968322</td><td>0.168106</td><td>0.716251</td><td>1.000000</td><td>weak (large gap)</td></tr>
-      </table>
-      <p class="muted"><strong>한 줄 요약:</strong> 현재 best는 <strong>XGBoost</strong>, DL 중 가장 유망한 모델은 <strong>MLP</strong>입니다.</p>
-    </section>
-
-    <section>
       <h2>2) DL 실험 계획/구성 (전체 모델 반영)</h2>
       <table>
         <tr><th>모델</th><th>입력</th><th>핵심 설정</th><th>지표</th><th>상태</th></tr>
@@ -120,52 +107,27 @@
     </section>
 
     <section>
-      <h2>10) XGBoost vs MLP vs VAE vs TabNet 비교</h2>
-      <table>
-        <tr><th>model</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th></tr>
-        <tr><td>XGBoost</td><td>2.107</td><td>1.585</td><td>0.445</td><td>0.836</td><td>1.000</td></tr>
-        <tr><td>MLP</td><td>2.113</td><td>1.598</td><td>0.440</td><td>0.836</td><td>1.000</td></tr>
-        <tr><td>VAE (best by Spearman: dim=32)</td><td>2.153</td><td>1.610</td><td>0.368</td><td>0.840</td><td>1.000</td></tr>
-        <tr><td>TabNet</td><td>2.538</td><td>1.968</td><td>0.168</td><td>0.716</td><td>1.000</td></tr>
-      </table>
-      <p class="muted">현재 목적(주지표 Spearman) 기준에서는 XGBoost/MLP가 우세. VAE는 NDCG@20은 상대적으로 높은 편이며, TabNet baseline은 현재 feature 구조에서 성능 저하가 큼.</p>
-    </section>
-
-    <section>
-      <h2>14) MLP Variants Comparison (Flat vs Block-wise vs Residual + XGBoost)</h2>
+      <h2>5) 통합 성능 비교표 (Holdout + CV)</h2>
       <p class="muted">
-        출력 파일: <code>mlp_variants_metrics.csv</code>, <code>xgb_mlp_variants_comparison.csv</code>,
-        <code>mlp_variants_learning_curve.csv</code>, <code>run_summary.json</code><br/>
-        경로: <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/mlp_variants/</code>
+        통합 출처:
+        <code>xgb_mlp_vae_tabnet_final_comparison.csv</code>,
+        <code>xgb_mlp_variants_comparison.csv</code>,
+        <code>xgb_vs_residual_mlp_cv_comparison.csv</code>
       </p>
       <table>
-        <tr><th>model</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th><th>comment</th></tr>
-        <tr><td>XGBoost</td><td>2.107257</td><td>1.584793</td><td>0.445384</td><td>0.835994</td><td>1.000000</td><td>best ML baseline</td></tr>
-        <tr><td>FlatMLP</td><td>2.112787</td><td>1.598048</td><td>0.440021</td><td>0.836289</td><td>1.000000</td><td>DL baseline</td></tr>
-        <tr><td>BlockWiseMLP</td><td>2.106591</td><td>1.583276</td><td>0.445905</td><td>0.837439</td><td>1.000000</td><td>flat 대비 소폭 개선</td></tr>
-        <tr><td>ResidualMLP</td><td>2.103150</td><td>1.582552</td><td>0.452853</td><td>0.839462</td><td>1.000000</td><td>현재 MLP 계열 best</td></tr>
+        <tr><th>experiment</th><th>model</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th><th>note</th></tr>
+        <tr><td>Holdout</td><td>XGBoost</td><td>2.107</td><td>1.585</td><td>0.445</td><td>0.836</td><td>1.000</td><td>4-model baseline best</td></tr>
+        <tr><td>Holdout</td><td>FlatMLP</td><td>2.113</td><td>1.598</td><td>0.440</td><td>0.836</td><td>1.000</td><td>DL baseline</td></tr>
+        <tr><td>Holdout</td><td>VAE</td><td>2.153</td><td>1.610</td><td>0.368</td><td>0.840</td><td>1.000</td><td>ranking drop</td></tr>
+        <tr><td>Holdout</td><td>TabNet</td><td>2.538</td><td>1.968</td><td>0.168</td><td>0.716</td><td>1.000</td><td>large gap</td></tr>
+        <tr><td>Holdout</td><td>BlockWiseMLP</td><td>2.107</td><td>1.583</td><td>0.446</td><td>0.837</td><td>1.000</td><td>flat 대비 개선</td></tr>
+        <tr><td>Holdout</td><td>ResidualMLP</td><td>2.103</td><td>1.583</td><td>0.453</td><td>0.839</td><td>1.000</td><td>holdout best</td></tr>
+        <tr><td>5-fold CV(mean±std)</td><td>XGBoost_tuned</td><td>2.133±0.040</td><td>1.594±0.021</td><td>0.431±0.009</td><td>0.840±0.004</td><td>1.000±0.000</td><td>tuned params</td></tr>
+        <tr><td>5-fold CV(mean±std)</td><td>ResidualMLP</td><td>2.129±0.041</td><td>1.589±0.019</td><td>0.437±0.011</td><td>0.841±0.003</td><td>1.000±0.000</td><td>cv 우세 확인</td></tr>
       </table>
       <p class="muted">
-        해석: 과도한 튜닝 없이도 구조 변경만으로 성능 개선이 확인됨. 특히 <strong>ResidualMLP</strong>는 Spearman 기준으로
-        XGBoost를 소폭 상회하여, 다음 DL 확장(예: graph 이전 단계)에서 우선 검토할 기본 구조로 적합함.
-      </p>
-    </section>
-
-    <section>
-      <h2>15) ResidualMLP 5-fold CV vs XGBoost tuned CV</h2>
-      <p class="muted">
-        출력 파일: <code>residual_mlp_cv_fold_metrics.csv</code>, <code>residual_mlp_cv_summary.json</code>,
-        <code>xgb_vs_residual_mlp_cv_comparison.csv</code><br/>
-        경로: <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/residual_mlp_cv/</code>
-      </p>
-      <table>
-        <tr><th>model</th><th>RMSE_mean±std</th><th>MAE_mean±std</th><th>Spearman_mean±std</th><th>NDCG@20_mean±std</th><th>Hit@20_mean±std</th></tr>
-        <tr><td>XGBoost_tuned_cv</td><td>2.133085 ± 0.040457</td><td>1.594438 ± 0.021274</td><td>0.430751 ± 0.008948</td><td>0.839619 ± 0.004367</td><td>1.000000 ± 0.000000</td></tr>
-        <tr><td>ResidualMLP_cv</td><td>2.128796 ± 0.041159</td><td>1.588846 ± 0.019151</td><td>0.436680 ± 0.010579</td><td>0.840609 ± 0.003035</td><td>1.000000 ± 0.000000</td></tr>
-      </table>
-      <p class="muted">
-        해석: holdout 단일 split 결과가 우연인지 확인하기 위한 5-fold CV에서도 <strong>ResidualMLP</strong>가
-        Spearman/RMSE/MAE/NDCG@20에서 XGBoost tuned CV 대비 소폭 우세하게 확인됨.
+        요약: 단일 holdout과 5-fold CV 모두에서 <strong>ResidualMLP</strong>가 안정적으로 상위권이며,
+        BlockWiseMLP는 현재 block grouping 이슈로 후순위 검토를 유지합니다.
       </p>
     </section>
 
