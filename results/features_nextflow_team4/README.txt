@@ -15,7 +15,7 @@ Input policy: Read team preprocessed data from s3://.../results/<source>/...
 integration + FE happen inside Nextflow.
 
 - Keep outputs only under this prefix (never mix into results/<source>/).
-- FE batch outputs (miss* runs from main.nf): results/features_nextflow_team4/fe_batch_runs/<run_id>/
+- FE batch outputs (miss* runs from main.nf): results/features_nextflow_team4/fe_re_batch_runs/<run_id>/
 - Other folders (input/, work/, abc_inputs/, sagemaker/, …) stay as needed.
 
 Agreed: 2026-03-29 (update if changed)

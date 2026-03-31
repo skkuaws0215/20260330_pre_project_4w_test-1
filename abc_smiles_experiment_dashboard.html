@@ -202,7 +202,17 @@
 
   <section>
     <h2>5) FE 진행·결과 수치 (결측·분산·판단 기준)</h2>
-    <p class="muted">아래는 팀4 Nextflow <code>build_features.py</code> 및 v2 배치/README에 정리된 값. S3에서는 <code>results/features_nextflow_team4/fe_batch_runs/&lt;run_id&gt;/</code> 아래에 miss·bridge·local 실험 산출을 묶어 둠. 클릭으로 세부 주석.</p>
+    <p class="muted">아래는 팀4 Nextflow <code>build_features.py</code> 및 v2 배치/README에 정리된 값. S3에서는 <code>results/features_nextflow_team4/fe_re_batch_runs/&lt;run_id&gt;/</code> 아래에 miss·bridge·local 실험 산출을 묶어 둠. 클릭으로 세부 주석.</p>
+
+    <details class="note">
+      <summary>주석 보기: 왜 폴더명이 <code>fe_re_batch_runs</code> 인가?</summary>
+      <ul>
+        <li><strong>목적</strong>: 앞으로 돌릴 <strong>신규 FE 배치</strong> 산출을 루트에 흩뿌리지 않고 한 디렉터리 아래에만 쌓기 위함.</li>
+        <li><strong><code>re_batch</code></strong>: “다시 돌린 배치 / 재생성 라인” 정도의 의미로 쓰기로 팀 대화에서 합의 가능.</li>
+        <li><strong><code>fe_</code> 접두</strong>: <code>input/</code>, <code>abc_inputs/</code> 등과 나란히 볼 때 “피처 엔지니어링 산출”이란 뜻이 바로 드러나게.</li>
+        <li><strong>대안 이름</strong>: <code>re_fe_batch_runs</code>도 가능하지만, 팀4에서는 <code>fe_re_batch_runs</code>가 더 읽기 쉬운 편.</li>
+      </ul>
+    </details>
 
     <table>
       <tr><th>FE 배치 (v2)</th><th>결측 제거 임계</th><th>행 수</th><th>wide 피처 열 수</th><th>비고</th></tr>

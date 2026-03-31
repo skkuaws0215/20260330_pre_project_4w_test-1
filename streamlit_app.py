@@ -83,7 +83,7 @@ def page_home():
 
 차이 컬럼: `drug__smiles`, `drug__canonical_smiles_raw` (30%에서 제거)
 
-S3 위치: `.../results/features_nextflow_team4/fe_batch_runs/<run_id>/`
+S3 위치: `.../results/features_nextflow_team4/fe_re_batch_runs/<run_id>/`
         """
     )
     st.caption("모델 비교는 A(엄격=결측치 30%), B(느슨=결측치 70%), C(SMILES 수치화 추가, 70% 기반) 프레임으로 진행")

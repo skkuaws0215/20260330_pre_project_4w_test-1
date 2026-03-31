@@ -109,10 +109,10 @@ git push -u origin main
 
 ### 결측 임계값 비교 실험 (70% vs 30%)
 
-팀4 FE 산출 기준으로 결측 임계값 비교용 run을 분리 저장 (**배치 산출 경로**: `results/features_nextflow_team4/fe_batch_runs/<run_id>/`, Nextflow `main.nf`의 `publishDir`와 동일):
+팀4 FE 산출 기준으로 결측 임계값 비교용 run을 분리 저장 (**배치 산출 경로**: `results/features_nextflow_team4/fe_re_batch_runs/<run_id>/`, Nextflow `main.nf`의 `publishDir`와 동일). 폴더명은 **신규 FE 재생성·재배치 배치**를 한곳에 모으려는 의도(`re_batch`); `fe_` 접두는 `input/`, `abc_inputs/` 등 팀4 prefix와 같이 쓰기 쉽게 맞춤.
 
-- **느슨한 결측(70%)**: `s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/fe_batch_runs/20260330_batch_miss70_v2/`
-- **엄격한 결측(30%)**: `s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/fe_batch_runs/20260330_batch_miss30_v2/`
+- **느슨한 결측(70%)**: `s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/fe_re_batch_runs/20260330_batch_miss70_v2/`
+- **엄격한 결측(30%)**: `s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/fe_re_batch_runs/20260330_batch_miss30_v2/`
 
 비교 결과 요약:
 
@@ -154,13 +154,13 @@ git push -u origin main
 
 ```bash
 python3 nextflow/scripts/prepare_b_input.py \
-  --features-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/fe_batch_runs/20260330_batch_miss70_v2/features.parquet" \
-  --labels-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/fe_batch_runs/20260330_batch_miss70_v2/labels.parquet" \
+  --features-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/fe_re_batch_runs/20260330_batch_miss70_v2/features.parquet" \
+  --labels-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/fe_re_batch_runs/20260330_batch_miss70_v2/labels.parquet" \
   --output-prefix "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/ab_tests/b_input_v1"
 
 python3 nextflow/scripts/train_abc_template.py \
-  --features-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/fe_batch_runs/20260330_batch_miss30_v2/features.parquet" \
-  --labels-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/fe_batch_runs/20260330_batch_miss30_v2/labels.parquet" \
+  --features-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/fe_re_batch_runs/20260330_batch_miss30_v2/features.parquet" \
+  --labels-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/fe_re_batch_runs/20260330_batch_miss30_v2/labels.parquet" \
   --output-prefix "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/ab_tests/train_v1" \
   --experiment-tag "A_miss30_seed42"
 ```

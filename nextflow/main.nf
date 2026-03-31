@@ -2,8 +2,8 @@ nextflow.enable.dsl = 2
 
 params.run_id = params.run_id ?: new Date().format("yyyyMMdd_HHmm")
 params.out_prefix = params.out_prefix ?: "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4"
-// FE parquet 산출(miss* 배치 등)은 루트에 흩어지지 않도록 한 단계 아래로 둔다.
-params.fe_output_subdir = params.fe_output_subdir ?: "fe_batch_runs"
+// FE parquet 산출(miss* 배치 등)은 루트에 흩어지지 않도록 한 단계 아래로 둔다. (재배치·신규 FE 생성용 이름: fe_re_batch_runs)
+params.fe_output_subdir = params.fe_output_subdir ?: "fe_re_batch_runs"
 
 /*
  Required input parquet URIs (shared team results/ as read-only input):

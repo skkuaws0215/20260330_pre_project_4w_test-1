@@ -76,7 +76,7 @@ withdrawn/illicit 약물 제거: ~2-3%</div>
 <div class="flow-arrow">▼ QC2: Pandera 35개 + Final 16-point</div>
 <div class="flow-box">🔗 <strong>ML 통합 (integrate.py)</strong><br>14개 전처리 산출물 → 10개 ML-ready parquet<br>TCGA∩METABRIC 공통 유전자: ~14,000<br>DrugBank+ChEMBL 통합: ~140K drug-target pairs</div>
 <div class="flow-arrow">▼ <strong>Nextflow</strong> 피처 엔지니어링 — 입력: S3 <code>raw</code> + <code>results/</code> · 실행: <strong>AWS Batch</strong>(Nextflow <code>awsbatch</code> executor, 대량 파일·병렬)</div>
-<div class="flow-box">🧬 <strong>피처 산출</strong><br>Drug-level ~2,011 + Cell-line 53 (기존 <code>features.py</code> 스키마·품질 목표와 정렬)<br>약물 매칭: 26% → 90%+ (<code>drug_harmonize.py</code> 4단계)<br>산출: <code>results/features_nextflow_team4/</code> (팀4 합의 · 타 트랙 FE와 구분)</div>
+<div class="flow-box">🧬 <strong>피처 산출</strong><br>Drug-level ~2,011 + Cell-line 53 (기존 <code>features.py</code> 스키마·품질 목표와 정렬)<br>약물 매칭: 26% → 90%+ (<code>drug_harmonize.py</code> 4단계)<br>산출: <code>results/features_nextflow_team4/fe_re_batch_runs/&lt;run_id&gt;/</code> (Nextflow <code>publishDir</code> 기본 · miss/배치 FE는 여기로 모음 · 팀4 합의)</div>
 <div class="flow-arrow">▼ 파일럿 → 전체 확장 (Pre-Project 전략)</div>
 <div class="flow-box">🧪 <strong>소수 테이블·부분 샘플</strong>로 ML·DL·Graph 스모크 테스트 → 통과 시 <strong>전 데이터 학습</strong> · <strong>모델별 벤치마크·랭킹</strong> · <strong>최고 모델</strong>로 후속 단계 고정</div>
 <div class="flow-arrow">▼</div>
@@ -520,7 +520,8 @@ s3://drug-discovery-joe-raw-data-team4/
 ├── tcga/, metabric/, drugbank/, chembl/, lincs/, string/
 ├── msigdb/, gdsc/, opentargets/, depmap/
 ├── results/                    # 전처리 완료 (소스별 하위 폴더 + parquet)
-│   └── features_nextflow_team4/  # Nextflow FE 산출 (팀4) + README.txt 팀 안내
+│   └── features_nextflow_team4/  # Nextflow FE (팀4) + README.txt
+│       └── fe_re_batch_runs/&lt;run_id&gt;/  # 배치·재생성 FE parquet (기본 산출 위치)
 └── ml_ready/                   # ML 통합 데이터셋
     ├── 01~10 parquet
     ├── features_table.parquet  (7,200 × 2,006+)
