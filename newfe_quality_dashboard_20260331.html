@@ -58,7 +58,7 @@
         <li><strong>split:</strong> <code>seed=42</code>, <code>test_size=0.2</code> (train/valid 공통)</li>
         <li><strong>LINCS:</strong> <code>normalize_lincs_mapping.py</code> 미실행 + 모든 LINCS 컬럼은 학습 입력에서 제외</li>
         <li><strong>실행 환경:</strong> <strong>로컬 PC에서 Python 스크립트로 실행</strong> (SageMaker Training Job 아님)</li>
-        <li><strong>계획:</strong> 본 결과를 기반으로 <strong>추후 CV/튜닝도 우선 로컬에서</strong> 돌린 뒤, 선택된 best 구성부터 SageMaker로 확장</li>
+        <li><strong>계획(업데이트):</strong> XGBoost SageMaker 최종 학습은 완료. 다음 단계는 <strong>DL 2종(MLP / VAE)</strong> 실험으로 전환하고, 별도 DL 대시보드에서 관리.</li>
       </ul>
       <details>
         <summary>주석 보기: baseline/newfe/newfe_v2가 각각 무엇인지</summary>
@@ -390,8 +390,19 @@
     </section>
 
     <section>
+      <h2>9) 단계 전환 안내 (ML 완료 → DL 시작)</h2>
+      <p class="muted">
+        이 대시보드는 <strong>New FE 품질 점검 + XGBoost(ML) 확정</strong>까지를 마무리한 기록이다.
+        다음 실험은 DL 2종(<code>MLP</code>, <code>VAE</code>)으로 진행하며, 상세 진행/결과는 별도 DL 대시보드에서 관리한다.
+      </p>
+      <p>
+        <a class="nav-btn" href="dl_experiment_dashboard_20260331.html">Go to DL Experiment Dashboard (MLP / VAE)</a>
+      </p>
+    </section>
+
+    <section>
       <details class="qc-wrap">
-        <summary>9) QC: 20260331 FE 품질 점검 (클릭해서 펼치기/접기)</summary>
+        <summary>10) QC: 20260331 FE 품질 점검 (클릭해서 펼치기/접기)</summary>
         <p class="muted">아래 1)~4)는 <strong>FE 자체 품질(QC)</strong>에 대한 내용이며, 학습·모델 비교와 분리해서 참고한다.</p>
 
       <details>

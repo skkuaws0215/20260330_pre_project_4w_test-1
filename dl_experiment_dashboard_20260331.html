@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DL Experiment Dashboard · 20260331</title>
+  <style>
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b1020; color: #e6edf7; }
+    .hero { padding: 42px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); background: linear-gradient(120deg, #10223a, #1a3558); }
+    .hero h1 { margin: 0 0 8px; font-size: 1.9rem; }
+    .hero p { margin: 0; color: #aab8d0; }
+    .badge { display: inline-block; margin-top: 12px; padding: 5px 10px; border: 1px solid #6ea8fe; border-radius: 999px; color: #9bc2ff; font-size: 0.82rem; }
+    .nav-btn { display: inline-block; margin-top: 12px; margin-left: 8px; border: 1px solid #42d59f; border-radius: 999px; color: #42d59f; padding: 5px 10px; font-size: 0.82rem; text-decoration: none; }
+    .container { max-width: 1120px; margin: 0 auto; padding: 22px; }
+    section { margin: 18px 0; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; background: rgba(255,255,255,0.02); }
+    h2 { margin: 0 0 12px; font-size: 1.2rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.92rem; }
+    th { background: rgba(110,168,254,0.13); color: #cfe2ff; }
+    .muted { color: #9fb0ca; font-size: 0.92rem; }
+    .ok { color: #42d59f; font-weight: 600; }
+    .plan { color: #f7c266; font-weight: 600; }
+    code { background: rgba(255,255,255,0.08); border-radius: 6px; padding: 2px 6px; }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>DL Experiment Dashboard</h1>
+    <p>ML(XGBoost) 확정 이후, DL 2종(MLP / VAE) 실험을 관리하는 전용 대시보드.</p>
+    <div class="badge">Snapshot · 20260331_dl_v1</div>
+    <a class="nav-btn" href="newfe_quality_dashboard_20260331.html">Back to New FE Quality Dashboard</a>
+  </div>
+
+  <div class="container">
+    <section>
+      <h2>1) 실험 목표</h2>
+      <ul class="muted">
+        <li>newfe_v2(target-only) 기반으로 DL 모델 성능/안정성 평가</li>
+        <li>MLP와 VAE(임베딩/재구성 기반) 2종 비교</li>
+        <li>기준선: SageMaker 최종 XGBoost 결과와 비교</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>2) DL 실험 계획 (MLP / VAE)</h2>
+      <table>
+        <tr><th>모델</th><th>입력</th><th>핵심 설정</th><th>지표</th><th>상태</th></tr>
+        <tr>
+          <td>MLP</td>
+          <td><code>pair_features_newfe_v2.parquet</code> (LINCS 제외)</td>
+          <td>hidden dims / dropout / batch size / lr 튜닝</td>
+          <td>RMSE, MAE, Spearman, NDCG@20</td>
+          <td class="plan">Planned</td>
+        </tr>
+        <tr>
+          <td>VAE</td>
+          <td><code>pair_features_newfe_v2.parquet</code> (LINCS 제외)</td>
+          <td>latent dim / beta / recon loss + downstream regressor</td>
+          <td>RMSE, MAE, Spearman, NDCG@20</td>
+          <td class="plan">Planned</td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>3) 실행 환경/원칙</h2>
+      <ul class="muted">
+        <li>1차: 로컬 실험으로 하이퍼파라미터 범위/학습 안정성 점검</li>
+        <li>2차: 확정 설정을 SageMaker로 이관해 full training</li>
+        <li>random_state/seed 고정, 동일 split 정책 유지</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>4) 현황</h2>
+      <p class="muted">
+        <span class="ok">완료</span>: New FE 품질 점검 + XGBoost 확정 + SageMaker 최종 학습 제출<br />
+        <span class="plan">다음</span>: MLP / VAE 실험 실행 후 본 대시보드에 표/그래프 업데이트
+      </p>
+    </section>
+  </div>
+</body>
+</html>
