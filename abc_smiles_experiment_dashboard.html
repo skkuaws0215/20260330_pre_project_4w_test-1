@@ -199,6 +199,52 @@
       <tr><td>비고</td><td>이번 new-C는 RDKit descriptor가 아니라 해시 인코딩 기반. RDKit 실험은 다음 확장 항목.</td></tr>
     </table>
   </section>
+
+  <section>
+    <h2>5) FE 진행·결과 수치 (결측·분산·판단 기준)</h2>
+    <p class="muted">아래는 팀4 Nextflow <code>build_features.py</code> 및 v2 배치/README에 정리된 값. 클릭으로 세부 주석.</p>
+
+    <table>
+      <tr><th>FE 배치 (v2)</th><th>결측 제거 임계</th><th>행 수</th><th>wide 피처 열 수</th><th>비고</th></tr>
+      <tr><td><code>20260330_batch_miss70_v2</code></td><td>컬럼 결측률 <strong>&gt; 70%</strong> 제거</td><td><strong>14,497</strong></td><td><strong>17,922</strong></td><td>B/C 기반 (느슨)</td></tr>
+      <tr><td><code>20260330_batch_miss30_v2</code></td><td>컬럼 결측률 <strong>&gt; 30%</strong> 제거</td><td><strong>14,497</strong></td><td><strong>17,920</strong></td><td>A 기반 (엄격)</td></tr>
+      <tr><td colspan="5" class="muted" style="font-size:0.88rem">행 수: README 기준 두 run 모두 <strong>14,497</strong> 행 동일. 70% run wide 컬럼 17,922 vs 30% run 17,920 — 엄격 run에서 SMILES 관련 문자열 2열이 결측 필터로 추가 제거됨.</td></tr>
+    </table>
+
+    <details class="note">
+      <summary>주석 보기: FE 파이프라인에서 무엇을 어떤 순서로 하나 (`nextflow/scripts/build_features.py`)</summary>
+      <ul>
+        <li><strong>병합</strong>: 라벨 ↔ sample 피처(inner) ↔ drug 피처(left), 키는 <code>sample_id</code>, <code>canonical_drug_id</code>.</li>
+        <li><strong>누수 제거</strong>: <code>--leakage-cols</code>에 지정된 열 드롭(배치별 설정).</li>
+        <li><strong>고결측 컬럼 제거</strong>: 보호열(key·라벨) 제외, <strong>열 단위 결측 비율 &gt; missing_threshold</strong>이면 컬럼 전체 삭제.</li>
+        <li><strong>결측 대체(impute)</strong>: 수치형 → <strong>열 중앙값(median)</strong>, 비수치형 → 문자열 <code>"UNK"</code>.</li>
+        <li><strong>저분산 제거</strong>: <code>variance_threshold</code> 기본 <strong>0.0</strong> → 수치형에서 <strong>분산 ≤ 0</strong>인 열 제거(상수열·정보량 없음).</li>
+        <li><strong>산출</strong>: <code>features.parquet</code>, <code>labels.parquet</code>, <code>feature_manifest.json</code>(제거된 컬럼·임pute 방식 등 메타).</li>
+        <li><strong>DL 브랜치(옵션)</strong>: 동일 wide 표에 대해 수치 Z-score 표준화한 <code>features_dl.parquet</code> — 이번 SageMaker tree 파일럿은 <strong>tree 산출물</strong> 기준.</li>
+      </ul>
+    </details>
+
+    <details class="note">
+      <summary>주석 보기: 결측·이상치·“이상값”을 어떻게 정의했나</summary>
+      <ul>
+        <li><strong>결측 처리</strong>: (1) 임계 초과 열은 통째로 버림 (2) 남은 셀은 중앙값/UNK로 채움. “행 단위로 결측 많으면 제거”가 아니라 <strong>열 단위 high-missing drop</strong>이 핵심.</li>
+        <li><strong>이상치(outlier) 전용 클리핑</strong>: 현재 <code>build_features.py</code>에는 <strong>IQR/clip 같은 전역 이상값 제거 단계 없음</strong>.</li>
+        <li><strong>대신 쓰는 “품질 필터”</strong>: 저분산 컬럼 제거 = 변화가 없는 피처 제거. 이는 통계적 outlier 탐지와는 다른 목적(모델 안정·불필요 차원 감소).</li>
+        <li><strong>학습 단계 추가 규칙</strong>: <code>train_tabular.py</code>는 FE 이후에도 <strong>dtype이 numeric인 열만</strong> 사용하고, 남은 수치 결측을 <strong>0.0</strong>으로 한 번 더 채움(문자 SMILES 등은 이 단계에서 제외 → C new에서는 해시로 별도 결합).</li>
+        <li><strong>wide 17,922 vs 학습 17,917</strong>: parquet 전체 열 중 일부는 비수치(문자열 SMILES 등)라 tree 학습에서 빠져 <code>n_features_numeric ≈ 17,917</code>로 집계됨.</li>
+      </ul>
+    </details>
+
+    <details class="note">
+      <summary>주석 보기: A/B/C 입력 폴더와 FE 산출의 연결 (`abc_inputs/20260330_abc_v1`)</summary>
+      <ul>
+        <li><strong>A</strong>: miss30_v2에서 온 <code>features.parquet</code> — 엄격 결측 + SMILES 문자열 열 미포함(30%에서 제거된 컬럼).</li>
+        <li><strong>B</strong>: miss70_v2 기반 + <code>prepare_b_input.py</code>로 <strong>문자열 SMILES 계열 제거</strong> → <code>features_b.parquet</code>.</li>
+        <li><strong>C</strong>: miss70_v2 기반 원본에 가까운 <code>features.parquet</code> — 문자열 SMILES 유지 쪽 실험용.</li>
+        <li>인덱스·경로 메타: 팀 버킷 <code>abc_index.json</code> (README 참조).</li>
+      </ul>
+    </details>
+  </section>
 </div>
 
 <footer>
