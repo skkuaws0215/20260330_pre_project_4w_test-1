@@ -117,41 +117,65 @@
       </tr>
       <tr>
         <td>LightGBM <span class="chip chip-on">smiles on</span></td>
-        <td>2.492839</td>
-        <td>2.049085</td>
-        <td class="delta-good">-0.443754</td>
-        <td>0.255948</td>
-        <td>0.481066</td>
-        <td class="delta-good">+0.225118</td>
+        <td>2.493</td>
+        <td>2.049</td>
+        <td class="delta-good">-0.444</td>
+        <td>0.256</td>
+        <td>0.481</td>
+        <td class="delta-good">+0.225</td>
       </tr>
       <tr>
         <td>XGBoost <span class="chip chip-on">smiles on</span></td>
-        <td>2.492044</td>
-        <td>2.055067</td>
-        <td class="delta-good">-0.436977</td>
-        <td>0.256628</td>
-        <td>0.478735</td>
-        <td class="delta-good">+0.222107</td>
+        <td>2.492</td>
+        <td>2.055</td>
+        <td class="delta-good">-0.437</td>
+        <td>0.257</td>
+        <td>0.479</td>
+        <td class="delta-good">+0.222</td>
       </tr>
       <tr>
         <td>ElasticNet <span class="chip chip-on">smiles on</span></td>
-        <td>2.491404</td>
-        <td>2.068953</td>
-        <td class="delta-good">-0.422451</td>
-        <td>0.262443</td>
-        <td>0.476986</td>
-        <td class="delta-good">+0.214543</td>
+        <td>2.491</td>
+        <td>2.069</td>
+        <td class="delta-good">-0.422</td>
+        <td>0.262</td>
+        <td>0.477</td>
+        <td class="delta-good">+0.215</td>
       </tr>
       <tr>
         <td>RandomForest <span class="chip chip-on">smiles on</span></td>
-        <td>2.492776</td>
+        <td>2.493</td>
         <td class="stop" title="학습 중단">—</td>
         <td class="stop" title="학습 미완료">—</td>
-        <td>0.255272</td>
+        <td>0.255</td>
         <td class="stop" title="학습 미완료">—</td>
         <td class="stop" title="학습 미완료">—</td>
       </tr>
     </table>
+
+    <details class="note">
+      <summary>클릭: 모델별 A-B 성능 차이표 (RMSE/MAE/Spearman)</summary>
+      <p class="muted" style="margin-top:8px;">현재 확보된 대시보드 수치 기준으로는 A/B/C(old) 지표가 동일하게 기록되어 있어 <code>delta(B-A)</code>가 0에 가깝다. MAE는 S3 학습 산출물(<code>model.tar.gz</code> 내부 <code>metrics.json</code>)에서 회수해 채웠다.</p>
+      <table>
+        <tr><th>Model</th><th>A RMSE</th><th>B RMSE</th><th>Delta (B-A)</th><th>A MAE</th><th>B MAE</th><th>Delta (B-A)</th><th>A Spearman</th><th>B Spearman</th><th>Delta (B-A)</th><th>A NDCG@20</th><th>B NDCG@20</th><th>Delta</th><th>A Hit@20</th><th>B Hit@20</th><th>Delta</th></tr>
+        <tr><td>LightGBM</td><td>2.493</td><td>2.493</td><td>0.000</td><td>1.938</td><td>1.938</td><td>0.000</td><td>0.256</td><td>0.256</td><td>0.000</td><td>0.632</td><td>0.632</td><td>0.000</td><td>0.050</td><td>0.050</td><td>0.000</td></tr>
+        <tr><td>XGBoost</td><td>2.492</td><td>2.492</td><td>0.000</td><td>1.937</td><td>1.937</td><td>0.000</td><td>0.257</td><td>0.257</td><td>0.000</td><td>0.616</td><td>0.616</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td></tr>
+        <tr><td>ElasticNet</td><td>2.491</td><td>2.491</td><td>0.000</td><td>1.938</td><td>1.938</td><td>0.000</td><td>0.262</td><td>0.262</td><td>0.000</td><td>0.632</td><td>0.632</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.000</td></tr>
+        <tr><td>RandomForest</td><td>2.493</td><td>2.493</td><td>0.000</td><td>1.937</td><td>1.937</td><td>0.000</td><td>0.255</td><td>0.255</td><td>0.000</td><td class="warn">TBD</td><td class="warn">TBD</td><td class="warn">TBD</td><td class="warn">TBD</td><td class="warn">TBD</td><td class="warn">TBD</td></tr>
+      </table>
+    </details>
+
+    <details class="note">
+      <summary>클릭: ABC + C′(C new) 모델 지표 비교표</summary>
+      <p class="muted" style="margin-top:8px;">A/B/C(old)는 baseline으로 동일 split·동일 numeric 경로 값으로 정리했다. C′은 SMILES 해시(2048) 활성 버전이며 RF는 학습 중단.</p>
+      <table>
+        <tr><th>Model</th><th>A RMSE</th><th>B RMSE</th><th>C old RMSE</th><th>C′ RMSE</th><th>A MAE</th><th>B MAE</th><th>C old MAE</th><th>C′ MAE</th><th>A Spearman</th><th>B Spearman</th><th>C old Spearman</th><th>C′ Spearman</th><th>C old NDCG@20</th><th>C′ NDCG@20</th><th>C old Hit@20</th><th>C′ Hit@20</th></tr>
+        <tr><td>LightGBM</td><td>2.493</td><td>2.493</td><td>2.493</td><td class="ok">2.049</td><td>1.938</td><td>1.938</td><td>1.938</td><td class="ok">1.533</td><td>0.256</td><td>0.256</td><td>0.256</td><td class="ok">0.481</td><td>0.632</td><td class="ok">0.863</td><td>0.050</td><td class="ok">0.250</td></tr>
+        <tr><td>XGBoost</td><td>2.492</td><td>2.492</td><td>2.492</td><td class="ok">2.055</td><td>1.937</td><td>1.937</td><td>1.937</td><td class="ok">1.538</td><td>0.257</td><td>0.257</td><td>0.257</td><td class="ok">0.479</td><td>0.616</td><td class="ok">0.866</td><td>0.000</td><td class="ok">0.250</td></tr>
+        <tr><td>ElasticNet</td><td>2.491</td><td>2.491</td><td>2.491</td><td class="ok">2.069</td><td>1.938</td><td>1.938</td><td>1.938</td><td class="ok">1.568</td><td>0.262</td><td>0.262</td><td>0.262</td><td class="ok">0.477</td><td>0.632</td><td class="ok">0.875</td><td>0.000</td><td class="ok">0.250</td></tr>
+        <tr><td>RandomForest</td><td>2.493</td><td>2.493</td><td>2.493</td><td class="stop">—</td><td>1.937</td><td>1.937</td><td>1.937</td><td class="stop">—</td><td>0.255</td><td>0.255</td><td>0.255</td><td class="stop">—</td><td class="warn">TBD</td><td class="warn">TBD</td><td class="warn">TBD</td><td class="warn">TBD</td></tr>
+      </table>
+    </details>
 
     <details class="note">
       <summary>주석 보기: 표의 각 컬럼이 의미하는 것</summary>
@@ -168,8 +192,12 @@
     <details class="note">
       <summary>주석 보기: 숫자값 해석 가이드 (특히 Spearman)</summary>
       <ul>
-        <li><strong>RMSE/MAE</strong>는 절대오차 크기 지표라서 <strong>작을수록 좋다</strong>. 단위는 타깃(<code>label_regression</code>) 단위와 동일.</li>
-        <li><strong>Spearman</strong>은 “정답 순위와 예측 순위가 얼마나 같은 방향으로 움직이는지”를 본다.</li>
+        <li><strong>RMSE</strong>: 큰 오차에 더 민감(outlier penalty). 모델의 “크게 틀리는 케이스”를 보려는 안정성 지표로 사용.</li>
+        <li><strong>MAE</strong>: 평균 절대 오차. 평균적으로 얼마나 틀리는지 보는 실제 예측 정확도 지표.</li>
+        <li><strong>R² (결정계수)</strong>: 전체 분산 설명력. noisy bio 데이터에서는 높게 안 나올 수 있어 절대 기준보다 상대 비교로 본다.</li>
+        <li><strong>Spearman</strong>: 정답 순위와 예측 순위의 상관. drug repurposing에서는 랭킹 품질 때문에 핵심 지표.</li>
+        <li><strong>NDCG@K</strong>: 상위 K 순위 품질을 할인 누적 이득으로 평가. 상위 후보 정렬 품질을 정량화.</li>
+        <li><strong>Hit@K</strong>: 상위 K 안에 “관심 후보(활성/상위 타깃)”가 들어갔는지 비율로 평가.</li>
         <li>값 범위는 <code>-1 ~ 1</code>:
           <ul>
             <li><code>+1</code>: 순위 완전 일치 (가장 이상적)</li>
@@ -188,6 +216,59 @@
         </li>
         <li>왜 Spearman이 중요한가? 약물 스크리닝/랭킹 문제에서는 “절대값 예측 오차”뿐 아니라 <strong>우선순위를 맞추는 능력</strong>이 핵심이기 때문. Spearman이 높으면 Top 후보 선별의 신뢰도가 올라간다.</li>
         <li>이번 결과에서는 baseline 약 <code>0.25</code>(약한 상관)에서 new-C 약 <code>0.48</code>(중간 상관)로 올라, 랭킹 품질이 의미 있게 개선된 것으로 해석 가능.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section>
+    <h2>3-1) 1단계 정밀 분석 프레임 (모델별 + 데이터셋별) <span class="chip chip-off" style="font-weight:500;">planning</span></h2>
+    <p class="muted">현재 대시보드는 valid <code>RMSE</code>, <code>Spearman</code> 중심의 요약 비교다. 아래 표는 “모델별 FE 해석”과 “데이터셋 변경 영향”을 추가로 채우기 위한 1단계 작업판이다. 숫자가 비어 있는 칸은 실험 산출물(<code>metrics.json</code>, 예측/라벨 parquet, feature importance) 수집 후 채운다.</p>
+
+    <h3 style="margin-top:14px;">A. 모델별 상세 분석 체크포인트</h3>
+    <table>
+      <tr><th>Model</th><th>현재 상태</th><th>추가할 지표</th><th>FE 상세 설명(예정)</th><th>판단 포인트</th></tr>
+      <tr><td>LightGBM</td><td class="ok">완료</td><td>MAE, R2, p90 abs error, residual mean/std</td><td>gain/split 상위 피처, SMILES 해시 블록 기여율</td><td>성능/안정성 균형 우수 후보</td></tr>
+      <tr><td>XGBoost</td><td class="ok">완료</td><td>MAE, R2, p90 abs error, residual mean/std</td><td>gain 상위 피처, 트리 깊이별 중요도 편향</td><td>LGBM 대비 과적합/일반화 비교</td></tr>
+      <tr><td>ElasticNet</td><td class="ok">완료</td><td>MAE, R2, residual quantiles</td><td>상위 양/음 계수 피처, 희소성(0 아닌 계수 비율)</td><td>해석성 기준 기본선</td></tr>
+      <tr><td>RandomForest</td><td class="stop">중단</td><td>완료 런 없음(추후 경량 재시도 시 수집)</td><td>재시도 시 impurity importance + 학습시간 기록</td><td>파일럿 목표 대비 비용 과다 여부</td></tr>
+    </table>
+
+    <h3 style="margin-top:14px;">B. 데이터셋이 결과에 미친 영향 (요청 반영)</h3>
+    <table>
+      <tr><th>비교 축</th><th>데이터셋/입력 차이</th><th>관찰된 결과(현재)</th><th>추가 분석(1단계)</th></tr>
+      <tr>
+        <td>A vs B</td>
+        <td>A: miss30(엄격), B: miss70(느슨)+SMILES 문자열 제외</td>
+        <td>현재 대시보드에는 A/B 별도 성능표 미정리 (<code>TBD</code>)</td>
+        <td>모델별 A-B 성능 차이표(RMSE/MAE/Spearman) 추가</td>
+      </tr>
+      <tr>
+        <td>C old vs C new</td>
+        <td>동일 C 기반 + C new만 SMILES 해시(2048) 활성</td>
+        <td class="ok">LGBM/XGB/EN에서 RMSE 감소, Spearman 증가</td>
+        <td>SMILES 해시 기여도(importance block share), 잔차 감소 구간 분석</td>
+      </tr>
+      <tr>
+        <td>miss30 vs miss70 FE</td>
+        <td>wide 컬럼 17,920 vs 17,922 (행 수 동일 14,497)</td>
+        <td>구조 차이는 작지만 입력 선택(A/B/C)에 간접 영향</td>
+        <td>열 드롭 목록과 모델 성능 민감도 연결(removed cols audit)</td>
+      </tr>
+      <tr>
+        <td>numeric-only vs mixed</td>
+        <td>기본 학습은 numeric만 사용, C new는 SMILES를 해시해 numeric 편입</td>
+        <td class="ok">C new 성능 개선으로 “텍스트 화학정보 추가 효과” 확인</td>
+        <td>해시 차원(1024/2048/4096) 민감도 실험 계획</td>
+      </tr>
+    </table>
+
+    <details class="note">
+      <summary>주석 보기: 1단계 완료 정의(DoD)</summary>
+      <ul>
+        <li>모델별로 <strong>RMSE/MAE/R2/Spearman + 학습시간</strong>이 모두 채워진다.</li>
+        <li><strong>데이터셋 차이표(A/B/C, old/new)</strong>에 숫자 기반 결론 1줄씩 적는다.</li>
+        <li>LGBM/XGB/EN은 <strong>Top-N 피처(또는 계수) + SMILES 해시 기여</strong>를 제시한다.</li>
+        <li>RF는 “중단 유지” 또는 “경량 재시도” 중 하나로 명확히 결론낸다.</li>
       </ul>
     </details>
   </section>

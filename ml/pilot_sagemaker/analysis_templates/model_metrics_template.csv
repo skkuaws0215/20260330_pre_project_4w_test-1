@@ -1,0 +1,9 @@
+run_tag,dataset_variant,model,status,train_seconds,valid_rmse,valid_mae,valid_r2,valid_spearman,valid_ndcg_at_20,valid_hit_at_20,valid_p90_abs_error,test_rmse,test_mae,test_r2,test_spearman,test_ndcg_at_20,test_hit_at_20,test_p90_abs_error,n_train_rows,n_valid_rows,n_test_rows,n_features_numeric,smiles_hash_enabled,smiles_hash_dim,notes
+20260330_v1,C_old_baseline,lightgbm,completed,,2.493,1.938,,0.256,0.632,0.050,,,,,,,,,,,,,false,0,
+20260330_v1,C_new_smiles,lightgbm,completed,,2.049,1.533,,0.481,0.863,0.250,,,,,,,,,,,,,true,2048,
+20260330_v1,C_old_baseline,xgboost,completed,,2.492,1.937,,0.257,0.616,0.000,,,,,,,,,,,,,false,0,
+20260330_v1,C_new_smiles,xgboost,completed,,2.055,1.538,,0.479,0.866,0.250,,,,,,,,,,,,,true,2048,
+20260330_v1,C_old_baseline,elasticnet,completed,,2.491,1.938,,0.262,0.632,0.000,,,,,,,,,,,,,false,0,
+20260330_v1,C_new_smiles,elasticnet,completed,,2.069,1.568,,0.477,0.875,0.250,,,,,,,,,,,,,true,2048,
+20260330_v1,C_old_baseline,random_forest,completed,,2.493,1.937,,0.255,,,,,,,,,,,,,,,false,0,
+20260330_v1,C_new_smiles,random_forest,stopped,,,,,,,,,,,,,,,,,,,,,true,2048,stopped_due_to_long_runtime
