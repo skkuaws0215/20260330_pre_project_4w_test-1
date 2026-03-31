@@ -33,10 +33,12 @@ def main() -> None:
     import numpy as np
     import pandas as pd
     from sklearn.ensemble import RandomForestRegressor
+    from sklearn.feature_extraction.text import HashingVectorizer
     from sklearn.linear_model import ElasticNet
     from sklearn.metrics import mean_absolute_error, mean_squared_error
     from sklearn.model_selection import train_test_split
     from sklearn.preprocessing import StandardScaler
+    from scipy import sparse
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--features_s3", type=str, required=True)
@@ -47,6 +49,9 @@ def main() -> None:
     parser.add_argument("--target_col", type=str, default="label_regression")
     parser.add_argument("--test_size", type=float, default=0.2)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--use_smiles", type=str, default="auto", choices=["off", "auto", "on"])
+    parser.add_argument("--smiles_col", type=str, default="drug__smiles")
+    parser.add_argument("--smiles_n_features", type=int, default=2048)
     args, _unknown = parser.parse_known_args()
 
     features = pd.read_parquet(args.features_s3)
@@ -63,12 +68,37 @@ def main() -> None:
     feat_cols = [c for c in merged.columns if c not in set(key + [args.target_col])]
     X = merged[feat_cols]
     numeric_cols = [c for c in X.columns if pd.api.types.is_numeric_dtype(X[c])]
-    X = X[numeric_cols].fillna(0.0)
+    X_num = X[numeric_cols].fillna(0.0)
+
+    use_smiles = False
+    if args.use_smiles == "on":
+        if args.smiles_col not in X.columns:
+            raise ValueError(f"use_smiles=on but missing smiles column: {args.smiles_col}")
+        use_smiles = True
+    elif args.use_smiles == "auto":
+        use_smiles = args.smiles_col in X.columns
+
+    X_num_csr = sparse.csr_matrix(X_num.to_numpy(dtype=np.float32))
+    if use_smiles:
+        smiles_raw = X[args.smiles_col].fillna("").astype(str)
+        hv = HashingVectorizer(
+            analyzer="char",
+            ngram_range=(2, 4),
+            n_features=args.smiles_n_features,
+            alternate_sign=False,
+            norm=None,
+            lowercase=False,
+        )
+        X_smiles = hv.transform(smiles_raw)
+        X_all = sparse.hstack([X_num_csr, X_smiles], format="csr")
+    else:
+        X_all = X_num_csr
+
     y = merged[args.target_col].to_numpy(dtype=np.float64)
 
     idx = np.arange(len(merged))
     tr_idx, va_idx = train_test_split(idx, test_size=args.test_size, random_state=args.seed)
-    X_train, X_valid = X.iloc[tr_idx], X.iloc[va_idx]
+    X_train, X_valid = X_all[tr_idx], X_all[va_idx]
     y_train, y_valid = y[tr_idx], y[va_idx]
 
     Xt_tr, Xt_va = X_train, X_valid
@@ -132,7 +162,13 @@ def main() -> None:
     metrics = {
         "model": args.model,
         "rows_total": int(len(merged)),
-        "n_features_numeric": int(X.shape[1]),
+        "n_features_numeric": int(X_num.shape[1]),
+        "n_features_total": int(X_all.shape[1]),
+        "smiles": {
+            "enabled": bool(use_smiles),
+            "column": args.smiles_col,
+            "n_features_hashed": int(args.smiles_n_features if use_smiles else 0),
+        },
         "train": _metrics(y_train, pred_tr),
         "valid": _metrics(y_valid, pred_va),
         "split": {"test_size": args.test_size, "seed": args.seed},

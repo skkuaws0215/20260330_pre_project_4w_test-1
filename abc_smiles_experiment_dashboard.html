@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABC + SMILES Pilot Dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b1020; color: #e6edf7; line-height: 1.6; }
+  .hero { padding: 64px 28px; background: linear-gradient(120deg, #111827, #1f2a44 55%, #1b1f3a); border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .hero h1 { font-size: 2.2rem; margin-bottom: 10px; }
+  .hero p { color: #a9b5c9; max-width: 900px; }
+  .badge { margin-top: 14px; display: inline-block; border: 1px solid #6ea8fe; color: #9bc2ff; padding: 6px 10px; border-radius: 999px; font-size: 0.82rem; }
+  .container { max-width: 1140px; margin: 0 auto; padding: 28px; }
+  section { margin: 22px 0; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 22px; background: rgba(255,255,255,0.02); }
+  h2 { margin-bottom: 12px; font-size: 1.25rem; }
+  .muted { color: #9aa8bf; font-size: 0.93rem; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 12px; }
+  .stat { border: 1px solid rgba(255,255,255,0.09); border-radius: 10px; padding: 14px; background: rgba(255,255,255,0.02); }
+  .num { font-size: 1.6rem; font-weight: 700; color: #8cc1ff; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { text-align: left; padding: 11px 10px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.92rem; }
+  th { color: #c1d6ff; background: rgba(110,168,254,0.12); }
+  .ok { color: #44d8a0; font-weight: 600; }
+  .warn { color: #f7c266; font-weight: 600; }
+  .chip { display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 0.78rem; border: 1px solid rgba(255,255,255,0.2); }
+  .chip-on { color: #44d8a0; border-color: #44d8a0; }
+  .chip-off { color: #b6c4da; border-color: #7f90aa; }
+  .delta-good { color: #44d8a0; }
+  .delta-up { color: #f7c266; }
+  code { background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 6px; }
+  footer { color: #90a1bc; text-align: center; padding: 30px; font-size: 0.82rem; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>ABC + SMILES Pilot Dashboard</h1>
+  <p>SageMaker 병렬 4모델 실험 이력(A/B/C)과 C 재실험(SMILES feature enabled) 결과를 한 화면에서 보는 운영 대시보드.</p>
+  <div class="badge">Team4 Shared AWS · Updated 2026-03-31</div>
+</div>
+
+<div class="container">
+  <section>
+    <h2>1) 실험 개요</h2>
+    <p class="muted">같은 split(seed=42, test_size=0.2)에서 A/B/C를 비교. C 재실험은 <code>use_smiles=on</code>으로 SMILES를 문자 n-gram 해시(2048) 피처로 추가.</p>
+    <div class="stats">
+      <div class="stat"><div class="num">14,497</div><div>rows</div></div>
+      <div class="stat"><div class="num">17,917</div><div>base numeric features</div></div>
+      <div class="stat"><div class="num">+2,048</div><div>SMILES hash features</div></div>
+      <div class="stat"><div class="num">19,965</div><div>new-C total features</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>2) 학습 잡 상태</h2>
+    <table>
+      <tr><th>Run</th><th>Job Prefix</th><th>Status</th><th>비고</th></tr>
+      <tr><td>B baseline</td><td><code>team4-b-pilot-1774916870</code></td><td class="ok">Completed (4/4)</td><td>KMS/Data 권한 이슈 우회 후 성공</td></tr>
+      <tr><td>A baseline</td><td><code>team4-a-pilot-1774919993</code></td><td class="ok">Completed (4/4)</td><td>baseline 비교군</td></tr>
+      <tr><td>C old baseline</td><td><code>team4-c-pilot-1774920000</code></td><td class="ok">Completed (4/4)</td><td>SMILES 미사용 경로와 동일 성능</td></tr>
+      <tr><td>C new (SMILES on)</td><td><code>team4-c-pilot-1774921192</code></td><td class="warn">3/4 Completed, RF InProgress</td><td>LGBM/XGB/EN 완료, RF 대기</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>3) 검증 성능 비교 (valid)</h2>
+    <p class="muted">A/B/C(old)는 동일 수치. 아래는 baseline(C old) 대비 C new(smiles on) 변화량.</p>
+    <table>
+      <tr>
+        <th>Model</th>
+        <th>Baseline RMSE</th>
+        <th>New-C RMSE</th>
+        <th>Delta</th>
+        <th>Baseline Spearman</th>
+        <th>New-C Spearman</th>
+        <th>Delta</th>
+      </tr>
+      <tr>
+        <td>LightGBM <span class="chip chip-on">smiles on</span></td>
+        <td>2.492839</td>
+        <td>2.049085</td>
+        <td class="delta-good">-0.443754</td>
+        <td>0.255948</td>
+        <td>0.481066</td>
+        <td class="delta-good">+0.225118</td>
+      </tr>
+      <tr>
+        <td>XGBoost <span class="chip chip-on">smiles on</span></td>
+        <td>2.492044</td>
+        <td>2.055067</td>
+        <td class="delta-good">-0.436977</td>
+        <td>0.256628</td>
+        <td>0.478735</td>
+        <td class="delta-good">+0.222107</td>
+      </tr>
+      <tr>
+        <td>ElasticNet <span class="chip chip-on">smiles on</span></td>
+        <td>2.491404</td>
+        <td>2.068953</td>
+        <td class="delta-good">-0.422451</td>
+        <td>0.262443</td>
+        <td>0.476986</td>
+        <td class="delta-good">+0.214543</td>
+      </tr>
+      <tr>
+        <td>RandomForest <span class="chip chip-on">smiles on</span></td>
+        <td>2.492776</td>
+        <td class="warn">Pending</td>
+        <td class="warn">Pending</td>
+        <td>0.255272</td>
+        <td class="warn">Pending</td>
+        <td class="warn">Pending</td>
+      </tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>4) 실험 설정 요약</h2>
+    <table>
+      <tr><th>항목</th><th>값</th></tr>
+      <tr><td>학습 코드</td><td><code>ml/pilot_sagemaker/train_tabular.py</code></td></tr>
+      <tr><td>제출 코드</td><td><code>ml/pilot_sagemaker/submit_b_parallel.py</code></td></tr>
+      <tr><td>데이터셋 선택</td><td><code>--dataset a|b|c</code></td></tr>
+      <tr><td>SMILES 처리</td><td><code>--dataset c</code>에서 <code>use_smiles=on</code> 자동 (char 2-4gram hash, 2048)</td></tr>
+      <tr><td>재발방지</td><td>코드 tar/data staging 모두 <code>aws s3 cp --sse AES256</code></td></tr>
+      <tr><td>비고</td><td>이번 new-C는 RDKit descriptor가 아니라 해시 인코딩 기반. RDKit 실험은 다음 확장 항목.</td></tr>
+    </table>
+  </section>
+</div>
+
+<footer>
+ABC + SMILES Pilot Dashboard · Team4 · SageMaker parallel jobs
+</footer>
+</body>
+</html>

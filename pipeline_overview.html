@@ -718,8 +718,21 @@ aws s3 sync results/ml_models/ s3://drug-discovery-joe-raw-data-team4/results/ml
 <p class="ref">METABRIC·멀티오믹스는 Stage 1 정합. Pre-Project에서 확보한 Batch·Nextflow·Bedrock 패턴을 Final에서 재사용·고도화.</p>
 </section>
 
+<!-- ═══════════════════════════════════════════════════════ 20 ═══ -->
+<section class="section" id="s20">
+<h2>20. ABC + SMILES Pilot (SageMaker) 현황</h2>
+<p>팀4 SageMaker 파일럿 진행 상황을 별도 대시보드로 분리해 관리. baseline(A/B/C old)와 C 재실험(SMILES feature enabled) 성능 차이를 추적한다.</p>
+<div class="tw"><table>
+<tr><th>항목</th><th>상태</th><th>비고</th></tr>
+<tr><td>A/B/C old baseline</td><td>Completed</td><td>세 실험의 수치가 사실상 동일 (numeric-only 경로)</td></tr>
+<tr><td>C new (SMILES on)</td><td>진행 중</td><td>LGBM/XGB/ElasticNet 완료, RF 학습 중</td></tr>
+<tr><td>결과 대시보드</td><td><a href="./abc_smiles_experiment_dashboard.html">abc_smiles_experiment_dashboard.html</a></td><td>지표/잡 상태/실험 조건 요약</td></tr>
+</table></div>
+<p class="ref">참고: 현재 new-C는 SMILES hash 인코딩 기반이며, RDKit descriptor/fingerprint 버전은 후속 실험으로 분리.</p>
+</section>
+
 <footer>
-AI Drug Discovery — Pipeline Report · 2026-03-27 · <strong>19 sections</strong> (§2·§9~§13·§11 보강 + §18~§19 신규) ·
+AI Drug Discovery — Pipeline Report · 2026-03-27 · <strong>20 sections</strong> (§2·§9~§13·§11 보강 + §18~§20 신규) ·
 <a href="https://github.com/chochanghyeon188-oss/AI-Drug-Discovery">GitHub</a>
 </footer>
 
