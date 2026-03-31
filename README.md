@@ -424,6 +424,31 @@ Delta 요약:
 - `ResidualMLP`는 주지표 Spearman 기준으로 `XGBoost`를 소폭 상회.
 - 과도한 튜닝 없이도 DL 구조 개선 효과가 확인되어, 다음 단계(예: graph 전환 전 최종 DL 확정)에 유의미한 근거를 제공.
 
+#### 20260401 ResidualMLP 5-fold CV 검증 (XGBoost tuned CV 동일 조건 비교)
+
+- 실행 스크립트: `ml/pilot_sagemaker/run_residual_mlp_cv_local.py`
+- 조건:
+  - 데이터: `pair_features_newfe_v2.parquet` (LINCS 제외)
+  - key join: `sample_id`, `canonical_drug_id` inner join
+  - split: `5-fold KFold(shuffle=True, random_state=42)`
+  - 전처리: 결측 0, continuous standard scaling, binary passthrough
+  - 비교 기준: tuned XGBoost CV (`max_depth=4`, `learning_rate=0.05`, `n_estimators=400`, `subsample=0.8`, `colsample_bytree=0.8`)
+- 출력 파일:
+  - `results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/residual_mlp_cv/residual_mlp_cv_fold_metrics.csv`
+  - `results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/residual_mlp_cv/residual_mlp_cv_summary.json`
+  - `results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/residual_mlp_cv/xgb_vs_residual_mlp_cv_comparison.csv`
+
+| model | RMSE_mean | RMSE_std | MAE_mean | MAE_std | Spearman_mean | Spearman_std | NDCG@20_mean | NDCG@20_std | Hit@20_mean | Hit@20_std |
+|------|-----------|----------|----------|---------|---------------|--------------|--------------|-------------|-------------|------------|
+| XGBoost_tuned_cv | 2.133085 | 0.040457 | 1.594438 | 0.021274 | 0.430751 | 0.008948 | 0.839619 | 0.004367 | 1.000000 | 0.000000 |
+| ResidualMLP_cv | 2.128796 | 0.041159 | 1.588846 | 0.019151 | 0.436680 | 0.010579 | 0.840609 | 0.003035 | 1.000000 | 0.000000 |
+
+해석:
+
+- holdout 단일 split에서 보인 우세가 5-fold CV에서도 재확인됨.
+- `ResidualMLP`는 Spearman/RMSE/MAE/NDCG@20에서 tuned XGBoost CV 대비 소폭 우세.
+- `BlockWiseMLP`는 block grouping 완성도 이슈로 현재 후순위, Residual 계열을 우선 확장 대상으로 유지.
+
 ## `credentials` 작성 시 주의
 
 - 파일 상단에 **`#` 주석을 넣지 않는 것**을 권장합니다. (일부 환경에서 AWS CLI 파싱 오류가 날 수 있음)

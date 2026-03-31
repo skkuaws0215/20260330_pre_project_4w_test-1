@@ -152,6 +152,24 @@
     </section>
 
     <section>
+      <h2>15) ResidualMLP 5-fold CV vs XGBoost tuned CV</h2>
+      <p class="muted">
+        출력 파일: <code>residual_mlp_cv_fold_metrics.csv</code>, <code>residual_mlp_cv_summary.json</code>,
+        <code>xgb_vs_residual_mlp_cv_comparison.csv</code><br/>
+        경로: <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/residual_mlp_cv/</code>
+      </p>
+      <table>
+        <tr><th>model</th><th>RMSE_mean±std</th><th>MAE_mean±std</th><th>Spearman_mean±std</th><th>NDCG@20_mean±std</th><th>Hit@20_mean±std</th></tr>
+        <tr><td>XGBoost_tuned_cv</td><td>2.133085 ± 0.040457</td><td>1.594438 ± 0.021274</td><td>0.430751 ± 0.008948</td><td>0.839619 ± 0.004367</td><td>1.000000 ± 0.000000</td></tr>
+        <tr><td>ResidualMLP_cv</td><td>2.128796 ± 0.041159</td><td>1.588846 ± 0.019151</td><td>0.436680 ± 0.010579</td><td>0.840609 ± 0.003035</td><td>1.000000 ± 0.000000</td></tr>
+      </table>
+      <p class="muted">
+        해석: holdout 단일 split 결과가 우연인지 확인하기 위한 5-fold CV에서도 <strong>ResidualMLP</strong>가
+        Spearman/RMSE/MAE/NDCG@20에서 XGBoost tuned CV 대비 소폭 우세하게 확인됨.
+      </p>
+    </section>
+
+    <section>
       <details>
         <summary><strong>주석 보관: 5)~9), 11), 12) 상세 결과</strong></summary>
         <div class="muted" style="margin-top:12px;">
