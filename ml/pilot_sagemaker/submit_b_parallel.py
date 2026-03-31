@@ -48,7 +48,8 @@ DATASET_PRESETS: dict[str, tuple[str, str]] = {
 
 OUTPUT_PREFIX_TEAM_BY_DATASET: dict[str, str] = {
     "a": f"s3://{BUCKET}/results/features_nextflow_team4/sagemaker/a_pilot_4models",
-    "b": f"s3://{BUCKET}/results/features_nextflow_team4/sagemaker/b_pilot_4models",
+    # B-only artifacts are grouped under one folder to keep sagemaker/ tidy.
+    "b": f"s3://{BUCKET}/results/features_nextflow_team4/sagemaker/team4_b_pilot_runs",
     "c": f"s3://{BUCKET}/results/features_nextflow_team4/sagemaker/c_pilot_4models",
 }
 
