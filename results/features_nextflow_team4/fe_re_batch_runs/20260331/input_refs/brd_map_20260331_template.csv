@@ -1,0 +1,11 @@
+brd_id,canonical_drug_id,sig_id,pert_iname,source,mapping_confidence,note
+BRD-A66861218,,,,manual_template,0.0,fill canonical_drug_id after curation
+BRD-A29322418,,,,manual_template,0.0,fill canonical_drug_id after curation
+BRD-K08109516,,,,manual_template,0.0,fill canonical_drug_id after curation
+BRD-K88741031,,,,manual_template,0.0,fill canonical_drug_id after curation
+BRD-K16604360,,,,manual_template,0.0,fill canonical_drug_id after curation
+BRD-K20482099,,,,manual_template,0.0,fill canonical_drug_id after curation
+BRD-K03670461,,,,manual_template,0.0,fill canonical_drug_id after curation
+BRD-K36737713,,,,manual_template,0.0,fill canonical_drug_id after curation
+BRD-A14966924,,,,manual_template,0.0,fill canonical_drug_id after curation
+BRD-K79131256,,,,manual_template,0.0,fill canonical_drug_id after curation

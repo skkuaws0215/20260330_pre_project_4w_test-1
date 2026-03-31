@@ -1,0 +1,9 @@
+{
+  "lincs_rows": 63367,
+  "lincs_brd_extracted_rows": 29276,
+  "brd_map_rows": 10,
+  "matched_rows": 44,
+  "matched_ratio": 0.0006943677308378178,
+  "mapped_drug_count": 1,
+  "note": "If matched_ratio is low, enrich brd_map first (BRD -> canonical_drug_id)."
+}

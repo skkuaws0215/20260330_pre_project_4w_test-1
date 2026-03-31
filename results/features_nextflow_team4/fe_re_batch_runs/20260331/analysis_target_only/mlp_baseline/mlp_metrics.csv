@@ -1,0 +1,2 @@
+model,dataset,RMSE,MAE,Spearman,NDCG@20,Hit@20
+MLP,newfe_v2_target_only,2.112787,1.598048,0.440021,0.836289,1.0

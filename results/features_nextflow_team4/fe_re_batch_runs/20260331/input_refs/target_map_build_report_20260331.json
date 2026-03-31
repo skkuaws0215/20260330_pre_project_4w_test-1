@@ -1,0 +1,8 @@
+{
+  "bridge_drug_count": 601,
+  "candidate_uniprot_count": 308,
+  "mapped_uniprot_to_symbol_count": 304,
+  "final_target_rows": 647,
+  "final_mapped_drug_count": 192,
+  "notes": "Drug mapping by normalized drug_name; UniProt mapped using UniProt REST gene_primary."
+}

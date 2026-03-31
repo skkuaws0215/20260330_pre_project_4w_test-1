@@ -1,0 +1,37 @@
+{
+  "dataset": "pair_features_newfe_v2.parquet (LINCS excluded)",
+  "rows_total": 14497,
+  "rows_train": 11597,
+  "rows_valid": 2900,
+  "feature_cols_total": 2068,
+  "feature_cols_continuous_scaled": 15,
+  "feature_cols_binary_passthrough": 2053,
+  "split": {
+    "test_size": 0.2,
+    "seed": 42
+  },
+  "mlp_config": {
+    "hidden_layer_sizes": [
+      512,
+      256,
+      64
+    ],
+    "max_iter": 200,
+    "learning_rate_init": 0.001,
+    "early_stopping": true
+  },
+  "metrics": {
+    "model": "MLP",
+    "dataset": "newfe_v2_target_only",
+    "RMSE": 2.112787,
+    "MAE": 1.598048,
+    "Spearman": 0.440021,
+    "NDCG@20": 0.836289,
+    "Hit@20": 1.0
+  },
+  "outputs": {
+    "metric_table": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/mlp_baseline/mlp_metrics.csv",
+    "comparison_table": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/mlp_baseline/xgb_vs_mlp_comparison.csv",
+    "learning_curve": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/mlp_baseline/mlp_learning_curve.csv"
+  }
+}

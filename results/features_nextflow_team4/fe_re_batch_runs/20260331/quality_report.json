@@ -1,0 +1,451 @@
+{
+  "run_dir": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260331",
+  "files": {
+    "sample_pathway_features": {
+      "rows": 53,
+      "cols": 1,
+      "numeric_cols": 0,
+      "duplicate_key_rows": 0,
+      "top_null_ratio": {},
+      "top_near_zero_numeric_cols": []
+    },
+    "drug_chem_features": {
+      "rows": 601,
+      "cols": 2059,
+      "numeric_cols": 2058,
+      "duplicate_key_rows": 0,
+      "top_null_ratio": {
+        "drug_desc_frac_csp3": 0.6821963394342762,
+        "drug_desc_heavy_atoms": 0.6821963394342762,
+        "drug_desc_ring_count": 0.6821963394342762,
+        "drug_desc_rot_bonds": 0.6821963394342762,
+        "drug_desc_hba": 0.6821963394342762,
+        "drug_desc_hbd": 0.6821963394342762,
+        "drug_desc_tpsa": 0.6821963394342762,
+        "drug_desc_logp": 0.6821963394342762,
+        "drug_desc_mol_wt": 0.6821963394342762
+      },
+      "top_near_zero_numeric_cols": [
+        {
+          "drug_morgan_0000": 0.0
+        },
+        {
+          "drug_morgan_0015": 0.0
+        },
+        {
+          "drug_morgan_0017": 0.0
+        },
+        {
+          "drug_morgan_0019": 0.0
+        },
+        {
+          "drug_morgan_0021": 0.0
+        },
+        {
+          "drug_morgan_0022": 0.0
+        },
+        {
+          "drug_morgan_0030": 0.0
+        },
+        {
+          "drug_morgan_0048": 0.0
+        },
+        {
+          "drug_morgan_0050": 0.0
+        },
+        {
+          "drug_morgan_0051": 0.0
+        },
+        {
+          "drug_morgan_0061": 0.0
+        },
+        {
+          "drug_morgan_0063": 0.0
+        },
+        {
+          "drug_morgan_0072": 0.0
+        },
+        {
+          "drug_morgan_0076": 0.0
+        },
+        {
+          "drug_morgan_0082": 0.0
+        },
+        {
+          "drug_morgan_0085": 0.0
+        },
+        {
+          "drug_morgan_0088": 0.0
+        },
+        {
+          "drug_morgan_0089": 0.0
+        },
+        {
+          "drug_morgan_0093": 0.0
+        },
+        {
+          "drug_morgan_0096": 0.0
+        }
+      ]
+    },
+    "pair_lincs_features": {
+      "rows": 25575,
+      "cols": 7,
+      "numeric_cols": 5,
+      "duplicate_key_rows": 0,
+      "top_null_ratio": {},
+      "top_near_zero_numeric_cols": [
+        {
+          "lincs_cosine": 0.0
+        },
+        {
+          "lincs_pearson": 0.0
+        },
+        {
+          "lincs_spearman": 0.0
+        },
+        {
+          "lincs_reverse_score_top50": 0.0
+        },
+        {
+          "lincs_reverse_score_top100": 0.0
+        }
+      ]
+    },
+    "pair_target_features": {
+      "rows": 25575,
+      "cols": 12,
+      "numeric_cols": 10,
+      "duplicate_key_rows": 0,
+      "top_null_ratio": {},
+      "top_near_zero_numeric_cols": [
+        {
+          "target_overlap_count": 0.0
+        },
+        {
+          "target_overlap_ratio": 0.0
+        },
+        {
+          "target_pathway_score_mean": 0.0
+        },
+        {
+          "target_pathway_hit_count": 0.0
+        }
+      ]
+    },
+    "pair_features_newfe": {
+      "rows": 25575,
+      "cols": 2065,
+      "numeric_cols": 2063,
+      "duplicate_key_rows": 0,
+      "top_null_ratio": {},
+      "top_near_zero_numeric_cols": [
+        {
+          "drug_morgan_0000": 0.0
+        },
+        {
+          "drug_morgan_0015": 0.0
+        },
+        {
+          "drug_morgan_0017": 0.0
+        },
+        {
+          "drug_morgan_0019": 0.0
+        },
+        {
+          "drug_morgan_0021": 0.0
+        },
+        {
+          "drug_morgan_0022": 0.0
+        },
+        {
+          "drug_morgan_0030": 0.0
+        },
+        {
+          "drug_morgan_0048": 0.0
+        },
+        {
+          "drug_morgan_0050": 0.0
+        },
+        {
+          "drug_morgan_0051": 0.0
+        },
+        {
+          "drug_morgan_0061": 0.0
+        },
+        {
+          "drug_morgan_0063": 0.0
+        },
+        {
+          "drug_morgan_0072": 0.0
+        },
+        {
+          "drug_morgan_0076": 0.0
+        },
+        {
+          "drug_morgan_0082": 0.0
+        },
+        {
+          "drug_morgan_0085": 0.0
+        },
+        {
+          "drug_morgan_0088": 0.0
+        },
+        {
+          "drug_morgan_0089": 0.0
+        },
+        {
+          "drug_morgan_0093": 0.0
+        },
+        {
+          "drug_morgan_0096": 0.0
+        }
+      ]
+    },
+    "pair_features_newfe_v2": {
+      "rows": 25575,
+      "cols": 2075,
+      "numeric_cols": 2073,
+      "duplicate_key_rows": 0,
+      "top_null_ratio": {},
+      "top_near_zero_numeric_cols": [
+        {
+          "drug_morgan_0000": 0.0
+        },
+        {
+          "drug_morgan_0015": 0.0
+        },
+        {
+          "drug_morgan_0017": 0.0
+        },
+        {
+          "drug_morgan_0019": 0.0
+        },
+        {
+          "drug_morgan_0021": 0.0
+        },
+        {
+          "drug_morgan_0022": 0.0
+        },
+        {
+          "drug_morgan_0030": 0.0
+        },
+        {
+          "drug_morgan_0048": 0.0
+        },
+        {
+          "drug_morgan_0050": 0.0
+        },
+        {
+          "drug_morgan_0051": 0.0
+        },
+        {
+          "drug_morgan_0061": 0.0
+        },
+        {
+          "drug_morgan_0063": 0.0
+        },
+        {
+          "drug_morgan_0072": 0.0
+        },
+        {
+          "drug_morgan_0076": 0.0
+        },
+        {
+          "drug_morgan_0082": 0.0
+        },
+        {
+          "drug_morgan_0085": 0.0
+        },
+        {
+          "drug_morgan_0088": 0.0
+        },
+        {
+          "drug_morgan_0089": 0.0
+        },
+        {
+          "drug_morgan_0093": 0.0
+        },
+        {
+          "drug_morgan_0096": 0.0
+        }
+      ]
+    }
+  },
+  "newfe_diff": {
+    "key_match": {
+      "left_only": 0,
+      "right_only": 0,
+      "both": 25575
+    },
+    "target_cols_in_v2": [
+      "target_expr_mean",
+      "target_expr_std",
+      "target_gene_count",
+      "target_gene_coverage_ratio",
+      "target_overlap_count",
+      "target_overlap_down_count",
+      "target_overlap_down_ratio",
+      "target_overlap_ratio",
+      "target_pathway_hit_count",
+      "target_pathway_score_mean"
+    ],
+    "target_nonzero_ratio": {
+      "target_expr_mean": 0.1790811339198436,
+      "target_expr_std": 0.11483870967741935,
+      "target_gene_count": 0.320039100684262,
+      "target_gene_coverage_ratio": 0.320039100684262,
+      "target_overlap_count": 0.0,
+      "target_overlap_down_count": 0.05356793743890518,
+      "target_overlap_down_ratio": 0.05356793743890518,
+      "target_overlap_ratio": 0.0,
+      "target_pathway_hit_count": 0.0,
+      "target_pathway_score_mean": 0.0
+    }
+  },
+  "target_signal": {
+    "target_cols": [
+      "target_overlap_count",
+      "target_overlap_ratio",
+      "target_overlap_down_count",
+      "target_overlap_down_ratio",
+      "target_expr_mean",
+      "target_expr_std",
+      "target_pathway_score_mean",
+      "target_pathway_hit_count",
+      "target_gene_coverage_ratio",
+      "target_gene_count"
+    ],
+    "summary": {
+      "target_overlap_count": {
+        "mean": 0.0,
+        "std": 0.0,
+        "nonzero_ratio": 0.0,
+        "max": 0.0
+      },
+      "target_overlap_ratio": {
+        "mean": 0.0,
+        "std": 0.0,
+        "nonzero_ratio": 0.0,
+        "max": 0.0
+      },
+      "target_overlap_down_count": {
+        "mean": 0.06956011730205279,
+        "std": 0.32015117690573,
+        "nonzero_ratio": 0.05356793743890518,
+        "max": 4.0
+      },
+      "target_overlap_down_ratio": {
+        "mean": 0.02984628431574753,
+        "std": 0.14465846985435574,
+        "nonzero_ratio": 0.05356793743890518,
+        "max": 1.0
+      },
+      "target_expr_mean": {
+        "mean": -0.07510351114449629,
+        "std": 0.305605763810329,
+        "nonzero_ratio": 0.1790811339198436,
+        "max": 0.46455255150794983
+      },
+      "target_expr_std": {
+        "mean": 0.04260929536325666,
+        "std": 0.1732971131003338,
+        "nonzero_ratio": 0.11483870967741935,
+        "max": 1.8683314323425293
+      },
+      "target_pathway_score_mean": {
+        "mean": 0.0,
+        "std": 0.0,
+        "nonzero_ratio": 0.0,
+        "max": 0.0
+      },
+      "target_pathway_hit_count": {
+        "mean": 0.0,
+        "std": 0.0,
+        "nonzero_ratio": 0.0,
+        "max": 0.0
+      },
+      "target_gene_coverage_ratio": {
+        "mean": 0.31846892892054185,
+        "std": 0.46450504408660515,
+        "nonzero_ratio": 0.320039100684262,
+        "max": 1.0
+      },
+      "target_gene_count": {
+        "mean": 1.0920430107526882,
+        "std": 2.91451234591028,
+        "nonzero_ratio": 0.320039100684262,
+        "max": 40.0
+      }
+    }
+  },
+  "lincs_signal": {
+    "lincs_cols": [
+      "lincs_cosine",
+      "lincs_pearson",
+      "lincs_spearman",
+      "lincs_reverse_score_top50",
+      "lincs_reverse_score_top100"
+    ],
+    "summary": {
+      "lincs_cosine": {
+        "mean": 0.0,
+        "std": 0.0,
+        "nunique": 1,
+        "nonzero_ratio": 0.0,
+        "max": 0.0
+      },
+      "lincs_pearson": {
+        "mean": 0.0,
+        "std": 0.0,
+        "nunique": 1,
+        "nonzero_ratio": 0.0,
+        "max": 0.0
+      },
+      "lincs_spearman": {
+        "mean": 0.0,
+        "std": 0.0,
+        "nunique": 1,
+        "nonzero_ratio": 0.0,
+        "max": 0.0
+      },
+      "lincs_reverse_score_top50": {
+        "mean": 0.0,
+        "std": 0.0,
+        "nunique": 1,
+        "nonzero_ratio": 0.0,
+        "max": 0.0
+      },
+      "lincs_reverse_score_top100": {
+        "mean": 0.0,
+        "std": 0.0,
+        "nunique": 1,
+        "nonzero_ratio": 0.0,
+        "max": 0.0
+      }
+    }
+  },
+  "signal_gate": {
+    "target_signal_pass": true,
+    "target_alive_cols_count": 6,
+    "target_alive_cols": [
+      "target_overlap_down_count",
+      "target_overlap_down_ratio",
+      "target_expr_mean",
+      "target_expr_std",
+      "target_gene_coverage_ratio",
+      "target_gene_count"
+    ],
+    "target_rule": ">=3 target_* cols with nonzero_ratio >= 0.05",
+    "lincs_signal_pass": false,
+    "lincs_fail_cols": [
+      "lincs_cosine",
+      "lincs_pearson",
+      "lincs_spearman",
+      "lincs_reverse_score_top50",
+      "lincs_reverse_score_top100"
+    ],
+    "lincs_rule": "all lincs_* cols must satisfy std > 0 and nunique > 1",
+    "overall_pass": false
+  }
+}

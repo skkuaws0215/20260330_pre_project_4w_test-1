@@ -1,0 +1,39 @@
+{
+  "dataset": "pair_features_newfe_v2.parquet (LINCS excluded)",
+  "rows_total": 14497,
+  "rows_train": 11597,
+  "rows_valid": 2900,
+  "feature_cols_total": 2068,
+  "feature_cols_continuous_scaled": 15,
+  "feature_cols_binary_passthrough": 2053,
+  "split": {
+    "test_size": 0.2,
+    "seed": 42
+  },
+  "vae_config": {
+    "latent_dims": [
+      32,
+      64
+    ],
+    "epochs": 40,
+    "batch_size": 256,
+    "lr": 0.001,
+    "beta": 0.001,
+    "pred_weight": 1.0,
+    "loss": "reconstruction + beta*KL + pred_weight*prediction"
+  },
+  "best_latent_dim": 32,
+  "best_metrics": {
+    "RMSE": 2.153212,
+    "MAE": 1.610322,
+    "Spearman": 0.367956,
+    "NDCG@20": 0.840474,
+    "Hit@20": 1.0
+  },
+  "outputs": {
+    "metric_table": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/vae_baseline/vae_metrics.csv",
+    "comparison_table": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/vae_baseline/xgb_mlp_vae_comparison.csv",
+    "latent_effect": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/vae_baseline/vae_latent_effect.csv",
+    "learning_curve": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/vae_baseline/vae_learning_curve.csv"
+  }
+}

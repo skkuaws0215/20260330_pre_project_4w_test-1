@@ -390,6 +390,40 @@ Delta 요약:
 - target feature 추가 효과(특히 Spearman/NDCG)는 `XGBoost`가 가장 큼.
 - 현재 best model 후보: `XGBoost + newfe_v2(target-only)`.
 
+#### 20260401 DL baseline + MLP Variants 비교 결과 (로컬, 동일 split)
+
+- DL 대시보드: `dl_experiment_dashboard_20260331.html` (`Snapshot · 20260401_v1`)
+- 공통 조건:
+  - 데이터셋: `pair_features_newfe_v2.parquet` (LINCS 제외)
+  - key inner join: `sample_id`, `canonical_drug_id`
+  - split: `seed=42`, `test_size=0.2`
+  - 전처리: 결측 `0`, continuous `standard scaling`, binary passthrough
+- 비교 모델:
+  - `XGBoost` (best ML baseline)
+  - `FlatMLP` (기존 baseline)
+  - `BlockWiseMLP` (pathway/chem/target block encoder)
+  - `ResidualMLP` (flat MLP + residual blocks)
+- 결과 파일:
+  - `results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/final_comparison/xgb_mlp_vae_tabnet_final_comparison.csv`
+  - `results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/final_comparison/xgb_mlp_vae_tabnet_final_comparison.md`
+  - `results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/mlp_variants/mlp_variants_metrics.csv`
+  - `results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/mlp_variants/xgb_mlp_variants_comparison.csv`
+  - `results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/mlp_variants/mlp_variants_learning_curve.csv`
+  - `results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/mlp_variants/run_summary.json`
+
+| model | RMSE | MAE | Spearman | NDCG@20 | Hit@20 | comment |
+|------|------|-----|----------|---------|--------|---------|
+| XGBoost | 2.107257 | 1.584793 | 0.445384 | 0.835994 | 1.000000 | best ML baseline |
+| FlatMLP | 2.112787 | 1.598048 | 0.440021 | 0.836289 | 1.000000 | DL baseline |
+| BlockWiseMLP | 2.106591 | 1.583276 | 0.445905 | 0.837439 | 1.000000 | flat 대비 소폭 개선 |
+| ResidualMLP | 2.103150 | 1.582552 | 0.452853 | 0.839462 | 1.000000 | 현재 MLP 계열 best |
+
+해석:
+
+- 구조 변경만으로도(`Flat -> BlockWise/Residual`) 성능 개선이 확인됨.
+- `ResidualMLP`는 주지표 Spearman 기준으로 `XGBoost`를 소폭 상회.
+- 과도한 튜닝 없이도 DL 구조 개선 효과가 확인되어, 다음 단계(예: graph 전환 전 최종 DL 확정)에 유의미한 근거를 제공.
+
 ## `credentials` 작성 시 주의
 
 - 파일 상단에 **`#` 주석을 넣지 않는 것**을 권장합니다. (일부 환경에서 AWS CLI 파싱 오류가 날 수 있음)

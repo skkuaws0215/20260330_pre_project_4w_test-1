@@ -1,0 +1,28 @@
+{
+  "dataset": "pair_features_newfe_v2.parquet (LINCS excluded)",
+  "rows_total": 14497,
+  "rows_train": 11597,
+  "rows_valid": 2900,
+  "feature_cols_total": 2068,
+  "blocks": {
+    "pathway_cols": 0,
+    "chem_cols": 2058,
+    "target_cols": 10
+  },
+  "split": {
+    "test_size": 0.2,
+    "seed": 42
+  },
+  "train_config": {
+    "epochs": 50,
+    "batch_size": 256,
+    "lr": 0.001,
+    "patience": 10
+  },
+  "best_by_spearman": "ResidualMLP",
+  "outputs": {
+    "variants_metrics": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/mlp_variants/mlp_variants_metrics.csv",
+    "comparison": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/mlp_variants/xgb_mlp_variants_comparison.csv",
+    "learning_curve": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/mlp_variants/mlp_variants_learning_curve.csv"
+  }
+}

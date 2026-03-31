@@ -1,0 +1,2 @@
+model,dataset,RMSE,MAE,Spearman,NDCG@20,Hit@20
+TabNet,newfe_v2_target_only,2.537977,1.968322,0.168106,0.716251,1.0
