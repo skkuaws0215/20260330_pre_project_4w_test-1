@@ -254,7 +254,13 @@ def build_target_features(
         raise ValueError(f"drug target input missing required columns: {missing}")
 
     expr_cols = [c for c in sample_expr_df.columns if c != sample_id_col and pd.api.types.is_numeric_dtype(sample_expr_df[c])]
-    expr_col_set = set(expr_cols)
+    # Handle prefixed expression columns (e.g., crispr__EGFR) by keeping both raw and tokenized symbol map.
+    expr_symbol_to_col: dict[str, str] = {}
+    for c in expr_cols:
+        sym = c.split("__")[-1].strip().upper()
+        if sym and sym not in expr_symbol_to_col:
+            expr_symbol_to_col[sym] = c
+    expr_symbol_set = set(expr_symbol_to_col.keys())
 
     sample_expr_idx = sample_expr_df[[sample_id_col] + expr_cols].drop_duplicates(subset=[sample_id_col]).set_index(sample_id_col)
     sample_high: dict[str, set[str]] = {}
@@ -263,12 +269,12 @@ def build_target_features(
         vals = row.to_numpy(dtype=np.float32)
         high_mask = vals >= high_z
         low_mask = vals <= low_z
-        sample_high[str(sid)] = {g for g, m in zip(expr_cols, high_mask) if m}
-        sample_low[str(sid)] = {g for g, m in zip(expr_cols, low_mask) if m}
+        sample_high[str(sid)] = {g.split("__")[-1].strip().upper() for g, m in zip(expr_cols, high_mask) if m}
+        sample_low[str(sid)] = {g.split("__")[-1].strip().upper() for g, m in zip(expr_cols, low_mask) if m}
 
     drug_targets: dict[str, set[str]] = {}
     for did, grp in drug_target_df[[drug_id_col, target_gene_col]].dropna().groupby(drug_id_col):
-        tset = {str(g).strip() for g in grp[target_gene_col].tolist() if str(g).strip()}
+        tset = {str(g).strip().upper() for g in grp[target_gene_col].tolist() if str(g).strip()}
         drug_targets[str(did).strip()] = tset
 
     pathway_score_cols = [c for c in sample_pathway_df.columns if c.startswith("pathway__")]
@@ -282,7 +288,7 @@ def build_target_features(
     pathway_map: dict[str, set[str]] = {}
     if not pathway_member_df.empty:
         for pname, grp in pathway_member_df.groupby("pathway_name"):
-            pathway_map[str(pname)] = {str(g).strip() for g in grp["gene_symbol"].tolist()}
+            pathway_map[str(pname)] = {str(g).strip().upper() for g in grp["gene_symbol"].tolist()}
 
     drug_target_pathways: dict[str, list[str]] = {}
     if pathway_map:
@@ -310,13 +316,14 @@ def build_target_features(
         overlap_up = len(targets.intersection(sample_high_genes))
         overlap_down = len(targets.intersection(sample_low_genes))
 
-        in_expr = targets.intersection(expr_col_set)
+        in_expr = targets.intersection(expr_symbol_set)
         coverage = float(len(in_expr) / tcount) if tcount > 0 else 0.0
 
         expr_mean = 0.0
         expr_std = 0.0
         if sid in sample_expr_idx.index and in_expr:
-            vals = sample_expr_idx.loc[sid, sorted(in_expr)].to_numpy(dtype=np.float32)
+            expr_cols_hit = [expr_symbol_to_col[g] for g in sorted(in_expr) if g in expr_symbol_to_col]
+            vals = sample_expr_idx.loc[sid, expr_cols_hit].to_numpy(dtype=np.float32)
             expr_mean = float(np.mean(vals))
             expr_std = float(np.std(vals))
 

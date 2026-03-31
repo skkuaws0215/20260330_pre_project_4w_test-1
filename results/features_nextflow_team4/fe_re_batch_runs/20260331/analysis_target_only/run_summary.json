@@ -1,0 +1,15 @@
+{
+  "rows_common_across_3_datasets": 14497,
+  "split": {
+    "test_size": 0.2,
+    "seed": 42
+  },
+  "labels_uri": "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/abc_inputs/20260330_abc_v1/B/labels.parquet",
+  "baseline_features_uri": "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/abc_inputs/20260330_abc_v1/B/features_b.parquet",
+  "newfe_features_uri": "results/features_nextflow_team4/fe_re_batch_runs/20260331/final/pair_features_newfe.parquet",
+  "newfe_v2_features_uri": "results/features_nextflow_team4/fe_re_batch_runs/20260331/final/pair_features_newfe_v2.parquet",
+  "outputs": {
+    "metrics_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/model_dataset_metrics.csv",
+    "delta_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/model_delta_summary.csv"
+  }
+}

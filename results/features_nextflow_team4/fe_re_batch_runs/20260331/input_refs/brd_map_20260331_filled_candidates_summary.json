@@ -1,0 +1,14 @@
+{
+  "total_brd": 10,
+  "auto_mapping_success": 0,
+  "name_match_count": 0,
+  "smiles_match_count": 0,
+  "unmatched_count": 10,
+  "metadata_rows": 51219,
+  "metadata_cols_detected": {
+    "brd_col": "pert_id",
+    "sig_col": "sig_id",
+    "pert_iname_col": "pert_iname",
+    "smiles_col": ""
+  }
+}

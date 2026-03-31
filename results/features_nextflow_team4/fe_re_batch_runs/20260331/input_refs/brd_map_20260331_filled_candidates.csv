@@ -1,0 +1,11 @@
+brd_id,canonical_drug_id,sig_id,pert_iname,source,mapping_confidence,note,matched_by
+BRD-A66861218,,CPC004_A375_6H:BRD-A66861218-001-03-5:10,BRD-A66861218,manual_template,0.0,fill canonical_drug_id after curation,none
+BRD-A29322418,,CPC004_A375_6H:BRD-A29322418-237-03-2:10,canrenoic-acid,manual_template,0.0,fill canonical_drug_id after curation,none
+BRD-K08109516,,CPC004_A375_6H:BRD-K08109516-001-02-9:10,L-701324,manual_template,0.0,fill canonical_drug_id after curation,none
+BRD-K88741031,,CPC004_A375_6H:BRD-K88741031-001-01-0:10,"methyl-2,5-dihydroxycinnamate",manual_template,0.0,fill canonical_drug_id after curation,none
+BRD-K16604360,,CPC004_A375_6H:BRD-K16604360-001-01-8:10,BRD-K16604360,manual_template,0.0,fill canonical_drug_id after curation,none
+BRD-K20482099,,CPC004_A375_6H:BRD-K20482099-001-01-1:10,rutin,manual_template,0.0,fill canonical_drug_id after curation,none
+BRD-K03670461,,CPC004_A375_6H:BRD-K03670461-001-02-0:10,tyrphostin-AG-82,manual_template,0.0,fill canonical_drug_id after curation,none
+BRD-K36737713,,CPC004_A375_6H:BRD-K36737713-001-01-6:10,AG-957,manual_template,0.0,fill canonical_drug_id after curation,none
+BRD-A14966924,,CPC004_A375_6H:BRD-A14966924-001-03-0:10,alaproclate,manual_template,0.0,fill canonical_drug_id after curation,none
+BRD-K79131256,,CPC004_A375_6H:BRD-K79131256-001-08-8:10,albendazole,manual_template,0.0,fill canonical_drug_id after curation,none

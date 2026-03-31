@@ -1,0 +1,11 @@
+brd_id,pert_iname,selected_canonical_drug_id,selected_drug_name_norm,selection_status,note
+BRD-A14966924,alaproclate,,,unmatched,review top-k candidates and fill selected_* manually
+BRD-A29322418,canrenoic-acid,,,unmatched,review top-k candidates and fill selected_* manually
+BRD-A66861218,BRD-A66861218,,,unmatched,review top-k candidates and fill selected_* manually
+BRD-K03670461,tyrphostin-AG-82,,,unmatched,review top-k candidates and fill selected_* manually
+BRD-K08109516,L-701324,,,unmatched,review top-k candidates and fill selected_* manually
+BRD-K16604360,BRD-K16604360,,,unmatched,review top-k candidates and fill selected_* manually
+BRD-K20482099,rutin,,,unmatched,review top-k candidates and fill selected_* manually
+BRD-K36737713,AG-957,,,unmatched,review top-k candidates and fill selected_* manually
+BRD-K79131256,albendazole,,,unmatched,review top-k candidates and fill selected_* manually
+BRD-K88741031,"methyl-2,5-dihydroxycinnamate",,,unmatched,review top-k candidates and fill selected_* manually

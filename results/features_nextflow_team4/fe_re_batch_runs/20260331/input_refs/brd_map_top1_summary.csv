@@ -1,0 +1,11 @@
+brd_id,pert_iname,top1_drug_name_norm,top1_canonical_drug_id,similarity_score
+BRD-A14966924,alaproclate,aicaribonucleotide,1001,0.551724
+BRD-A29322418,canrenoic-acid,mycophenolicacid,2055,0.689655
+BRD-A66861218,BRD-A66861218,bayhdac111,1364,0.454545
+BRD-K03670461,tyrphostin-AG-82,trichostatina,437,0.666667
+BRD-K08109516,L-701324,ct70332,2149,0.571429
+BRD-K16604360,BRD-K16604360,erk6604,1714,0.631579
+BRD-K20482099,rutin,ibrutinib,1799,0.714286
+BRD-K36737713,AG-957,amg319,2045,0.545455
+BRD-K79131256,albendazole,gallibiscoquinazole,1830,0.6
+BRD-K88741031,"methyl-2,5-dihydroxycinnamate",methotrexate,1008,0.473684

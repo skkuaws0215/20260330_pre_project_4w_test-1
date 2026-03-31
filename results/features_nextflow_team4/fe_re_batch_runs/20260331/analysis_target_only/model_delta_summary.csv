@@ -1,0 +1,4 @@
+model,delta_newfe_spear,delta_target_spear,delta_target_ndcg
+LightGBM,0.176821,0.000814,0.003745
+XGBoost,0.173578,0.008528,0.005225
+ElasticNet,0.172713,0.002141,0.002399

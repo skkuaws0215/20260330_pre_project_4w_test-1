@@ -84,6 +84,42 @@
         <li>동일 run 규칙으로 재실행: <code>fe_re_batch_runs/20260331/</code> 하위 <code>final/</code> 재생성</li>
       </ol>
     </section>
+
+    <section>
+      <h2>5) Target-only 모델 비교 (동일 split, LINCS 제외)</h2>
+      <p class="muted">고정 조건: <code>seed=42</code>, <code>test_size=0.2</code>, 공통 key 교집합(14497 rows), <code>normalize_lincs_mapping.py</code> 미실행, LINCS 컬럼 제외.</p>
+      <table>
+        <tr><th>model</th><th>dataset</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th></tr>
+        <tr><td>LGBM</td><td>baseline</td><td>2.483</td><td>1.927</td><td>0.264</td><td>0.736</td><td>1.000</td></tr>
+        <tr><td>LGBM</td><td>newfe</td><td>2.119</td><td>1.596</td><td>0.441</td><td>0.832</td><td>1.000</td></tr>
+        <tr><td>LGBM</td><td>newfe_v2</td><td>2.111</td><td>1.593</td><td>0.441</td><td>0.836</td><td>1.000</td></tr>
+        <tr><td>XGBoost</td><td>baseline</td><td>2.485</td><td>1.930</td><td>0.263</td><td>0.736</td><td>1.000</td></tr>
+        <tr><td>XGBoost</td><td>newfe</td><td>2.119</td><td>1.595</td><td>0.437</td><td>0.831</td><td>1.000</td></tr>
+        <tr><td>XGBoost</td><td>newfe_v2</td><td>2.107</td><td>1.585</td><td>0.445</td><td>0.836</td><td>1.000</td></tr>
+        <tr><td>ElasticNet</td><td>baseline</td><td>2.491</td><td>1.938</td><td>0.262</td><td>0.728</td><td>1.000</td></tr>
+        <tr><td>ElasticNet</td><td>newfe</td><td>2.126</td><td>1.611</td><td>0.435</td><td>0.830</td><td>1.000</td></tr>
+        <tr><td>ElasticNet</td><td>newfe_v2</td><td>2.123</td><td>1.607</td><td>0.437</td><td>0.832</td><td>1.000</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>6) Delta 요약 (필수)</h2>
+      <table>
+        <tr><th>model</th><th>delta_newfe_spear</th><th>delta_target_spear</th><th>delta_target_ndcg</th></tr>
+        <tr><td>LightGBM</td><td>0.177</td><td>0.001</td><td>0.004</td></tr>
+        <tr><td>XGBoost</td><td>0.174</td><td>0.009</td><td>0.005</td></tr>
+        <tr><td>ElasticNet</td><td>0.173</td><td>0.002</td><td>0.002</td></tr>
+      </table>
+      <details>
+        <summary>주석 보기: 해석/후속 의사결정</summary>
+        <ul>
+          <li><strong>baseline vs newfe</strong>: 3모델 모두 RMSE/MAE 하락, Spearman/NDCG 상승.</li>
+          <li><strong>newfe vs newfe_v2</strong>: target feature 추가 효과는 일관된 소폭 개선.</li>
+          <li><strong>target 추가 효과 최대</strong>: XGBoost (delta_target_spear, delta_target_ndcg 모두 최대).</li>
+          <li><strong>현재 best 후보</strong>: XGBoost + newfe_v2 (target-only).</li>
+        </ul>
+      </details>
+    </section>
   </div>
 </body>
 </html>

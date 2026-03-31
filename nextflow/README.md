@@ -143,6 +143,35 @@ python nextflow/scripts/build_pair_features_newfe_v2.py `
 - overlap은 count + ratio를 모두 생성한다.
 - pathway relevance는 mean + hit_count를 모두 생성한다.
 
+### LINCS BRD 매핑 입력 스키마 (고정)
+
+`normalize_lincs_mapping.py` 입력 `brd_map`은 CSV 또는 Parquet를 받을 수 있고 스키마는 아래와 같다.
+
+- **필수 컬럼**
+  - `brd_id`
+  - `canonical_drug_id`
+- **선택 컬럼**
+  - `sig_id`
+  - `pert_iname`
+  - `source`
+  - `mapping_confidence`
+  - `note`
+
+샘플 템플릿(20260331):
+
+- `results/features_nextflow_team4/fe_re_batch_runs/20260331/input_refs/brd_map_20260331_template.csv`
+- `results/features_nextflow_team4/fe_re_batch_runs/20260331/input_refs/brd_map_20260331_template.parquet`
+
+실행 예시:
+
+```powershell
+python nextflow/scripts/normalize_lincs_mapping.py `
+  --lincs-uri "s3://drug-discovery-joe-raw-data-team4/results/lincs/16_mcf7_processed.parquet" `
+  --brd-map-uri "results/features_nextflow_team4/fe_re_batch_runs/20260331/input_refs/brd_map_20260331_template.csv" `
+  --out-parquet "results/features_nextflow_team4/fe_re_batch_runs/20260331/input_refs/lincs_drug_signature_mapped_20260331.parquet" `
+  --out-report "results/features_nextflow_team4/fe_re_batch_runs/20260331/input_refs/lincs_mapping_report_20260331.json"
+```
+
 ## 지금 바로 할 일 (Batch 본 실행)
 
 현재 구성 기준(예시):

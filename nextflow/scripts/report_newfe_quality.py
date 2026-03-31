@@ -75,6 +75,55 @@ def _target_signal_report(df_target: pd.DataFrame) -> dict[str, Any]:
     return out
 
 
+def _lincs_signal_report(df_lincs: pd.DataFrame) -> dict[str, Any]:
+    lincs_cols = [c for c in df_lincs.columns if c.startswith("lincs_")]
+    out: dict[str, Any] = {"lincs_cols": lincs_cols}
+    if not lincs_cols:
+        return out
+    stats = {}
+    for c in lincs_cols:
+        s = pd.to_numeric(df_lincs[c], errors="coerce").fillna(0.0)
+        stats[c] = {
+            "mean": float(s.mean()),
+            "std": float(s.std()),
+            "nunique": int(s.nunique(dropna=True)),
+            "nonzero_ratio": float((s != 0).mean()),
+            "max": float(s.max()),
+        }
+    out["summary"] = stats
+    return out
+
+
+def _signal_pass_fail(target_signal: dict[str, Any], lincs_signal: dict[str, Any]) -> dict[str, Any]:
+    # Target success rule:
+    # at least 3 target_* columns have non-zero ratio >= 0.05  (equiv. non-zero ratio < 0.95 from user's rule)
+    t_summary = target_signal.get("summary", {})
+    target_alive_cols = [
+        c for c, s in t_summary.items() if float(s.get("nonzero_ratio", 0.0)) >= 0.05
+    ]
+    target_pass = len(target_alive_cols) >= 3
+
+    # LINCS success rule:
+    # all lincs_* metric columns: std > 0 and unique value > 1
+    l_summary = lincs_signal.get("summary", {})
+    lincs_fail_cols = []
+    for c, s in l_summary.items():
+        if not (float(s.get("std", 0.0)) > 0.0 and int(s.get("nunique", 0)) > 1):
+            lincs_fail_cols.append(c)
+    lincs_pass = len(l_summary) > 0 and len(lincs_fail_cols) == 0
+
+    return {
+        "target_signal_pass": target_pass,
+        "target_alive_cols_count": len(target_alive_cols),
+        "target_alive_cols": target_alive_cols,
+        "target_rule": ">=3 target_* cols with nonzero_ratio >= 0.05",
+        "lincs_signal_pass": lincs_pass,
+        "lincs_fail_cols": lincs_fail_cols,
+        "lincs_rule": "all lincs_* cols must satisfy std > 0 and nunique > 1",
+        "overall_pass": bool(target_pass and lincs_pass),
+    }
+
+
 def _newfe_diff_report(df_newfe: pd.DataFrame, df_newfe_v2: pd.DataFrame) -> dict[str, Any]:
     key_cols = ["sample_id", "canonical_drug_id"]
     report: dict[str, Any] = {}
@@ -115,6 +164,28 @@ def _to_markdown(obj: dict[str, Any]) -> str:
     for name, info in files.items():
         lines.append(f"- `{name}`: rows={info['rows']}, cols={info['cols']}, numeric={info['numeric_cols']}, dup_keys={info['duplicate_key_rows']}")
     lines.append("")
+    lines.append("## PASS / FAIL Gate")
+    lines.append("")
+    gate = obj.get("signal_gate", {})
+    if gate:
+        lines.append(f"- overall: {'PASS' if gate.get('overall_pass') else 'FAIL'}")
+        lines.append(
+            f"- target gate: {'PASS' if gate.get('target_signal_pass') else 'FAIL'} "
+            f"(alive_cols={gate.get('target_alive_cols_count', 0)})"
+        )
+        lines.append(
+            f"- lincs gate: {'PASS' if gate.get('lincs_signal_pass') else 'FAIL'} "
+            f"(fail_cols={len(gate.get('lincs_fail_cols', []))})"
+        )
+        if gate.get("target_alive_cols"):
+            lines.append("- target alive cols:")
+            for c in gate["target_alive_cols"]:
+                lines.append(f"  - `{c}`")
+        if gate.get("lincs_fail_cols"):
+            lines.append("- lincs fail cols:")
+            for c in gate["lincs_fail_cols"]:
+                lines.append(f"  - `{c}`")
+    lines.append("")
     lines.append("## newfe vs newfe_v2")
     lines.append("")
     km = obj.get("newfe_diff", {}).get("key_match", {})
@@ -134,6 +205,17 @@ def _to_markdown(obj: dict[str, Any]) -> str:
             lines.append(f"- `{c}`: mean={s['mean']:.6f}, std={s['std']:.6f}, nonzero_ratio={s['nonzero_ratio']:.4f}, max={s['max']:.6f}")
     else:
         lines.append("- no target_* columns found")
+    lines.append("")
+    lines.append("## LINCS Signal")
+    lines.append("")
+    ls = obj.get("lincs_signal", {}).get("summary", {})
+    if ls:
+        for c, s in ls.items():
+            lines.append(
+                f"- `{c}`: mean={s['mean']:.6f}, std={s['std']:.6f}, nunique={s['nunique']}, nonzero_ratio={s['nonzero_ratio']:.4f}, max={s['max']:.6f}"
+            )
+    else:
+        lines.append("- no lincs_* columns found")
     lines.append("")
     return "\n".join(lines)
 
@@ -175,7 +257,9 @@ def main() -> None:
             dfs["pair_features_newfe_v2"],
         ),
         "target_signal": _target_signal_report(dfs["pair_target_features"]),
+        "lincs_signal": _lincs_signal_report(dfs["pair_lincs_features"]),
     }
+    report["signal_gate"] = _signal_pass_fail(report["target_signal"], report["lincs_signal"])
 
     out_json = run_dir / args.out_json
     out_md = run_dir / args.out_md
