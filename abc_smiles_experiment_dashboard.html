@@ -194,10 +194,10 @@
       <ul>
         <li><strong>RMSE</strong>: 큰 오차에 더 민감(outlier penalty). 모델의 “크게 틀리는 케이스”를 보려는 안정성 지표로 사용.</li>
         <li><strong>MAE</strong>: 평균 절대 오차. 평균적으로 얼마나 틀리는지 보는 실제 예측 정확도 지표.</li>
-        <li><strong>R² (결정계수)</strong>: 전체 분산 설명력. noisy bio 데이터에서는 높게 안 나올 수 있어 절대 기준보다 상대 비교로 본다.</li>
-        <li><strong>Spearman</strong>: 정답 순위와 예측 순위의 상관. drug repurposing에서는 랭킹 품질 때문에 핵심 지표.</li>
-        <li><strong>NDCG@K</strong>: 상위 K 순위 품질을 할인 누적 이득으로 평가. 상위 후보 정렬 품질을 정량화.</li>
-        <li><strong>Hit@K</strong>: 상위 K 안에 “관심 후보(활성/상위 타깃)”가 들어갔는지 비율로 평가.</li>
+        <li><strong>R² (결정계수)</strong>: 전체 분산 설명력. noisy bio 데이터에서는 잘 안 올라갈 수 있어서 “절대값”보다 모델 간 상대 비교용.</li>
+        <li><strong>Spearman</strong>: 정답 순위와 예측 순위의 상관. drug repurposing에서는 “Top 후보 랭킹이 맞았는지”를 보는 <strong>핵심 지표</strong>.</li>
+        <li><strong>NDCG@20</strong>: 상위 20개 랭킹의 품질 지표. <strong>위에 있을수록 가중치를 더 주는</strong> 방식이라, 정답 후보를 1~5위 근처에 얼마나 잘 올려놓는지 본다.</li>
+        <li><strong>Hit@20</strong>: 상위 20개 안에 “진짜 좋은 약(또는 활성 표지)”이 <strong>몇 개나 들어왔는지 / 20으로 나눈 비율</strong>. 예: 0.25면 상위 20개 중 5개가 진짜 좋은 후보.</li>
         <li>값 범위는 <code>-1 ~ 1</code>:
           <ul>
             <li><code>+1</code>: 순위 완전 일치 (가장 이상적)</li>

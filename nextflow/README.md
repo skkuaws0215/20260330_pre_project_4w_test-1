@@ -99,6 +99,50 @@ nextflow run nextflow/main.nf -profile awsbatch `
   --run_id "20260330_batch_reg_main"
 ```
 
+## 신규 FE v2 (20260331) - 3개 + target
+
+스크립트: `nextflow/scripts/build_pair_features_newfe_v2.py`
+
+생성 FE:
+
+1. sample-level pathway feature
+2. drug-level chemistry feature (Morgan + RDKit descriptor)
+3. pair-level LINCS interaction feature
+4. pair-level target interaction feature (v2 추가)
+
+실행 예시:
+
+```powershell
+python nextflow/scripts/build_pair_features_newfe_v2.py `
+  --run-id "20260331" `
+  --pairs-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/input/20260330_bridge_v1/labels.parquet" `
+  --sample-expression-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/input/20260330_bridge_v1/sample_features.parquet" `
+  --drug-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/input/20260330_bridge_v1/drug_features.parquet" `
+  --lincs-drug-signature-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/input/20260330_bridge_v1/drug_features.parquet" `
+  --drug-target-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/input/20260331/drug_target_map.parquet" `
+  --pathway-gmt "nextflow/refs/hallmark.gmt" `
+  --high-z-threshold 1.0 `
+  --low-z-threshold -1.0 `
+  --out-dir "results/features_nextflow_team4/fe_re_batch_runs/20260331"
+```
+
+출력 파일:
+
+- `sample_pathway_features.parquet`
+- `drug_chem_features.parquet`
+- `pair_lincs_features.parquet`
+- `pair_target_features.parquet`
+- `pair_features_newfe.parquet` (신규 3개)
+- `pair_features_newfe_v2.parquet` (신규 3개 + target)
+- `feature_manifest.json`
+
+중요:
+
+- `feature_manifest.json`에 target high/low 기준을 기록한다.
+  - 예: `high_gene_rule = zscore >= 1.0`, `low_gene_rule = zscore <= -1.0`
+- overlap은 count + ratio를 모두 생성한다.
+- pathway relevance는 mean + hit_count를 모두 생성한다.
+
 ## 지금 바로 할 일 (Batch 본 실행)
 
 현재 구성 기준(예시):

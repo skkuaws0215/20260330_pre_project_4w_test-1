@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New FE Quality Dashboard · 20260331</title>
+  <style>
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b1020; color: #e6edf7; }
+    .hero { padding: 42px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); background: linear-gradient(120deg, #131a2f, #1d2948); }
+    .hero h1 { margin: 0 0 8px; font-size: 1.9rem; }
+    .hero p { margin: 0; color: #aab8d0; }
+    .badge { display: inline-block; margin-top: 12px; padding: 5px 10px; border: 1px solid #6ea8fe; border-radius: 999px; color: #9bc2ff; font-size: 0.82rem; }
+    .container { max-width: 1120px; margin: 0 auto; padding: 22px; }
+    section { margin: 18px 0; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; background: rgba(255,255,255,0.02); }
+    h2 { margin: 0 0 12px; font-size: 1.2rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.92rem; }
+    th { background: rgba(110,168,254,0.13); color: #cfe2ff; }
+    .ok { color: #42d59f; font-weight: 600; }
+    .warn { color: #f7c266; font-weight: 600; }
+    .bad { color: #f2a7a7; font-weight: 600; }
+    code { background: rgba(255,255,255,0.08); border-radius: 6px; padding: 2px 6px; }
+    details { margin-top: 12px; border: 1px dashed rgba(155,194,255,0.45); border-radius: 10px; padding: 10px 12px; background: rgba(110,168,254,0.08); }
+    details summary { cursor: pointer; color: #c6dcff; font-weight: 600; }
+    .muted { color: #9fb0ca; font-size: 0.92rem; }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>New FE Quality Dashboard</h1>
+    <p>run_id <code>20260331</code> 기준 신규 FE(3개 + target) 품질 점검 결과.</p>
+    <div class="badge">Snapshot · 20260331</div>
+  </div>
+
+  <div class="container">
+    <section>
+      <h2>1) 파일 구조/크기 체크</h2>
+      <table>
+        <tr><th>파일</th><th>Rows</th><th>Cols</th><th>Duplicate Keys</th><th>해석</th></tr>
+        <tr><td><code>sample_pathway_features.parquet</code></td><td>53</td><td>1</td><td>0</td><td class="warn">pathway score 미주입 상태</td></tr>
+        <tr><td><code>drug_chem_features.parquet</code></td><td>601</td><td>2059</td><td>0</td><td class="ok">실제 feature signal 존재</td></tr>
+        <tr><td><code>pair_lincs_features.parquet</code></td><td>25575</td><td>7</td><td>0</td><td class="bad">proxy 입력으로 상수화</td></tr>
+        <tr><td><code>pair_target_features.parquet</code></td><td>25575</td><td>12</td><td>0</td><td class="bad">symbol 체계 mismatch 영향</td></tr>
+        <tr><td><code>pair_features_newfe.parquet</code></td><td>25575</td><td>2065</td><td>0</td><td class="ok">신규 3개 baseline 결합</td></tr>
+        <tr><td><code>pair_features_newfe_v2.parquet</code></td><td>25575</td><td>2075</td><td>0</td><td class="warn">target 컬럼 추가(값은 약함)</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>2) newfe vs newfe_v2 차이</h2>
+      <p class="muted">key 정합: both=25575 / left_only=0 / right_only=0</p>
+      <table>
+        <tr><th>newfe_v2에만 있는 컬럼</th></tr>
+        <tr><td><code>target_expr_mean</code>, <code>target_expr_std</code>, <code>target_gene_count</code>, <code>target_gene_coverage_ratio</code>, <code>target_overlap_count</code>, <code>target_overlap_ratio</code>, <code>target_overlap_down_count</code>, <code>target_overlap_down_ratio</code>, <code>target_pathway_hit_count</code>, <code>target_pathway_score_mean</code></td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>3) 핵심 품질 지표</h2>
+      <table>
+        <tr><th>체크 항목</th><th>값</th><th>판정</th></tr>
+        <tr><td>pair_target zero ratio (대부분)</td><td>1.000</td><td class="bad">signal 미활성</td></tr>
+        <tr><td><code>target_gene_count</code> non-zero ratio</td><td>0.320</td><td class="warn">매핑 일부 성공</td></tr>
+        <tr><td>pair_lincs constant-like ratio</td><td>1.000</td><td class="bad">proxy 상수 입력 영향</td></tr>
+        <tr><td>drug_chem zero-variance numeric cols</td><td>434</td><td class="warn">sparse/상수 컬럼 존재</td></tr>
+      </table>
+
+      <details>
+        <summary>주석 보기: 현재 결과 해석 (중요)</summary>
+        <ul>
+          <li>이번 런은 <strong>파이프라인 구조/출력 계약 검증(v1)</strong>은 완료됐다.</li>
+          <li><code>drug_chem_features</code>, <code>pair_features_newfe</code>는 현재도 비교 가치가 있다.</li>
+          <li><code>pair_lincs_features</code>는 BRD→canonical_drug_id 매핑 전이라 상수화되어 있다.</li>
+          <li><code>pair_target_features</code>는 UniProt↔gene symbol(또는 entrez) 정규화 전이라 overlap/expr/pathway 값이 거의 0이다.</li>
+        </ul>
+      </details>
+    </section>
+
+    <section>
+      <h2>4) 다음 단계 (v2 신호 활성화)</h2>
+      <ol>
+        <li>LINCS 매핑 정규화: <code>sig_id(BRD) → canonical_drug_id</code></li>
+        <li>Target 매핑 정규화: <code>UniProt → gene symbol(or entrez)</code></li>
+        <li>동일 run 규칙으로 재실행: <code>fe_re_batch_runs/20260331/</code> 하위 <code>final/</code> 재생성</li>
+      </ol>
+    </section>
+  </div>
+</body>
+</html>
