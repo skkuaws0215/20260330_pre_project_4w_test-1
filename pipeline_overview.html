@@ -725,7 +725,7 @@ aws s3 sync results/ml_models/ s3://drug-discovery-joe-raw-data-team4/results/ml
 <div class="tw"><table>
 <tr><th>항목</th><th>상태</th><th>비고</th></tr>
 <tr><td>A/B/C old baseline</td><td>Completed</td><td>세 실험의 수치가 사실상 동일 (numeric-only 경로)</td></tr>
-<tr><td>C new (SMILES on)</td><td>진행 중</td><td>LGBM/XGB/ElasticNet 완료, RF 학습 중</td></tr>
+<tr><td>C new (SMILES on)</td><td>3/4 Completed, RF Stopped</td><td>LGBM/XGB/ElasticNet 완료. RF는 고차원+SMILES 해시에서 수 시간 소요로 파일럿 비용·시간 대비 비합리적이라 중단.</td></tr>
 <tr><td>결과 대시보드</td><td><a href="./abc_smiles_experiment_dashboard.html">abc_smiles_experiment_dashboard.html</a></td><td>지표/잡 상태/실험 조건 요약</td></tr>
 </table></div>
 <p class="ref">참고: 현재 new-C는 SMILES hash 인코딩 기반이며, RDKit descriptor/fingerprint 버전은 후속 실험으로 분리.</p>

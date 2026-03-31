@@ -23,12 +23,17 @@
   th { color: #c1d6ff; background: rgba(110,168,254,0.12); }
   .ok { color: #44d8a0; font-weight: 600; }
   .warn { color: #f7c266; font-weight: 600; }
+  .stop { color: #f1a3a3; font-weight: 600; }
   .chip { display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 0.78rem; border: 1px solid rgba(255,255,255,0.2); }
   .chip-on { color: #44d8a0; border-color: #44d8a0; }
   .chip-off { color: #b6c4da; border-color: #7f90aa; }
   .delta-good { color: #44d8a0; }
   .delta-up { color: #f7c266; }
   code { background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 6px; }
+  details.note { margin-top: 14px; border: 1px dashed rgba(155,194,255,0.45); border-radius: 10px; padding: 10px 12px; background: rgba(110,168,254,0.08); }
+  details.note summary { cursor: pointer; color: #c6dcff; font-weight: 600; }
+  details.note p, details.note li { color: #b8c9e5; font-size: 0.9rem; }
+  details.note ul { margin: 8px 0 0 18px; }
   footer { color: #90a1bc; text-align: center; padding: 30px; font-size: 0.82rem; }
 </style>
 </head>
@@ -49,6 +54,27 @@
       <div class="stat"><div class="num">+2,048</div><div>SMILES hash features</div></div>
       <div class="stat"><div class="num">19,965</div><div>new-C total features</div></div>
     </div>
+
+    <details class="note">
+      <summary>주석 보기: A/B/C 실험군 정의</summary>
+      <ul>
+        <li><strong>A (엄격 baseline)</strong>: 결측치 30% 기준으로 정제된 피처셋. 안정성/보수적 기준 비교군.</li>
+        <li><strong>B (느슨 baseline)</strong>: 결측치 70% 기준 피처셋 + 문자열 SMILES 제외. 기존 파일럿 기준선.</li>
+        <li><strong>C old</strong>: 결측치 70% 원본 기반이지만 기존 학습 코드가 numeric-only라 A/B와 사실상 동일 경로.</li>
+        <li><strong>C new (SMILES on)</strong>: C 데이터에서 <code>drug__smiles</code>를 해시 피처로 수치화해 기존 numeric 피처에 결합.</li>
+      </ul>
+    </details>
+
+    <details class="note">
+      <summary>주석 보기: FE 생성 기준(무엇을 기준으로 만들었는지)</summary>
+      <ul>
+        <li>공통 키: <code>sample_id</code> + <code>canonical_drug_id</code> 기준으로 labels/features를 inner join.</li>
+        <li>결측 기준: A는 30% 임계, B/C는 70% 임계로 피처 보존 폭을 다르게 설계.</li>
+        <li>학습 입력 기본: numeric dtype만 사용, 결측은 <code>0.0</code>으로 대체.</li>
+        <li>SMILES 확장(new-C): char n-gram(2~4) + hashing(2048)으로 고정 차원 sparse 벡터 생성.</li>
+        <li>실행 안정성 기준: 팀 버킷 원본을 SageMaker 버킷으로 AES256 스테이징 후 학습(권한/KMS 실패 재발 방지).</li>
+      </ul>
+    </details>
   </section>
 
   <section>
@@ -58,13 +84,22 @@
       <tr><td>B baseline</td><td><code>team4-b-pilot-1774916870</code></td><td class="ok">Completed (4/4)</td><td>KMS/Data 권한 이슈 우회 후 성공</td></tr>
       <tr><td>A baseline</td><td><code>team4-a-pilot-1774919993</code></td><td class="ok">Completed (4/4)</td><td>baseline 비교군</td></tr>
       <tr><td>C old baseline</td><td><code>team4-c-pilot-1774920000</code></td><td class="ok">Completed (4/4)</td><td>SMILES 미사용 경로와 동일 성능</td></tr>
-      <tr><td>C new (SMILES on)</td><td><code>team4-c-pilot-1774921192</code></td><td class="warn">3/4 Completed, RF InProgress</td><td>LGBM/XGB/EN 완료, RF 대기</td></tr>
+      <tr><td>C new (SMILES on)</td><td><code>team4-c-pilot-1774921192</code></td><td class="ok">3/4 Completed</td><td>LGBM / XGBoost / ElasticNet 완료</td></tr>
+      <tr><td>C new — RF only</td><td><code>team4-c-pilot-rf-1774921192</code></td><td class="stop">Stopped</td><td>고차원 + SMILES 해시 조합에서 RF 학습이 비정상적으로 길어짐(수 시간 수준). 파일럿·회고 논의상 RF는 여기서 종료.</td></tr>
     </table>
+    <details class="note">
+      <summary>주석 보기: C new에서 RF만 멈춘 이유 (운영 판단)</summary>
+      <ul>
+        <li>동일 인스턴스·동일 데이터에서 LGBM/XGB/EN은 수십 분대에 끝났고, RF만 수 시간 단위로 늘어짐.</li>
+        <li>RandomForest는 고차원 sparse 입력에서 트리 분할 비용이 커지는 경우가 많아, 파일럿 4모델 비교 목적과 맞지 않음.</li>
+        <li>따라서 <strong>성능 지표는 3모델로 확정</strong>하고, RF는 재시도 없이 종료. 향후 필요 시 <code>n_estimators</code>·<code>max_depth</code> 경량화 또는 RF 제외 루틴으로 정리하는 것이 합리적.</li>
+      </ul>
+    </details>
   </section>
 
   <section>
     <h2>3) 검증 성능 비교 (valid)</h2>
-    <p class="muted">A/B/C(old)는 동일 수치. 아래는 baseline(C old) 대비 C new(smiles on) 변화량.</p>
+    <p class="muted">A/B/C(old)는 동일 수치. 아래는 baseline(C old) 대비 C new(smiles on) 변화량. RandomForest는 학습 시간이 비현실적으로 길어 파일럿에서 중단(Stopped)되어 지표는 비워 둠(—).</p>
     <table>
       <tr>
         <th>Model</th>
@@ -105,13 +140,51 @@
       <tr>
         <td>RandomForest <span class="chip chip-on">smiles on</span></td>
         <td>2.492776</td>
-        <td class="warn">Pending</td>
-        <td class="warn">Pending</td>
+        <td class="stop" title="학습 중단">—</td>
+        <td class="stop" title="학습 미완료">—</td>
         <td>0.255272</td>
-        <td class="warn">Pending</td>
-        <td class="warn">Pending</td>
+        <td class="stop" title="학습 미완료">—</td>
+        <td class="stop" title="학습 미완료">—</td>
       </tr>
     </table>
+
+    <details class="note">
+      <summary>주석 보기: 표의 각 컬럼이 의미하는 것</summary>
+      <ul>
+        <li><strong>Model</strong>: 비교 대상 알고리즘. 같은 split에서 서로 성능 비교.</li>
+        <li><strong>Baseline RMSE</strong>: 기존 C old(실질 numeric-only) 검증 RMSE. 낮을수록 오차가 작음.</li>
+        <li><strong>New-C RMSE</strong>: SMILES on(C new) 검증 RMSE. baseline보다 낮아지면 개선.</li>
+        <li><strong>Delta (RMSE)</strong>: <code>New-C - Baseline</code>. 음수면 개선, 양수면 악화.</li>
+        <li><strong>Baseline/New-C Spearman</strong>: 예측값-정답의 순위 일치도(단조 관계). 높을수록 순위가 잘 맞음.</li>
+        <li><strong>Delta (Spearman)</strong>: <code>New-C - Baseline</code>. 양수면 개선.</li>
+      </ul>
+    </details>
+
+    <details class="note">
+      <summary>주석 보기: 숫자값 해석 가이드 (특히 Spearman)</summary>
+      <ul>
+        <li><strong>RMSE/MAE</strong>는 절대오차 크기 지표라서 <strong>작을수록 좋다</strong>. 단위는 타깃(<code>label_regression</code>) 단위와 동일.</li>
+        <li><strong>Spearman</strong>은 “정답 순위와 예측 순위가 얼마나 같은 방향으로 움직이는지”를 본다.</li>
+        <li>값 범위는 <code>-1 ~ 1</code>:
+          <ul>
+            <li><code>+1</code>: 순위 완전 일치 (가장 이상적)</li>
+            <li><code>0</code> 부근: 순위 관계 거의 없음</li>
+            <li><code>-1</code>: 순위 완전 반대</li>
+          </ul>
+        </li>
+        <li>실무 해석(경험적 가이드):
+          <ul>
+            <li><code>0.00 ~ 0.10</code>: 거의 무관</li>
+            <li><code>0.10 ~ 0.30</code>: 약한 상관</li>
+            <li><code>0.30 ~ 0.50</code>: 중간 상관</li>
+            <li><code>0.50 ~ 0.70</code>: 강한 상관</li>
+            <li><code>0.70+</code>: 매우 강한 상관</li>
+          </ul>
+        </li>
+        <li>왜 Spearman이 중요한가? 약물 스크리닝/랭킹 문제에서는 “절대값 예측 오차”뿐 아니라 <strong>우선순위를 맞추는 능력</strong>이 핵심이기 때문. Spearman이 높으면 Top 후보 선별의 신뢰도가 올라간다.</li>
+        <li>이번 결과에서는 baseline 약 <code>0.25</code>(약한 상관)에서 new-C 약 <code>0.48</code>(중간 상관)로 올라, 랭킹 품질이 의미 있게 개선된 것으로 해석 가능.</li>
+      </ul>
+    </details>
   </section>
 
   <section>
