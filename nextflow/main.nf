@@ -2,6 +2,8 @@ nextflow.enable.dsl = 2
 
 params.run_id = params.run_id ?: new Date().format("yyyyMMdd_HHmm")
 params.out_prefix = params.out_prefix ?: "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4"
+// FE parquet 산출(miss* 배치 등)은 루트에 흩어지지 않도록 한 단계 아래로 둔다.
+params.fe_output_subdir = params.fe_output_subdir ?: "fe_batch_runs"
 
 /*
  Required input parquet URIs (shared team results/ as read-only input):
@@ -38,7 +40,7 @@ workflow {
 process BUILD_FEATURE_TABLE {
     tag "${params.run_id}"
 
-    publishDir "${params.out_prefix}/${params.run_id}", mode: "copy", overwrite: true
+    publishDir "${params.out_prefix}/${params.fe_output_subdir}/${params.run_id}", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_feature_uri), val(drug_feature_uri), val(label_uri), path(build_script)

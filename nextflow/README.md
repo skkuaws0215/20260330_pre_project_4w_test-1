@@ -11,7 +11,7 @@
 
 - **사용(입력):** **raw에서 만든** `s3://…/results/<소스>/…` 전처리 parquet·산출물. (저장소 `README.md` Parquet 표 참고.)
 - **사용하지 않음(입력):** **`ml_ready/`** — 통합 테이블은 Nextflow가 `results/` 소스들을 조인·FE 하여 새로 만든다.
-- **산출:** `results/features_nextflow_team4/` (권장: `run_id` 하위폴더).
+- **산출:** `results/features_nextflow_team4/` — `main.nf`는 FE parquet를 **`fe_batch_runs/<run_id>/`** 에 두도록 기본 설정(`publishDir`). 그 외 `input/`, `work/` 등은 기존처럼 prefix 루트에 둔다.
 
 ## S3 산출 위치
 
