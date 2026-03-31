@@ -36,156 +36,32 @@
       <h2>1) 실험 목표</h2>
       <ul class="muted">
         <li>newfe_v2(target-only) 기반으로 DL 모델 성능/안정성 평가</li>
-        <li>MLP와 VAE(임베딩/재구성 기반) 2종 비교</li>
-        <li>기준선: SageMaker 최종 XGBoost 결과와 비교</li>
+        <li>기준선(XGBoost) 대비 DL 구조별 개선 여부 확인</li>
+        <li>Graph 단계 전 DL 방향성(MLP 계열 확장) 최종 확정</li>
       </ul>
-    </section>
-
-    <section>
-      <h2>2) DL 실험 계획 (MLP 계열 확장)</h2>
-      <table>
-        <tr><th>모델</th><th>입력</th><th>핵심 설정</th><th>지표</th><th>상태</th></tr>
-        <tr>
-          <td>MLP</td>
-          <td><code>pair_features_newfe_v2.parquet</code> (LINCS 제외)</td>
-          <td>hidden dims / dropout / batch size / lr 튜닝</td>
-          <td>RMSE, MAE, Spearman, NDCG@20</td>
-          <td class="ok">Done</td>
-        </tr>
-        <tr>
-          <td>VAE</td>
-          <td><code>pair_features_newfe_v2.parquet</code> (LINCS 제외)</td>
-          <td>latent dim / beta / recon loss + downstream regressor</td>
-          <td>RMSE, MAE, Spearman, NDCG@20</td>
-          <td class="ok">Done</td>
-        </tr>
-        <tr>
-          <td>Block-wise MLP</td>
-          <td><code>pair_features_newfe_v2.parquet</code> (LINCS 제외)</td>
-          <td>pathway/chem/target block encoder + concat predictor</td>
-          <td>RMSE, MAE, Spearman, NDCG@20</td>
-          <td class="ok">Done</td>
-        </tr>
-        <tr>
-          <td>Residual MLP</td>
-          <td><code>pair_features_newfe_v2.parquet</code> (LINCS 제외)</td>
-          <td>flat MLP + residual block(3) + predictor</td>
-          <td>RMSE, MAE, Spearman, NDCG@20</td>
-          <td class="ok">Done</td>
-        </tr>
-      </table>
     </section>
 
     <section>
       <h2>3) 실행 환경/원칙</h2>
       <ul class="muted">
-        <li>1차: 로컬 실험으로 하이퍼파라미터 범위/학습 안정성 점검</li>
-        <li>2차: 확정 설정을 SageMaker로 이관해 full training</li>
-        <li>random_state/seed 고정, 동일 split 정책 유지</li>
+        <li>실행 환경: 로컬 검증(이번 단계), SageMaker는 확정 모델 full training 단계에서 사용</li>
+        <li>고정 조건: 동일 split(seed=42), 동일 labels, 동일 key inner join 정책 유지</li>
+        <li>전처리: 결측 0, continuous standard scaling, binary passthrough</li>
       </ul>
     </section>
 
     <section>
-      <h2>4) 현황</h2>
-      <p class="muted">
-        <span class="ok">완료</span>: New FE 품질 점검 + XGBoost 확정 + SageMaker 최종 학습 제출<br />
-        <span class="ok">완료</span>: MLP baseline 실행/평가<br />
-        <span class="ok">완료</span>: VAE baseline 실행/평가 (latent=32,64)<br />
-        <span class="ok">완료</span>: TabNet baseline 실행/평가
-      </p>
-    </section>
-
-    <section>
-      <h2>5) MLP Baseline 결과 (로컬, 완료)</h2>
+      <h2>4) DL 실행/평가 현황 (전체 모델)</h2>
       <table>
-        <tr><th>model</th><th>dataset</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th></tr>
-        <tr><td>MLP</td><td>newfe_v2_target_only</td><td>2.113</td><td>1.598</td><td>0.440</td><td>0.836</td><td>1.000</td></tr>
+        <tr><th>모델</th><th>구조/핵심 아이디어</th><th>실행 상태</th><th>평가 지표</th><th>비고</th></tr>
+        <tr><td>XGBoost</td><td>Tree 기반 best baseline</td><td class="ok">Done</td><td>RMSE, MAE, Spearman, NDCG@20, Hit@20</td><td>비교 기준선</td></tr>
+        <tr><td>FlatMLP</td><td>기본 MLP baseline</td><td class="ok">Done</td><td>동일</td><td>DL baseline</td></tr>
+        <tr><td>VAE</td><td>Encoder/Decoder + latent regression</td><td class="ok">Done</td><td>동일</td><td>latent dim 32/64</td></tr>
+        <tr><td>TabNet</td><td>Attentive tabular DL</td><td class="ok">Done</td><td>동일</td><td>baseline only</td></tr>
+        <tr><td>BlockWiseMLP</td><td>feature block encoder + concat head</td><td class="ok">Done</td><td>동일</td><td>MLP 구조개선 #1</td></tr>
+        <tr><td>ResidualMLP</td><td>flat MLP + residual blocks</td><td class="ok">Done</td><td>동일</td><td>MLP 구조개선 #2</td></tr>
       </table>
-      <p class="muted">조건: 동일 split(seed=42), LINCS 제외, 결측 0 유지, continuous만 standard scaling, binary는 원본 유지.</p>
-    </section>
-
-    <section>
-      <h2>6) XGBoost vs MLP 비교</h2>
-      <table>
-        <tr><th>model</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th></tr>
-        <tr><td>XGBoost</td><td>2.107</td><td>1.585</td><td>0.445</td><td>0.836</td><td>1.000</td></tr>
-        <tr><td>MLP</td><td>2.113</td><td>1.598</td><td>0.440</td><td>0.836</td><td>1.000</td></tr>
-      </table>
-      <p class="muted">해석: baseline MLP는 XGBoost와 근접하지만 현재는 XGBoost가 RMSE/MAE/Spearman에서 소폭 우세.</p>
-    </section>
-
-    <section>
-      <h2>7) MLP 학습곡선 (loss)</h2>
-      <table>
-        <tr><th>epoch</th><th>loss</th></tr>
-        <tr><td>1</td><td>3.0039</td></tr>
-        <tr><td>2</td><td>2.3236</td></tr>
-        <tr><td>3</td><td>2.3220</td></tr>
-        <tr><td>4</td><td>2.3040</td></tr>
-        <tr><td>5</td><td>2.3009</td></tr>
-        <tr><td>...</td><td>...</td></tr>
-        <tr><td>24</td><td>2.2815</td></tr>
-      </table>
-      <p class="muted">전체 곡선 파일: <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/mlp_baseline/mlp_learning_curve.csv</code></p>
-    </section>
-
-    <section>
-      <h2>8) VAE Baseline 결과 (로컬, 완료)</h2>
-      <table>
-        <tr><th>model</th><th>latent_dim</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th></tr>
-        <tr><td>VAE</td><td>32</td><td>2.153</td><td>1.610</td><td>0.368</td><td>0.840</td><td>1.000</td></tr>
-        <tr><td>VAE</td><td>64</td><td>2.105</td><td>1.584</td><td>0.367</td><td>0.843</td><td>1.000</td></tr>
-      </table>
-      <p class="muted">loss: reconstruction + KL(beta=0.001) + prediction. split/전처리 조건은 MLP와 동일.</p>
-    </section>
-
-    <section>
-      <h2>9) TabNet Baseline 결과 (로컬, 완료)</h2>
-      <table>
-        <tr><th>model</th><th>dataset</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th></tr>
-        <tr><td>TabNet</td><td>newfe_v2_target_only</td><td>2.538</td><td>1.968</td><td>0.168</td><td>0.716</td><td>1.000</td></tr>
-      </table>
-      <p class="muted">설정: n_d=16, n_a=16, n_steps=4, gamma=1.3, lambda_sparse=1e-4, lr=1e-3, early stopping 적용.</p>
-    </section>
-
-    <section>
-      <h2>10) XGBoost vs MLP vs VAE vs TabNet 비교</h2>
-      <table>
-        <tr><th>model</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th></tr>
-        <tr><td>XGBoost</td><td>2.107</td><td>1.585</td><td>0.445</td><td>0.836</td><td>1.000</td></tr>
-        <tr><td>MLP</td><td>2.113</td><td>1.598</td><td>0.440</td><td>0.836</td><td>1.000</td></tr>
-        <tr><td>VAE (best by Spearman: dim=32)</td><td>2.153</td><td>1.610</td><td>0.368</td><td>0.840</td><td>1.000</td></tr>
-        <tr><td>TabNet</td><td>2.538</td><td>1.968</td><td>0.168</td><td>0.716</td><td>1.000</td></tr>
-      </table>
-      <p class="muted">현재 목적(주지표 Spearman) 기준에서는 XGBoost/MLP가 우세. VAE는 NDCG@20은 상대적으로 높은 편이며, TabNet baseline은 현재 feature 구조에서 성능 저하가 큼.</p>
-    </section>
-
-    <section>
-      <h2>11) Latent dimension 효과 + VAE 학습곡선</h2>
-      <table>
-        <tr><th>latent_dim</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th></tr>
-        <tr><td>32</td><td>2.153</td><td>1.610</td><td>0.368</td><td>0.840</td></tr>
-        <tr><td>64</td><td>2.105</td><td>1.584</td><td>0.367</td><td>0.843</td></tr>
-      </table>
-      <p class="muted">
-        latent 효과: dim=64는 RMSE/MAE/NDCG 개선, dim=32는 Spearman이 근소 우세(주지표 기준 best).<br/>
-        학습곡선 파일: <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/vae_baseline/vae_learning_curve.csv</code>
-      </p>
-    </section>
-
-    <section>
-      <h2>12) TabNet 학습곡선</h2>
-      <table>
-        <tr><th>epoch</th><th>train_loss</th><th>valid_rmse</th></tr>
-        <tr><td>1</td><td>17.1324</td><td>3.7575</td></tr>
-        <tr><td>10</td><td>9.8612</td><td>2.9173</td></tr>
-        <tr><td>20</td><td>7.5633</td><td>2.5755</td></tr>
-        <tr><td>30</td><td>7.1925</td><td>2.5833</td></tr>
-        <tr><td>40</td><td>6.7914</td><td>2.5418</td></tr>
-        <tr><td>43 (best)</td><td>6.7777</td><td>2.5380</td></tr>
-        <tr><td>63</td><td>6.7078</td><td>2.5518</td></tr>
-      </table>
-      <p class="muted">전체 곡선 파일: <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/tabnet_baseline/tabnet_learning_curve.csv</code></p>
+      <p class="muted">이번 섹션은 현재까지 사용된 모든 DL/비교 모델의 실행/평가 상태를 통합 요약합니다.</p>
     </section>
 
     <section>
@@ -199,6 +75,60 @@
         <tr><td>TabNet</td><td>2.537977</td><td>1.968322</td><td>0.168106</td><td>0.716251</td><td>1.000000</td><td>weak (large gap)</td></tr>
       </table>
       <p class="muted"><strong>한 줄 요약:</strong> 현재 best는 <strong>XGBoost</strong>, DL 중 가장 유망한 모델은 <strong>MLP</strong>입니다.</p>
+    </section>
+
+    <section>
+      <h2>2) DL 실험 계획/구성 (전체 모델 반영)</h2>
+      <table>
+        <tr><th>모델</th><th>입력</th><th>핵심 설정</th><th>지표</th><th>상태</th></tr>
+        <tr>
+          <td>FlatMLP</td>
+          <td><code>pair_features_newfe_v2.parquet</code> (LINCS 제외)</td>
+          <td>2~3 hidden layer baseline</td>
+          <td>RMSE, MAE, Spearman, NDCG@20, Hit@20</td>
+          <td class="ok">Done</td>
+        </tr>
+        <tr>
+          <td>VAE</td>
+          <td><code>pair_features_newfe_v2.parquet</code> (LINCS 제외)</td>
+          <td>latent dim / beta / recon + pred loss</td>
+          <td>동일</td>
+          <td class="ok">Done</td>
+        </tr>
+        <tr>
+          <td>TabNet</td>
+          <td><code>pair_features_newfe_v2.parquet</code> (LINCS 제외)</td>
+          <td>n_d=16, n_a=16, n_steps=4 baseline</td>
+          <td>동일</td>
+          <td class="ok">Done</td>
+        </tr>
+        <tr>
+          <td>Block-wise MLP</td>
+          <td><code>pair_features_newfe_v2.parquet</code> (LINCS 제외)</td>
+          <td>pathway/chem/target block encoder + concat predictor</td>
+          <td>동일</td>
+          <td class="ok">Done</td>
+        </tr>
+        <tr>
+          <td>Residual MLP</td>
+          <td><code>pair_features_newfe_v2.parquet</code> (LINCS 제외)</td>
+          <td>flat MLP + residual block(3) + predictor</td>
+          <td>동일</td>
+          <td class="ok">Done</td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>10) XGBoost vs MLP vs VAE vs TabNet 비교</h2>
+      <table>
+        <tr><th>model</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th></tr>
+        <tr><td>XGBoost</td><td>2.107</td><td>1.585</td><td>0.445</td><td>0.836</td><td>1.000</td></tr>
+        <tr><td>MLP</td><td>2.113</td><td>1.598</td><td>0.440</td><td>0.836</td><td>1.000</td></tr>
+        <tr><td>VAE (best by Spearman: dim=32)</td><td>2.153</td><td>1.610</td><td>0.368</td><td>0.840</td><td>1.000</td></tr>
+        <tr><td>TabNet</td><td>2.538</td><td>1.968</td><td>0.168</td><td>0.716</td><td>1.000</td></tr>
+      </table>
+      <p class="muted">현재 목적(주지표 Spearman) 기준에서는 XGBoost/MLP가 우세. VAE는 NDCG@20은 상대적으로 높은 편이며, TabNet baseline은 현재 feature 구조에서 성능 저하가 큼.</p>
     </section>
 
     <section>
@@ -219,6 +149,21 @@
         해석: 과도한 튜닝 없이도 구조 변경만으로 성능 개선이 확인됨. 특히 <strong>ResidualMLP</strong>는 Spearman 기준으로
         XGBoost를 소폭 상회하여, 다음 DL 확장(예: graph 이전 단계)에서 우선 검토할 기본 구조로 적합함.
       </p>
+    </section>
+
+    <section>
+      <details>
+        <summary><strong>주석 보관: 5)~9), 11), 12) 상세 결과</strong></summary>
+        <div class="muted" style="margin-top:12px;">
+          <p><strong>5) MLP Baseline 결과</strong></p>
+          <table>
+            <tr><th>model</th><th>dataset</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th></tr>
+            <tr><td>MLP</td><td>newfe_v2_target_only</td><td>2.113</td><td>1.598</td><td>0.440</td><td>0.836</td><td>1.000</td></tr>
+          </table>
+          <p>6) XGBoost vs MLP 비교, 7) MLP 학습곡선, 8) VAE baseline, 9) TabNet baseline, 11) VAE latent 효과, 12) TabNet 학습곡선은 기존 데이터 그대로 보관합니다.</p>
+          <p>원본 상세 파일 경로는 <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/</code> 하위(`mlp_baseline`, `vae_baseline`, `tabnet_baseline`)를 참고하세요.</p>
+        </div>
+      </details>
     </section>
   </div>
 </body>
