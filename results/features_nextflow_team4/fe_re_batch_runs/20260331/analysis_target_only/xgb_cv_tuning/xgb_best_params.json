@@ -1,0 +1,13 @@
+{
+  "best_params": {
+    "max_depth": 4,
+    "learning_rate": 0.05,
+    "n_estimators": 400,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8
+  },
+  "best_cv_spearman_mean": 0.430751,
+  "best_cv_spearman_std": 0.008949,
+  "best_cv_ndcg20_mean": 0.839619,
+  "best_cv_ndcg20_std": 0.004367
+}

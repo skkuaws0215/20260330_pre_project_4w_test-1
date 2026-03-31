@@ -10,6 +10,8 @@
     .hero h1 { margin: 0 0 8px; font-size: 1.9rem; }
     .hero p { margin: 0; color: #aab8d0; }
     .badge { display: inline-block; margin-top: 12px; padding: 5px 10px; border: 1px solid #6ea8fe; border-radius: 999px; color: #9bc2ff; font-size: 0.82rem; }
+    .nav-btn { display: inline-block; margin-top: 12px; margin-left: 8px; border: 1px solid #42d59f; border-radius: 999px; color: #42d59f; padding: 5px 10px; font-size: 0.82rem; text-decoration: none; }
+    .nav-btn:hover { background: rgba(66,213,159,0.12); }
     .container { max-width: 1120px; margin: 0 auto; padding: 22px; }
     section { margin: 18px 0; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; background: rgba(255,255,255,0.02); }
     h2 { margin: 0 0 12px; font-size: 1.2rem; }
@@ -19,10 +21,20 @@
     .ok { color: #42d59f; font-weight: 600; }
     .warn { color: #f7c266; font-weight: 600; }
     .bad { color: #f2a7a7; font-weight: 600; }
+    .best { color: #ff6b6b; font-weight: 700; }
     code { background: rgba(255,255,255,0.08); border-radius: 6px; padding: 2px 6px; }
     details { margin-top: 12px; border: 1px dashed rgba(155,194,255,0.45); border-radius: 10px; padding: 10px 12px; background: rgba(110,168,254,0.08); }
     details summary { cursor: pointer; color: #c6dcff; font-weight: 600; }
     .muted { color: #9fb0ca; font-size: 0.92rem; }
+    .qc-wrap { border: 1px solid rgba(155,194,255,0.5); border-radius: 10px; padding: 10px 12px; background: rgba(110,168,254,0.06); }
+    .qc-wrap > summary { font-size: 1.05rem; }
+    .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; margin-top: 10px; }
+    .chart-card { border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; background: rgba(255,255,255,0.02); }
+    .chart-card h3 { margin: 0 0 6px; font-size: 0.98rem; }
+    .bar-row { display: grid; grid-template-columns: 90px 1fr 56px; gap: 8px; align-items: center; margin: 6px 0; font-size: 0.86rem; }
+    .bar-track { width: 100%; height: 10px; border-radius: 999px; background: rgba(255,255,255,0.12); overflow: hidden; }
+    .bar-fill { height: 100%; background: linear-gradient(90deg, #6ea8fe, #ff6b6b); }
+    .svg-wrap { width: 100%; overflow-x: auto; }
   </style>
 </head>
 <body>
@@ -30,84 +42,86 @@
     <h1>New FE Quality Dashboard</h1>
     <p>run_id <code>20260331</code> 기준 신규 FE(3개 + target) 품질 점검 결과.</p>
     <div class="badge">Snapshot · 20260331</div>
+    <a class="nav-btn" href="abc_smiles_experiment_dashboard.html">Go to ABC + SMILES Pilot Dashboard</a>
   </div>
 
   <div class="container">
     <section>
-      <h2>1) 파일 구조/크기 체크</h2>
-      <table>
-        <tr><th>파일</th><th>Rows</th><th>Cols</th><th>Duplicate Keys</th><th>해석</th></tr>
-        <tr><td><code>sample_pathway_features.parquet</code></td><td>53</td><td>1</td><td>0</td><td class="warn">pathway score 미주입 상태</td></tr>
-        <tr><td><code>drug_chem_features.parquet</code></td><td>601</td><td>2059</td><td>0</td><td class="ok">실제 feature signal 존재</td></tr>
-        <tr><td><code>pair_lincs_features.parquet</code></td><td>25575</td><td>7</td><td>0</td><td class="bad">proxy 입력으로 상수화</td></tr>
-        <tr><td><code>pair_target_features.parquet</code></td><td>25575</td><td>12</td><td>0</td><td class="bad">symbol 체계 mismatch 영향</td></tr>
-        <tr><td><code>pair_features_newfe.parquet</code></td><td>25575</td><td>2065</td><td>0</td><td class="ok">신규 3개 baseline 결합</td></tr>
-        <tr><td><code>pair_features_newfe_v2.parquet</code></td><td>25575</td><td>2075</td><td>0</td><td class="warn">target 컬럼 추가(값은 약함)</td></tr>
-      </table>
-    </section>
-
-    <section>
-      <h2>2) newfe vs newfe_v2 차이</h2>
-      <p class="muted">key 정합: both=25575 / left_only=0 / right_only=0</p>
-      <table>
-        <tr><th>newfe_v2에만 있는 컬럼</th></tr>
-        <tr><td><code>target_expr_mean</code>, <code>target_expr_std</code>, <code>target_gene_count</code>, <code>target_gene_coverage_ratio</code>, <code>target_overlap_count</code>, <code>target_overlap_ratio</code>, <code>target_overlap_down_count</code>, <code>target_overlap_down_ratio</code>, <code>target_pathway_hit_count</code>, <code>target_pathway_score_mean</code></td></tr>
-      </table>
-    </section>
-
-    <section>
-      <h2>3) 핵심 품질 지표</h2>
-      <table>
-        <tr><th>체크 항목</th><th>값</th><th>판정</th></tr>
-        <tr><td>pair_target zero ratio (대부분)</td><td>1.000</td><td class="bad">signal 미활성</td></tr>
-        <tr><td><code>target_gene_count</code> non-zero ratio</td><td>0.320</td><td class="warn">매핑 일부 성공</td></tr>
-        <tr><td>pair_lincs constant-like ratio</td><td>1.000</td><td class="bad">proxy 상수 입력 영향</td></tr>
-        <tr><td>drug_chem zero-variance numeric cols</td><td>434</td><td class="warn">sparse/상수 컬럼 존재</td></tr>
-      </table>
-
+      <h2>1) 20260331 FE + 실험 조건 요약</h2>
+      <p class="muted">
+        이 블록은 <strong>새로 생성된 FE(20260331)</strong>를 사용해 <strong>3개 모델(LGBM/XGBoost/ElasticNet)</strong>을
+        동일 split에서 비교한 <strong>Training/Validation 결과</strong>를 요약한다.
+      </p>
+      <ul class="muted">
+        <li><strong>실험셋:</strong> <code>baseline</code> (ABC B-features), <code>newfe</code>, <code>newfe_v2(target-only)</code></li>
+        <li><strong>키 단위:</strong> <code>sample_id</code> + <code>canonical_drug_id</code> pair (공통 교집합 14,497 rows)</li>
+        <li><strong>split:</strong> <code>seed=42</code>, <code>test_size=0.2</code> (train/valid 공통)</li>
+        <li><strong>LINCS:</strong> <code>normalize_lincs_mapping.py</code> 미실행 + 모든 LINCS 컬럼은 학습 입력에서 제외</li>
+        <li><strong>실행 환경:</strong> <strong>로컬 PC에서 Python 스크립트로 실행</strong> (SageMaker Training Job 아님)</li>
+        <li><strong>계획:</strong> 본 결과를 기반으로 <strong>추후 CV/튜닝도 우선 로컬에서</strong> 돌린 뒤, 선택된 best 구성부터 SageMaker로 확장</li>
+      </ul>
       <details>
-        <summary>주석 보기: 현재 결과 해석 (중요)</summary>
+        <summary>주석 보기: baseline/newfe/newfe_v2가 각각 무엇인지</summary>
         <ul>
-          <li>이번 런은 <strong>파이프라인 구조/출력 계약 검증(v1)</strong>은 완료됐다.</li>
-          <li><code>drug_chem_features</code>, <code>pair_features_newfe</code>는 현재도 비교 가치가 있다.</li>
-          <li><code>pair_lincs_features</code>는 BRD→canonical_drug_id 매핑 전이라 상수화되어 있다.</li>
-          <li><code>pair_target_features</code>는 UniProt↔gene symbol(또는 entrez) 정규화 전이라 overlap/expr/pathway 값이 거의 0이다.</li>
+          <li><strong>baseline (ABC B-features)</strong>: <code>abc_inputs/20260330_abc_v1/B/features_b.parquet</code> 사용. miss70 기반 FE에서 문자열 SMILES 계열을 제외한 baseline 입력셋.</li>
+          <li><strong>newfe</strong>: <code>fe_re_batch_runs/20260331/final/pair_features_newfe.parquet</code>. 신규 FE 묶음(chem/pathway/pair)으로 만든 테이블.</li>
+          <li><strong>newfe_v2 (target-only)</strong>: <code>pair_features_newfe_v2.parquet</code>. newfe에 target 관련 feature를 추가한 버전. 이번 실험에서는 LINCS는 제외하고 target 추가 효과만 본다.</li>
         </ul>
+      </details>
+      <details>
+        <summary>주석 보기: 행/열/feature 수 및 공통키·결측 기준</summary>
+        <table>
+          <tr><th>dataset</th><th>원본 rows</th><th>학습 사용 rows (공통키)</th><th>학습 feature cols</th><th>비고</th></tr>
+          <tr><td>baseline</td><td>14,497</td><td>14,497</td><td>17,918</td><td>B-features baseline</td></tr>
+          <tr><td>newfe</td><td>25,575</td><td>14,497</td><td>2,058</td><td>pair_features_newfe에서 LINCS 제외 후 사용</td></tr>
+          <tr><td>newfe_v2</td><td>25,575</td><td>14,497</td><td>2,068</td><td>newfe_v2에서 LINCS 제외 + target 추가 10개 반영</td></tr>
+        </table>
+        <ul>
+          <li><strong>공통키</strong>: <code>sample_id</code> + <code>canonical_drug_id</code>를 기준으로 3개 실험셋 교집합만 사용.</li>
+          <li><strong>결측 처리</strong>: 학습 직전 numeric 변환 후 결측은 <code>0.0</code>으로 채움.</li>
+          <li><strong>결측 임계/필터 기준(생성 단계)</strong>: baseline B는 miss70 기준 FE 산출을 기반으로 구성. newfe/newfe_v2는 20260331 FE 산출 규칙을 따름.</li>
+          <li><strong>이번 비교 목적</strong>: FE 생성 스펙 차이를 고정 split에서 비교하고, target feature 추가 효과를 분리 평가.</li>
+        </ul>
+      </details>
+      <details>
+        <summary>주석 보기: newfe_v2 임계값/결측 요약</summary>
+        <table>
+          <tr><th>항목</th><th>값</th><th>기준/해석</th></tr>
+          <tr><td>rows / cols / numeric cols</td><td>25,575 / 2,075 / 2,073</td><td>newfe_v2 전체 스키마 기준</td></tr>
+          <tr><td>null ratio 상위 컬럼</td><td>없음 (top_null_ratio 비어 있음)</td><td>QC 리포트 기준 결측은 실질적으로 정리된 상태</td></tr>
+          <tr><td>duplicate key rows</td><td>0</td><td><code>sample_id + canonical_drug_id</code> 중복 없음</td></tr>
+          <tr><td>target gate</td><td class="ok">PASS (alive_cols=6)</td><td>규칙: <code>nonzero_ratio >= 0.05</code> 인 target 컬럼 3개 이상</td></tr>
+          <tr><td>lincs gate</td><td class="bad">FAIL</td><td>규칙: 모든 lincs 컬럼에서 <code>std &gt; 0</code> and <code>nunique &gt; 1</code></td></tr>
+          <tr><td>overall gate</td><td class="bad">FAIL</td><td>target PASS + lincs FAIL 상태</td></tr>
+        </table>
+        <p class="muted" style="margin-top:8px;">target nonzero_ratio 주요 값: <code>target_gene_count=0.3200</code>, <code>target_gene_coverage_ratio=0.3200</code>, <code>target_expr_mean=0.1791</code>, <code>target_expr_std=0.1148</code>, <code>target_overlap_down_count=0.0536</code>, <code>target_overlap_down_ratio=0.0536</code>.</p>
       </details>
     </section>
 
     <section>
-      <h2>4) 다음 단계 (v2 신호 활성화)</h2>
-      <ol>
-        <li>LINCS 매핑 정규화: <code>sig_id(BRD) → canonical_drug_id</code></li>
-        <li>Target 매핑 정규화: <code>UniProt → gene symbol(or entrez)</code></li>
-        <li>동일 run 규칙으로 재실행: <code>fe_re_batch_runs/20260331/</code> 하위 <code>final/</code> 재생성</li>
-      </ol>
-    </section>
-
-    <section>
-      <h2>5) Target-only 모델 비교 (동일 split, LINCS 제외)</h2>
-      <p class="muted">고정 조건: <code>seed=42</code>, <code>test_size=0.2</code>, 공통 key 교집합(14497 rows), <code>normalize_lincs_mapping.py</code> 미실행, LINCS 컬럼 제외.</p>
+      <h2>2) Target-only 모델 비교 (동일 split, LINCS 제외)</h2>
+      <p class="muted">아래 표는 각 모델별로 <code>baseline</code> → <code>newfe</code> → <code>newfe_v2(target-only)</code> 로 갈수록 어떻게 변하는지를 한 번에 보여준다.</p>
+      <p class="muted"><strong>주의:</strong> 이 표는 절대값 성능 비교표라서 delta 컬럼을 넣지 않았다. delta는 아래 <code>3) Delta 요약</code>에서만 별도로 본다.</p>
       <table>
         <tr><th>model</th><th>dataset</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th></tr>
         <tr><td>LGBM</td><td>baseline</td><td>2.483</td><td>1.927</td><td>0.264</td><td>0.736</td><td>1.000</td></tr>
         <tr><td>LGBM</td><td>newfe</td><td>2.119</td><td>1.596</td><td>0.441</td><td>0.832</td><td>1.000</td></tr>
-        <tr><td>LGBM</td><td>newfe_v2</td><td>2.111</td><td>1.593</td><td>0.441</td><td>0.836</td><td>1.000</td></tr>
+        <tr><td>LGBM</td><td>newfe_v2</td><td class="best">2.111</td><td class="best">1.593</td><td class="best">0.441</td><td class="best">0.836</td><td>1.000</td></tr>
         <tr><td>XGBoost</td><td>baseline</td><td>2.485</td><td>1.930</td><td>0.263</td><td>0.736</td><td>1.000</td></tr>
         <tr><td>XGBoost</td><td>newfe</td><td>2.119</td><td>1.595</td><td>0.437</td><td>0.831</td><td>1.000</td></tr>
-        <tr><td>XGBoost</td><td>newfe_v2</td><td>2.107</td><td>1.585</td><td>0.445</td><td>0.836</td><td>1.000</td></tr>
+        <tr><td>XGBoost</td><td>newfe_v2</td><td class="best">2.107</td><td class="best">1.585</td><td class="best">0.445</td><td class="best">0.836</td><td>1.000</td></tr>
         <tr><td>ElasticNet</td><td>baseline</td><td>2.491</td><td>1.938</td><td>0.262</td><td>0.728</td><td>1.000</td></tr>
         <tr><td>ElasticNet</td><td>newfe</td><td>2.126</td><td>1.611</td><td>0.435</td><td>0.830</td><td>1.000</td></tr>
-        <tr><td>ElasticNet</td><td>newfe_v2</td><td>2.123</td><td>1.607</td><td>0.437</td><td>0.832</td><td>1.000</td></tr>
+        <tr><td>ElasticNet</td><td>newfe_v2</td><td class="best">2.123</td><td class="best">1.607</td><td class="best">0.437</td><td class="best">0.832</td><td>1.000</td></tr>
       </table>
     </section>
 
     <section>
-      <h2>6) Delta 요약 (필수)</h2>
+      <h2>3) Delta 요약 (필수)</h2>
       <table>
         <tr><th>model</th><th>delta_newfe_spear</th><th>delta_target_spear</th><th>delta_target_ndcg</th></tr>
         <tr><td>LightGBM</td><td>0.177</td><td>0.001</td><td>0.004</td></tr>
-        <tr><td>XGBoost</td><td>0.174</td><td>0.009</td><td>0.005</td></tr>
+        <tr><td>XGBoost</td><td class="best">0.174</td><td class="best">0.009</td><td class="best">0.005</td></tr>
         <tr><td>ElasticNet</td><td>0.173</td><td>0.002</td><td>0.002</td></tr>
       </table>
       <details>
@@ -118,6 +132,328 @@
           <li><strong>target 추가 효과 최대</strong>: XGBoost (delta_target_spear, delta_target_ndcg 모두 최대).</li>
           <li><strong>현재 best 후보</strong>: XGBoost + newfe_v2 (target-only).</li>
         </ul>
+      </details>
+    </section>
+
+    <section>
+      <h2>4) 지표 정의 / 실험 해석 기준</h2>
+      <details>
+        <summary>주석 보기: 각 지표의 의미</summary>
+        <ul>
+          <li><strong>RMSE</strong>: Root Mean Squared Error, 큰 오차(outlier)에 더 민감한 오차 지표. 낮을수록 좋다.</li>
+          <li><strong>MAE</strong>: Mean Absolute Error, 평균 절대 오차. 평균적으로 얼마나 틀리는지 보는 지표. 낮을수록 좋다.</li>
+          <li><strong>Spearman</strong>: 순위 상관계수. 정답 순위와 예측 순위가 얼마나 일치하는지(단조 관계)를 본다. 높을수록 좋다.</li>
+          <li><strong>NDCG@20</strong>: 상위 20개 랭킹 품질 지표. 중요한 정답을 상위에 올려둘수록 값이 커진다. 높을수록 좋다.</li>
+          <li><strong>Hit@20</strong>: 상위 20개 안에 좋은 후보가 포함될 확률(비율). 높을수록 좋다.</li>
+          <li><strong>Delta</strong>: 전 단계 대비 변화량. 본 대시보드에서는 Spearman/NDCG 기준으로 +가 개선.</li>
+          <li><strong class="best">붉은색(bold)</strong>: 각 비교에서 best 또는 강조 포인트를 표시한다.</li>
+        </ul>
+      </details>
+    </section>
+
+    <section>
+      <h2>5) 실험 설정 요약</h2>
+      <table>
+        <tr><th>항목</th><th>값</th></tr>
+        <tr><td>실험 목적</td><td>LINCS 제외 상태에서 <code>baseline</code> vs <code>newfe</code> vs <code>newfe_v2(target-only)</code> 비교</td></tr>
+        <tr><td>모델</td><td>LightGBM, XGBoost, ElasticNet</td></tr>
+        <tr><td>split</td><td><code>seed=42</code>, <code>test_size=0.2</code> (동일 split 고정)</td></tr>
+        <tr><td>학습 키</td><td><code>sample_id</code> + <code>canonical_drug_id</code> 교집합 14,497 rows</td></tr>
+        <tr><td>결측 처리(학습 직전)</td><td>numeric 변환 후 결측 <code>0.0</code> 채움</td></tr>
+        <tr><td>실행 환경</td><td>로컬 Python 실행 (SageMaker training job 아님)</td></tr>
+        <tr><td>운영 계획</td><td>CV/튜닝까지 로컬 우선 검증 후, 이후 단계부터 SageMaker 확장</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>6) FE 진행·결과 수치 (결측·분산·판단 기준)</h2>
+      <table>
+        <tr><th>FE 산출</th><th>rows</th><th>cols</th><th>numeric cols</th><th>핵심 해석</th></tr>
+        <tr><td><code>pair_features_newfe</code></td><td>25,575</td><td>2,065</td><td>2,063</td><td>신규 FE baseline</td></tr>
+        <tr><td><code>pair_features_newfe_v2</code></td><td>25,575</td><td>2,075</td><td>2,073</td><td>target feature 10개 추가</td></tr>
+      </table>
+      <ul class="muted">
+        <li><strong>결측(null) 기준</strong>: QC 리포트의 <code>top_null_ratio</code>에서 newfe/newfe_v2는 비어 있음(실질 결측 정리 상태).</li>
+        <li><strong>분산/신호 기준</strong>: target gate는 <code>nonzero_ratio >= 0.05</code> 컬럼 3개 이상이면 PASS.</li>
+        <li><strong>판단 기준</strong>: target gate PASS + lincs gate FAIL이므로 현재는 target-only 실험을 진행하고, LINCS는 매핑 정규화 후 재평가.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>7) 로컬 XGBoost CV + 간단 튜닝 (newfe_v2 target-only)</h2>
+      <p class="muted">SageMaker 이전 단계로, 로컬에서 5-fold CV와 20-trial 튜닝을 수행한 결과다. primary metric은 Spearman, secondary metric은 NDCG@20.</p>
+      <table>
+        <tr><th>STEP</th><th>설정</th><th>Spearman (mean ± std)</th><th>NDCG@20 (mean ± std)</th><th>비고</th></tr>
+        <tr>
+          <td>CV (base)</td>
+          <td><code>max_depth=6</code>, <code>lr=0.05</code>, <code>n_estimators=200</code>, <code>subsample=0.8</code>, <code>colsample=0.8</code></td>
+          <td>0.429879 ± 0.010246</td>
+          <td>0.839007 ± 0.004049</td>
+          <td>5-fold KFold (shuffle=True, random_state=42)</td>
+        </tr>
+        <tr>
+          <td>Tuning (best)</td>
+          <td><code>max_depth=4</code>, <code>lr=0.05</code>, <code>n_estimators=400</code>, <code>subsample=0.8</code>, <code>colsample=0.8</code></td>
+          <td class="best">0.430751 ± 0.008949</td>
+          <td class="best">0.839619 ± 0.004367</td>
+          <td>20 trials 중 최고 조합</td>
+        </tr>
+      </table>
+      <p class="muted" style="margin-top:8px;">
+        위 설정의 의미: <strong>모델</strong>은 XGBoost 회귀, <strong>입력</strong>은 <code>pair_features_newfe_v2.parquet</code>,
+        <strong>조건</strong>은 LINCS feature 제외 + <code>sample_id, canonical_drug_id</code> 기준 labels inner join, <strong>seed</strong>는 42로 고정했다.
+        CV는 <strong>5-fold KFold(shuffle=True, random_state=42)</strong>로 fold별 RMSE/MAE/Spearman/NDCG@20을 계산했고,
+        튜닝은 지정된 탐색공간에서 <strong>랜덤 20 trial</strong>을 돌려 <strong>Spearman (우선) / NDCG@20 (보조)</strong> 기준으로 best 조합을 선택했다.
+      </p>
+      <details>
+        <summary>주석 보기: 파라미터/숫자 의미 풀이</summary>
+        <ul>
+          <li><strong>max_depth</strong>: 트리 최대 깊이. 값이 클수록 복잡한 패턴을 학습하지만 과적합 위험도 커진다. 이번 best는 <code>4</code>(상대적으로 얕은 트리).</li>
+          <li><strong>lr (learning_rate)</strong>: 학습률. 한 번에 얼마나 크게 업데이트할지 정한다. 작을수록 안정적이지만 많은 트리가 필요하다. best는 <code>0.05</code>.</li>
+          <li><strong>n_estimators</strong>: 트리 개수. 많을수록 표현력은 늘지만 시간/과적합 부담이 커진다. best는 <code>400</code>.</li>
+          <li><strong>subsample</strong>: 각 트리를 학습할 때 사용하는 행 샘플 비율. <code>0.8</code>은 매 트리마다 데이터 80%만 사용해 분산/과적합을 줄이는 설정.</li>
+          <li><strong>colsample (colsample_bytree)</strong>: 각 트리에서 사용하는 피처 비율. <code>0.8</code>은 매 트리마다 피처 80%만 사용해 일반화를 돕는 설정.</li>
+          <li><strong>5-fold KFold</strong>: 데이터를 5개 조각으로 나눠 4개로 학습+1개로 검증을 5번 반복. 한 번의 split 우연성보다 안정적인 평균 성능을 본다.</li>
+          <li><strong>20 trials 중 최고 조합</strong>: 탐색공간에서 20개 파라미터 조합을 시험해, Spearman 평균이 가장 높고(동률 시 NDCG@20 보조) 좋은 조합을 선택했다는 뜻.</li>
+          <li><strong>mean ± std</strong>: 5개 fold 성능의 평균과 표준편차. mean이 좋고 std가 작을수록 성능이 높고 fold 간 변동이 적다고 해석한다.</li>
+        </ul>
+      </details>
+      <details>
+        <summary>주석 보기: fold별 결과 / baseline 대비 요약</summary>
+        <table>
+          <tr><th>fold</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th></tr>
+          <tr><td>1</td><td>2.105361</td><td>1.584677</td><td>0.444327</td><td>0.836150</td></tr>
+          <tr><td>2</td><td>2.078578</td><td>1.562912</td><td>0.429724</td><td>0.844797</td></tr>
+          <tr><td>3</td><td>2.198165</td><td>1.625120</td><td>0.436594</td><td>0.842887</td></tr>
+          <tr><td>4</td><td>2.138465</td><td>1.593079</td><td>0.424397</td><td>0.834591</td></tr>
+          <tr><td>5</td><td>2.151054</td><td>1.615110</td><td>0.414354</td><td>0.836613</td></tr>
+        </table>
+        <ul>
+          <li>기존 holdout 기준 XGBoost baseline Spearman(0.263278) 대비, 이번 newfe_v2 CV Spearman mean은 크게 높은 구간이다.</li>
+          <li>base CV 대비 tuning best는 Spearman/NDCG 모두 소폭 개선되어 안정적으로 우세하다.</li>
+          <li>다음 단계 권장: best params 고정 후 동일 조건으로 최종 학습/저장, 이후 SageMaker 이관.</li>
+        </ul>
+      </details>
+    </section>
+
+    <section>
+      <h2>8) 그래프 기반 정밀 분석 (클릭형 주석)</h2>
+      <p class="muted">아래 항목은 다른 실험/데이터셋에도 재사용 가능한 그래프 분석 프레임이다. 현재 페이지에서는 해석 기준을 먼저 고정하고, 이후 산출물과 함께 그래프를 채운다.</p>
+
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>8-1) CV fold 분포 (Spearman)</h3>
+          <p class="muted">fold별 Spearman 값(0.414~0.444) 분포</p>
+          <div class="svg-wrap">
+            <svg viewBox="0 0 360 140" width="100%" height="140" role="img" aria-label="CV Spearman box style">
+              <line x1="20" y1="110" x2="340" y2="110" stroke="#5f6f8a" stroke-width="1"/>
+              <line x1="40" y1="20" x2="40" y2="110" stroke="#5f6f8a" stroke-width="1"/>
+              <line x1="80" y1="90" x2="80" y2="30" stroke="#9bc2ff" stroke-width="2"/>
+              <rect x="70" y="55" width="20" height="25" fill="#6ea8fe66" stroke="#9bc2ff"/>
+              <line x1="70" y1="66" x2="90" y2="66" stroke="#ff6b6b" stroke-width="2"/>
+              <text x="98" y="34" fill="#9fb0ca" font-size="10">max 0.444</text>
+              <text x="98" y="69" fill="#9fb0ca" font-size="10">median ~0.430</text>
+              <text x="98" y="92" fill="#9fb0ca" font-size="10">min 0.414</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>8-2) 튜닝 결과 scatter (trial vs Spearman)</h3>
+          <p class="muted">20 trials 중 Spearman 상위 구간 시각화 (color=max_depth, size=n_estimators)</p>
+          <div class="svg-wrap">
+            <svg viewBox="0 0 360 140" width="100%" height="140" role="img" aria-label="Tuning scatter">
+              <line x1="24" y1="110" x2="340" y2="110" stroke="#5f6f8a" stroke-width="1"/>
+              <line x1="24" y1="20" x2="24" y2="110" stroke="#5f6f8a" stroke-width="1"/>
+              <circle cx="45" cy="42" r="6" fill="#56b6ff" fill-opacity="0.9"/>
+              <circle cx="62" cy="46" r="4" fill="#56b6ff" fill-opacity="0.85"/>
+              <circle cx="78" cy="47" r="4" fill="#56b6ff" fill-opacity="0.85"/>
+              <circle cx="95" cy="49" r="6" fill="#7cd992" fill-opacity="0.85"/>
+              <circle cx="112" cy="53" r="4" fill="#7cd992" fill-opacity="0.85"/>
+              <circle cx="130" cy="54" r="4" fill="#7cd992" fill-opacity="0.85"/>
+              <circle cx="146" cy="55" r="6" fill="#ff8c8c" fill-opacity="0.85"/>
+              <circle cx="162" cy="58" r="4" fill="#ff8c8c" fill-opacity="0.85"/>
+              <circle cx="178" cy="59" r="4" fill="#ff8c8c" fill-opacity="0.85"/>
+              <circle cx="195" cy="62" r="6" fill="#ff8c8c" fill-opacity="0.7"/>
+              <text x="206" y="42" fill="#ff6b6b" font-size="10">best=0.4308 (d=4, est=400)</text>
+              <text x="206" y="57" fill="#56b6ff" font-size="10">blue: depth=4</text>
+              <text x="206" y="68" fill="#7cd992" font-size="10">green: depth=6</text>
+              <text x="206" y="79" fill="#ff8c8c" font-size="10">red: depth=8</text>
+              <text x="206" y="92" fill="#9fb0ca" font-size="10">size: 400 trees (big), 200 trees (small)</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>8-3) 학습곡선(대체): n_estimators 영향</h3>
+          <p class="muted">튜닝 결과에서 트리 수 증가 시 Spearman이 <strong>slight improvement</strong>를 보임</p>
+          <div class="bar-row"><span>200 trees</span><div class="bar-track"><div class="bar-fill" style="width:99.7%"></div></div><span>0.429</span></div>
+          <div class="bar-row"><span>400 trees</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span>0.431</span></div>
+        </div>
+
+        <div class="chart-card">
+          <h3>8-4) 잔차 요약(대체): fold별 RMSE</h3>
+          <p class="muted">잔차 플롯 대신 fold 오차 수준 시각화</p>
+          <div class="bar-row"><span>fold1</span><div class="bar-track"><div class="bar-fill" style="width:95.8%"></div></div><span>2.105</span></div>
+          <div class="bar-row"><span>fold2</span><div class="bar-track"><div class="bar-fill" style="width:94.6%"></div></div><span>2.079</span></div>
+          <div class="bar-row"><span>fold3</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span>2.198</span></div>
+          <div class="bar-row"><span>fold4</span><div class="bar-track"><div class="bar-fill" style="width:97.3%"></div></div><span>2.138</span></div>
+          <div class="bar-row"><span>fold5</span><div class="bar-track"><div class="bar-fill" style="width:97.9%"></div></div><span>2.151</span></div>
+        </div>
+
+        <div class="chart-card">
+          <h3>8-5) Feature group composition (count)</h3>
+          <p class="muted">기여도(importance)가 아니라 feature 개수 구성. chem가 많고 target은 적지만 성능 영향은 별도 해석 필요.</p>
+          <div class="bar-row"><span>chem</span><div class="bar-track"><div class="bar-fill" style="width:99.0%"></div></div><span>2058</span></div>
+          <div class="bar-row"><span>target</span><div class="bar-track"><div class="bar-fill" style="width:0.5%"></div></div><span>10</span></div>
+          <div class="bar-row"><span>other pair</span><div class="bar-track"><div class="bar-fill" style="width:0.2%"></div></div><span>5</span></div>
+        </div>
+
+        <div class="chart-card">
+          <h3>8-6) SHAP summary (top 20 feature)</h3>
+          <p class="muted">best params XGBoost + 샘플 2000개 기준 SHAP mean(|value|) top feature. 상위일수록 예측에 미치는 평균 영향이 큼.</p>
+          <div class="bar-row"><span>drug_has_valid_smiles</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span>0.102</span></div>
+          <div class="bar-row"><span>drug_desc_heavy_atoms</span><div class="bar-track"><div class="bar-fill" style="width:90.8%"></div></div><span>0.092</span></div>
+          <div class="bar-row"><span>drug_desc_mol_wt</span><div class="bar-track"><div class="bar-fill" style="width:85.8%"></div></div><span>0.087</span></div>
+          <div class="bar-row"><span>target_gene_coverage_ratio</span><div class="bar-track"><div class="bar-fill" style="width:77.0%"></div></div><span>0.078</span></div>
+          <div class="bar-row"><span>drug_morgan_0878</span><div class="bar-track"><div class="bar-fill" style="width:70.5%"></div></div><span>0.072</span></div>
+          <div class="bar-row"><span>drug_morgan_1292</span><div class="bar-track"><div class="bar-fill" style="width:69.1%"></div></div><span>0.070</span></div>
+          <div class="bar-row"><span>target_expr_mean</span><div class="bar-track"><div class="bar-fill" style="width:65.5%"></div></div><span>0.067</span></div>
+          <div class="bar-row"><span>target_gene_count</span><div class="bar-track"><div class="bar-fill" style="width:57.9%"></div></div><span>0.059</span></div>
+          <div class="bar-row"><span>drug_morgan_0314</span><div class="bar-track"><div class="bar-fill" style="width:53.4%"></div></div><span>0.054</span></div>
+          <div class="bar-row"><span>target_overlap_down_ratio</span><div class="bar-track"><div class="bar-fill" style="width:51.2%"></div></div><span>0.052</span></div>
+          <p class="muted">상위 20개 전체는 <code>xgb_shap_top20.csv</code> 참고.</p>
+        </div>
+      </div>
+
+      <details>
+        <summary>CV fold 분포 (box/violin): 안정성(분산) 확인</summary>
+        <ul>
+          <li><strong>목적</strong>: fold별 성능의 퍼짐(분산)을 확인해 모델이 split 변화에 얼마나 안정적인지 평가.</li>
+          <li><strong>입력</strong>: <code>xgb_cv_fold_metrics.csv</code>의 RMSE/MAE/Spearman/NDCG@20 (5 folds).</li>
+          <li><strong>해석</strong>: 중앙값이 좋고 IQR/whisker가 좁을수록 안정적. 특정 fold만 크게 벗어나면 데이터 편향 또는 취약 구간 가능성.</li>
+          <li><strong>현재 상태</strong>: fold 원본 지표 확보 완료, 박스/바이올린 그래프는 후속 렌더링 단계에서 추가.</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>튜닝 결과 scatter/heatmap: 파라미터-성능 관계 확인</summary>
+        <ul>
+          <li><strong>목적</strong>: 어떤 하이퍼파라미터 조합이 Spearman/NDCG에 유리한지 시각적으로 탐색.</li>
+          <li><strong>입력</strong>: <code>xgb_tuning_results.csv</code> (20 trials).</li>
+          <li><strong>권장 축</strong>: x축 <code>max_depth</code>/<code>n_estimators</code>, y축 <code>cv_spearman_mean</code>, 색상 <code>cv_ndcg20_mean</code>.</li>
+          <li><strong>해석</strong>: 고성능 점이 특정 구간에 모이면 그 파라미터 영역을 다음 탐색의 중심으로 설정.</li>
+          <li><strong>현재 상태</strong>: trial 결과 확보 완료, scatter/heatmap은 후속 렌더링 단계에서 추가.</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>학습곡선 (learning curve): 데이터량/트리 수에 따른 추세</summary>
+        <ul>
+          <li><strong>목적</strong>: 데이터량 또는 트리 수 증가 시 성능 개선이 포화되는지 확인.</li>
+          <li><strong>권장 구성</strong>: train fraction(20/40/60/80/100%) 또는 <code>n_estimators</code> 단계별 CV 성능 곡선.</li>
+          <li><strong>해석</strong>: train/valid 간격이 크면 과적합, 둘 다 낮으면 언더피팅 가능성. 포화 지점 이후는 비용 대비 이득이 작음.</li>
+          <li><strong>현재 상태</strong>: 본 런은 고정 데이터량 CV+튜닝 중심이라 learning curve는 후속 실험으로 분리.</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>잔차 플롯 (residual): 오차 편향/이상치 확인</summary>
+        <ul>
+          <li><strong>목적</strong>: 예측값 구간별로 오차가 체계적으로 치우치는지(편향) 확인.</li>
+          <li><strong>권장 플롯</strong>: <code>y_pred vs residual</code>, 또는 <code>y_true vs residual</code> 산점도.</li>
+          <li><strong>해석</strong>: 잔차가 0 주변에 랜덤하게 퍼지면 양호. 특정 구간에서 한쪽으로 치우치면 보정 필요.</li>
+          <li><strong>현재 상태</strong>: CV fold 예측 저장을 추가하면 즉시 생성 가능(현재는 metric 집계 중심).</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>Feature importance/bar plot: 기여 피처 확인</summary>
+        <ul>
+          <li><strong>목적</strong>: 어떤 피처 그룹(예: target, chem)이 성능 개선에 기여했는지 설명 가능성 확보.</li>
+          <li><strong>권장 산출</strong>: XGBoost gain 기반 top-N bar plot + 그룹별 누적 기여율.</li>
+          <li><strong>해석</strong>: 상위 피처가 한 그룹에 과도하게 몰리면 데이터 의존 편향 가능성을 점검.</li>
+          <li><strong>현재 상태</strong>: best params 확정됨. 최종 학습 모델에서 importance 추출해 시각화 가능.</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>SHAP 숫자(예: 0.102, 0.092)가 의미하는 것</summary>
+        <ul>
+          <li><strong>값 정의</strong>: 각 숫자는 <code>mean(|SHAP value|)</code>로, 해당 피처가 예측값을 평균적으로 얼마나 크게 움직였는지(절대 영향 크기)를 뜻한다.</li>
+          <li><strong>단위</strong>: 타깃(<code>label_regression</code>)과 같은 단위. 예: <code>0.102</code>는 평균적으로 예측값을 약 0.102 규모로 이동시켰다는 의미.</li>
+          <li><strong>비교 해석</strong>: 값이 클수록 영향력이 큼. 예: <code>0.102</code>는 <code>0.052</code>보다 약 2배 큰 영향.</li>
+          <li><strong>주의점</strong>: SHAP는 영향 크기 해석 도구이지 인과관계 증명이 아님. 현재 값은 샘플 2000개 기준이라 샘플링에 따라 소폭 변할 수 있음.</li>
+          <li><strong>부호 정보</strong>: 현재 표는 절대값 평균이라 방향(+/-)은 보이지 않음. 방향 해석은 dependence/force plot에서 확인.</li>
+        </ul>
+      </details>
+    </section>
+
+    <section>
+      <details class="qc-wrap">
+        <summary>9) QC: 20260331 FE 품질 점검 (클릭해서 펼치기/접기)</summary>
+        <p class="muted">아래 1)~4)는 <strong>FE 자체 품질(QC)</strong>에 대한 내용이며, 학습·모델 비교와 분리해서 참고한다.</p>
+
+      <details>
+        <summary>1) 파일 구조/크기 체크</summary>
+        <table>
+          <tr><th>파일</th><th>Rows</th><th>Cols</th><th>Duplicate Keys</th><th>해석</th></tr>
+          <tr><td><code>sample_pathway_features.parquet</code></td><td>53</td><td>1</td><td>0</td><td class="warn">pathway score 미주입 상태</td></tr>
+          <tr><td><code>drug_chem_features.parquet</code></td><td>601</td><td>2059</td><td>0</td><td class="ok">실제 feature signal 존재</td></tr>
+          <tr><td><code>pair_lincs_features.parquet</code></td><td>25575</td><td>7</td><td>0</td><td class="bad">proxy 입력으로 상수화</td></tr>
+          <tr><td><code>pair_target_features.parquet</code></td><td>25575</td><td>12</td><td>0</td><td class="bad">symbol 체계 mismatch 영향</td></tr>
+          <tr><td><code>pair_features_newfe.parquet</code></td><td>25575</td><td>2065</td><td>0</td><td class="ok">신규 3개 baseline 결합</td></tr>
+          <tr><td><code>pair_features_newfe_v2.parquet</code></td><td>25575</td><td>2075</td><td>0</td><td class="warn">target 컬럼 추가(값은 약함)</td></tr>
+        </table>
+      </details>
+
+      <details>
+        <summary>2) newfe vs newfe_v2 차이</summary>
+        <p class="muted">key 정합: both=25575 / left_only=0 / right_only=0</p>
+        <table>
+          <tr><th>newfe_v2에만 있는 컬럼</th></tr>
+          <tr><td><code>target_expr_mean</code>, <code>target_expr_std</code>, <code>target_gene_count</code>, <code>target_gene_coverage_ratio</code>, <code>target_overlap_count</code>, <code>target_overlap_ratio</code>, <code>target_overlap_down_count</code>, <code>target_overlap_down_ratio</code>, <code>target_pathway_hit_count</code>, <code>target_pathway_score_mean</code></td></tr>
+        </table>
+      </details>
+
+      <details>
+        <summary>3) 핵심 품질 지표</summary>
+        <table>
+          <tr><th>체크 항목</th><th>값</th><th>판정</th></tr>
+          <tr><td>pair_target zero ratio (대부분)</td><td>1.000</td><td class="bad">signal 미활성</td></tr>
+          <tr><td><code>target_gene_count</code> non-zero ratio</td><td>0.320</td><td class="warn">매핑 일부 성공</td></tr>
+          <tr><td>pair_lincs constant-like ratio</td><td>1.000</td><td class="bad">proxy 상수 입력 영향</td></tr>
+          <tr><td>drug_chem zero-variance numeric cols</td><td>434</td><td class="warn">sparse/상수 컬럼 존재</td></tr>
+        </table>
+      </details>
+
+      <details>
+        <summary>4) 다음 단계 (v2 신호 활성화)</summary>
+        <ol>
+          <li>LINCS 매핑 정규화: <code>sig_id(BRD) → canonical_drug_id</code></li>
+          <li>Target 매핑 정규화: <code>UniProt → gene symbol(or entrez)</code></li>
+          <li>동일 run 규칙으로 재실행: <code>fe_re_batch_runs/20260331/</code> 하위 <code>final/</code> 재생성</li>
+        </ol>
+      </details>
+
+      <details>
+        <summary>5) 정밀 분석 프레임 (모델별 + 데이터셋별)</summary>
+        <p class="muted">아래 프레임은 다음 분석 단계에서 채울 체크리스트이며, 이번 페이지에서는 QC 주석으로 관리한다.</p>
+        <h3 style="margin-top:10px;">A. 모델별 상세 분석 체크포인트</h3>
+        <table>
+          <tr><th>Model</th><th>추가할 지표</th><th>FE 상세 설명</th><th>판단 포인트</th></tr>
+          <tr><td>LightGBM</td><td>MAE, R2, p90 abs error</td><td>importance 상위 피처, block 기여율</td><td>성능/안정성 균형</td></tr>
+          <tr><td>XGBoost</td><td>MAE, R2, p90 abs error</td><td>gain 기반 중요도, 과적합 징후</td><td>일반화/순위 품질</td></tr>
+          <tr><td>ElasticNet</td><td>MAE, R2, residual quantiles</td><td>계수 해석(양/음), 희소성</td><td>해석성/기준선</td></tr>
+        </table>
+        <h3 style="margin-top:10px;">B. 데이터셋이 결과에 미친 영향 (요청 반영)</h3>
+        <table>
+          <tr><th>비교 축</th><th>데이터셋/입력 차이</th><th>관찰 결과</th><th>추가 분석</th></tr>
+          <tr><td>baseline vs newfe</td><td>B-features vs new FE</td><td>3모델 공통 개선</td><td>개선에 기여한 FE 블록 분해</td></tr>
+          <tr><td>newfe vs newfe_v2</td><td>target 10개 추가</td><td>소폭 추가 개선</td><td>target feature 영향도 정량화</td></tr>
+          <tr><td>target-only vs future LINCS</td><td>LINCS 제외 vs 포함(예정)</td><td>현재는 target-only 우선</td><td>LINCS 매핑 복구 후 재비교</td></tr>
+        </table>
+      </details>
       </details>
     </section>
   </div>

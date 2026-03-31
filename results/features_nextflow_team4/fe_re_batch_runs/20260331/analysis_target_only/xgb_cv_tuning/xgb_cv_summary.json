@@ -1,0 +1,47 @@
+{
+  "dataset": "newfe_v2 target-only (LINCS excluded)",
+  "rows": 14497,
+  "feature_cols_used": 2068,
+  "cv_config": {
+    "n_splits": 5,
+    "shuffle": true,
+    "random_state": 42
+  },
+  "step1_cv_base_params": {
+    "max_depth": 6,
+    "learning_rate": 0.05,
+    "n_estimators": 200,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8
+  },
+  "step1_cv_summary": {
+    "RMSE_mean": 2.134325,
+    "RMSE_std": 0.04079,
+    "MAE_mean": 1.59618,
+    "MAE_std": 0.022111,
+    "Spearman_mean": 0.429879,
+    "Spearman_std": 0.010246,
+    "NDCG@20_mean": 0.839007,
+    "NDCG@20_std": 0.004049
+  },
+  "step2_trials": 20,
+  "step2_best_params": {
+    "max_depth": 4,
+    "learning_rate": 0.05,
+    "n_estimators": 400,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8
+  },
+  "step2_best_cv": {
+    "spearman_mean": 0.430751,
+    "spearman_std": 0.008949,
+    "ndcg20_mean": 0.839619,
+    "ndcg20_std": 0.004367
+  },
+  "baseline_reference": {
+    "source": "analysis_target_only/model_dataset_metrics.csv",
+    "xgboost_baseline_spearman_holdout": 0.263278,
+    "xgboost_newfe_v2_spearman_holdout": 0.445384
+  },
+  "improvement_note": "Primary selection uses CV Spearman, secondary uses CV NDCG@20. Baseline comparison uses prior holdout snapshot."
+}

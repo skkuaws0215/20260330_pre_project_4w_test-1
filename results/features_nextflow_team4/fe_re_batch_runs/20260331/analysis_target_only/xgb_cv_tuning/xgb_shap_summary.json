@@ -1,0 +1,19 @@
+{
+  "model": "XGBoost",
+  "dataset": "newfe_v2 target-only (LINCS excluded)",
+  "rows_total": 14497,
+  "feature_cols_used": 2068,
+  "shap_sample_size": 2000,
+  "best_params": {
+    "max_depth": 4,
+    "learning_rate": 0.05,
+    "n_estimators": 400,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8
+  },
+  "top1_feature": "drug_has_valid_smiles",
+  "top1_mean_abs_shap": 0.10152428,
+  "outputs": {
+    "top20_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/xgb_cv_tuning/xgb_shap_top20.csv"
+  }
+}
