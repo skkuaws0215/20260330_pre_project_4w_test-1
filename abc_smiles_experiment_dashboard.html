@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ABC + SMILES Pilot Dashboard</title>
+<title>ABC + SMILES Pilot Dashboard · 20260330_v.1</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b1020; color: #e6edf7; line-height: 1.6; }
@@ -41,12 +41,17 @@
 <div class="hero">
   <h1>ABC + SMILES Pilot Dashboard</h1>
   <p>SageMaker 병렬 4모델 실험 이력(A/B/C)과 C 재실험(SMILES feature enabled) 결과를 한 화면에서 보는 운영 대시보드.</p>
-  <div class="badge">Team4 Shared AWS · Updated 2026-03-31</div>
+  <p class="muted" style="margin-top:14px; max-width:920px; font-size:0.95rem;"><strong>대시보드 버전:</strong> 이 파일에 정리된 표·수치·잡 이력은 <code>20260330_v.1</code> 스냅샷이다. <strong>2026-03-31 이후</strong> 새 FE 산출이나 이 HTML 갱신 시 운영 태그는 <code>20260331_v.1</code>을 쓴다.</p>
+  <div style="margin-top:14px; display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+    <div class="badge">스냅샷 · 20260330_v.1</div>
+    <div class="badge">신규·갱신 태그 · 20260331_v.1</div>
+    <div class="badge">Team4 Shared AWS</div>
+  </div>
 </div>
 
 <div class="container">
   <section>
-    <h2>1) 실험 개요</h2>
+    <h2>1) 실험 개요 <span class="chip chip-off" style="font-weight:500;">20260330_v.1</span></h2>
     <p class="muted">같은 split(seed=42, test_size=0.2)에서 A/B/C를 비교. C 재실험은 <code>use_smiles=on</code>으로 SMILES를 문자 n-gram 해시(2048) 피처로 추가.</p>
     <div class="stats">
       <div class="stat"><div class="num">14,497</div><div>rows</div></div>
@@ -78,7 +83,7 @@
   </section>
 
   <section>
-    <h2>2) 학습 잡 상태</h2>
+    <h2>2) 학습 잡 상태 <span class="chip chip-off" style="font-weight:500;">20260330_v.1</span></h2>
     <table>
       <tr><th>Run</th><th>Job Prefix</th><th>Status</th><th>비고</th></tr>
       <tr><td>B baseline</td><td><code>team4-b-pilot-1774916870</code></td><td class="ok">Completed (4/4)</td><td>KMS/Data 권한 이슈 우회 후 성공</td></tr>
@@ -98,7 +103,7 @@
   </section>
 
   <section>
-    <h2>3) 검증 성능 비교 (valid)</h2>
+    <h2>3) 검증 성능 비교 (valid) <span class="chip chip-off" style="font-weight:500;">20260330_v.1</span></h2>
     <p class="muted">A/B/C(old)는 동일 수치. 아래는 baseline(C old) 대비 C new(smiles on) 변화량. RandomForest는 학습 시간이 비현실적으로 길어 파일럿에서 중단(Stopped)되어 지표는 비워 둠(—).</p>
     <table>
       <tr>
@@ -188,7 +193,7 @@
   </section>
 
   <section>
-    <h2>4) 실험 설정 요약</h2>
+    <h2>4) 실험 설정 요약 <span class="chip chip-off" style="font-weight:500;">20260330_v.1</span></h2>
     <table>
       <tr><th>항목</th><th>값</th></tr>
       <tr><td>학습 코드</td><td><code>ml/pilot_sagemaker/train_tabular.py</code></td></tr>
@@ -201,8 +206,8 @@
   </section>
 
   <section>
-    <h2>5) FE 진행·결과 수치 (결측·분산·판단 기준)</h2>
-    <p class="muted">아래는 팀4 Nextflow <code>build_features.py</code> 및 v2 배치/README에 정리된 값. S3에서는 <code>results/features_nextflow_team4/fe_re_batch_runs/&lt;run_id&gt;/</code> 아래에 miss·bridge·local 실험 산출을 묶어 둠. 클릭으로 세부 주석.</p>
+    <h2>5) FE 진행·결과 수치 (결측·분산·판단 기준) <span class="chip chip-off" style="font-weight:500;">20260330_v.1</span></h2>
+    <p class="muted">아래는 팀4 Nextflow <code>build_features.py</code> 및 v2 배치/README에 정리된 값(대시보드 <code>20260330_v.1</code>). S3에서는 <code>results/features_nextflow_team4/fe_re_batch_runs/&lt;run_id&gt;/</code> 아래에 miss·bridge·local 실험 산출을 묶어 둠. 클릭으로 세부 주석.</p>
 
     <details class="note">
       <summary>주석 보기: 왜 폴더명이 <code>fe_re_batch_runs</code> 인가?</summary>
@@ -258,7 +263,7 @@
 </div>
 
 <footer>
-ABC + SMILES Pilot Dashboard · Team4 · SageMaker parallel jobs
+ABC + SMILES Pilot Dashboard · 스냅샷 20260330_v.1 · 신규·갱신 20260331_v.1 · Team4 · SageMaker parallel jobs
 </footer>
 </body>
 </html>
