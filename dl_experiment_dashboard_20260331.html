@@ -378,7 +378,7 @@
         <tr>
           <td>BlockWiseMLP vs ResidualMLP</td>
           <td>1) Spearman_mean 2) fold std 3) train-validation gap</td>
-          <td><strong class="best">ResidualMLP</strong></td>
+          <td><strong class="best">BlockWiseMLP</strong></td>
         </tr>
       </table>
       <details class="muted" style="margin-top:12px;">
@@ -387,6 +387,9 @@
           <li><strong>입력 고정:</strong> <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/final_pathway_addon/pair_features_newfe_v2.parquet</code> + 실 labels.parquet 사용</li>
           <li><strong>공정성:</strong> 전 모델 동일 5-fold CV(<code>KFold(shuffle=True, random_state=42)</code>), 동일 탐색 예산(각 12 config), DL 공통 epochs/batch/patience</li>
           <li><strong>DL 선정 규칙:</strong> Spearman_mean 우선 → fold std(안정성) → val-train gap(과적합) 보조</li>
+          <li><strong>선정 해석(업데이트):</strong> ResidualMLP가 Spearman_mean에서 미세 우위(0.476152 vs 0.473404, +0.002748)였지만,
+            과적합 신호(val-train MSE gap: 0.120905 vs -0.026954)와 fold 안정성(std: 0.011203 vs 0.008381)을 함께 반영해
+            Stage 1 최종 DL 대표를 <strong>BlockWiseMLP</strong>로 조정했습니다.</li>
           <li><strong>결과 루트:</strong> <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/model_selection_stage1/</code></li>
           <li><strong>파일:</strong> <code>xgboost/</code>, <code>blockwise_mlp/</code>, <code>residual_mlp/</code> 각 <code>cv_results.csv</code>/<code>best_config.json</code>/<code>training_log.json</code> + 루트 <code>summary.md</code></li>
         </ul>
