@@ -42,7 +42,7 @@
     </section>
 
     <section>
-      <h2>3) 실행 환경/원칙</h2>
+      <h2>2) 실행 환경/원칙</h2>
       <ul class="muted">
         <li>실행 환경: 로컬 검증(이번 단계), SageMaker는 확정 모델 full training 단계에서 사용</li>
         <li>고정 조건: 동일 split(seed=42), 동일 labels, 동일 key inner join 정책 유지</li>
@@ -51,7 +51,7 @@
     </section>
 
     <section>
-      <h2>4) DL 실행/평가 현황 (전체 모델)</h2>
+      <h2>3) DL 실행/평가 현황 (전체 모델)</h2>
       <table>
         <tr><th>모델</th><th>구조/핵심 아이디어</th><th>실행 상태</th><th>평가 지표</th><th>비고</th></tr>
         <tr><td>XGBoost</td><td>Tree 기반 best baseline</td><td class="ok">Done</td><td>RMSE, MAE, Spearman, NDCG@20, Hit@20</td><td>비교 기준선</td></tr>
@@ -65,7 +65,7 @@
     </section>
 
     <section>
-      <h2>2) DL 실험 계획/구성 (전체 모델 반영)</h2>
+      <h2>4) DL 실험 계획/구성 (전체 모델 반영)</h2>
       <table>
         <tr><th>모델</th><th>입력</th><th>핵심 설정</th><th>지표</th><th>상태</th></tr>
         <tr>
@@ -172,20 +172,20 @@
       </table>
       <p class="muted">
         해석: 동일 5-fold에서 Spearman 기준 <strong>ResidualMLP</strong> &gt; BlockWiseMLP &gt; FlatMLP &gt; XGBoost_tuned 순입니다.
-        위 표는 <strong>6) holdout 5모델(DL 전체)</strong>과 구분되는 <strong>ML 대표 vs 주요 MLP 구조</strong> CV 뷰입니다.
+        위 표는 <strong>6)</strong> holdout 5모델(DL 전체)과 구분되는 <strong>ML 대표 vs 주요 MLP 구조</strong> CV 뷰입니다.
       </p>
     </section>
 
     <section>
       <details>
-        <summary><strong>주석 보관: 5)~9), 11), 12) 상세 결과</strong></summary>
+        <summary><strong>주석 보관: 세부 결과 (보조 자료)</strong></summary>
         <div class="muted" style="margin-top:12px;">
-          <p><strong>5) MLP Baseline 결과</strong></p>
+          <p><strong>MLP Baseline 결과 (보관)</strong></p>
           <table>
             <tr><th>model</th><th>dataset</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th></tr>
             <tr><td>MLP</td><td>newfe_v2_target_only</td><td>2.113</td><td>1.598</td><td>0.440</td><td>0.836</td><td>1.000</td></tr>
           </table>
-          <p>6) XGBoost vs MLP 비교, 7) MLP 학습곡선, 8) VAE baseline, 9) TabNet baseline, 11) VAE latent 효과, 12) TabNet 학습곡선은 기존 데이터 그대로 보관합니다.</p>
+          <p>XGBoost vs MLP, MLP·VAE·TabNet 학습곡선 등 예전에 분리 표시되던 항목은 CSV·폴더에 그대로 보관되어 있습니다.</p>
           <p>원본 상세 파일 경로는 <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/</code> 하위(`mlp_baseline`, `vae_baseline`, `tabnet_baseline`)를 참고하세요.</p>
         </div>
       </details>
