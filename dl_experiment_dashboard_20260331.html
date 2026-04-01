@@ -155,6 +155,28 @@
     </section>
 
     <section>
+      <h2>7) 5-fold CV — XGBoost(tuned) vs MLP 3종 (동일 폴드)</h2>
+      <p class="muted">
+        스크립트: <code>ml/pilot_sagemaker/run_xgb_mlp3_cv_local.py</code><br/>
+        출력: <code>xgb_mlp3_cv_fold_metrics.csv</code>, <code>xgb_mlp3_cv_comparison.csv</code>, <code>xgb_mlp3_cv_summary.json</code><br/>
+        경로: <code>results/.../analysis_target_only/dl_family/</code><br/>
+        폴드: <code>KFold(n=5, shuffle=True, random_state=42)</code>. 지표는 fold별 검증 집합에서 계산 후 mean±std (표시 소수 3자리).
+        <strong>전처리:</strong> XGBoost는 트리 관행상 <strong>스케일 미적용(raw)</strong>, Flat/Block/Residual MLP는 폴드마다 train 기준 continuous만 <code>StandardScaler</code> (이전 XGB vs Residual CV 스크립트와 동일한 비교 관례).
+      </p>
+      <table>
+        <tr><th>model</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th></tr>
+        <tr><td>XGBoost_tuned</td><td>2.133±0.040</td><td>1.594±0.021</td><td>0.431±0.009</td><td>0.840±0.004</td><td>1.000±0.000</td></tr>
+        <tr><td>FlatMLP</td><td>2.136±0.039</td><td>1.603±0.022</td><td>0.433±0.007</td><td>0.839±0.002</td><td>1.000±0.000</td></tr>
+        <tr><td>BlockWiseMLP</td><td>2.130±0.040</td><td>1.592±0.020</td><td>0.434±0.013</td><td>0.839±0.005</td><td>1.000±0.000</td></tr>
+        <tr><td>ResidualMLP</td><td>2.129±0.041</td><td>1.589±0.019</td><td>0.437±0.011</td><td>0.841±0.003</td><td>1.000±0.000</td></tr>
+      </table>
+      <p class="muted">
+        해석: 동일 5-fold에서 Spearman 기준 <strong>ResidualMLP</strong> &gt; BlockWiseMLP &gt; FlatMLP &gt; XGBoost_tuned 순입니다.
+        위 표는 <strong>6) holdout 5모델(DL 전체)</strong>과 구분되는 <strong>ML 대표 vs 주요 MLP 구조</strong> CV 뷰입니다.
+      </p>
+    </section>
+
+    <section>
       <details>
         <summary><strong>주석 보관: 5)~9), 11), 12) 상세 결과</strong></summary>
         <div class="muted" style="margin-top:12px;">

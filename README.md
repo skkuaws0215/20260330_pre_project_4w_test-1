@@ -459,6 +459,16 @@ Delta 요약:
   - `results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/dl_family/dl_family_summary.json`
 - 대시보드: `dl_experiment_dashboard_20260331.html` → **6) DL family final comparison**
 
+#### 5-fold CV — XGBoost(tuned) vs MLP 3종 (동일 폴드)
+
+- 스크립트: `ml/pilot_sagemaker/run_xgb_mlp3_cv_local.py`
+- 비교: `XGBoost_tuned`, `FlatMLP`, `BlockWiseMLP`, `ResidualMLP`
+- 출력 (동일 `dl_family/` 폴더):
+  - `xgb_mlp3_cv_fold_metrics.csv`
+  - `xgb_mlp3_cv_comparison.csv`
+  - `xgb_mlp3_cv_summary.json`
+- 대시보드: `dl_experiment_dashboard_20260331.html` → **7)**
+
 ## `credentials` 작성 시 주의
 
 - 파일 상단에 **`#` 주석을 넣지 않는 것**을 권장합니다. (일부 환경에서 AWS CLI 파싱 오류가 날 수 있음)

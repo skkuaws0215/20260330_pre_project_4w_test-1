@@ -1,0 +1,91 @@
+{
+  "description": "5-fold CV (shuffle=True, random_state=42): XGBoost tuned vs FlatMLP / BlockWiseMLP / ResidualMLP; identical folds.",
+  "preprocessing": {
+    "XGBoost": "raw numeric features (no standardization; matches prior xgb CV comparability).",
+    "FlatMLP_BlockWise_Residual": "per-fold continuous columns StandardScaler fit on train fold; binary passthrough."
+  },
+  "xgb_tuned_params": {
+    "max_depth": 4,
+    "learning_rate": 0.05,
+    "n_estimators": 400,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8
+  },
+  "block_grouping": {
+    "pathway_features": 0,
+    "chem_features": 2058,
+    "target_features": 10
+  },
+  "flat_mlp": {
+    "hidden_layer_sizes": [
+      512,
+      256,
+      64
+    ],
+    "max_iter": 200
+  },
+  "torch": {
+    "epochs_max": 45,
+    "batch_size": 256,
+    "lr": 0.001,
+    "early_stop_patience": 8
+  },
+  "dataset": "pair_features_newfe_v2 (LINCS excluded)",
+  "rows": 14497,
+  "feature_cols": 2068,
+  "n_splits": 5,
+  "per_model_cv_summary": {
+    "XGBoost_tuned": {
+      "RMSE_mean": 2.133085,
+      "RMSE_std": 0.040457,
+      "MAE_mean": 1.594438,
+      "MAE_std": 0.021274,
+      "Spearman_mean": 0.430751,
+      "Spearman_std": 0.008948,
+      "NDCG@20_mean": 0.839619,
+      "NDCG@20_std": 0.004367,
+      "Hit@20_mean": 1.0,
+      "Hit@20_std": 0.0
+    },
+    "FlatMLP": {
+      "RMSE_mean": 2.13597,
+      "RMSE_std": 0.039115,
+      "MAE_mean": 1.603,
+      "MAE_std": 0.022487,
+      "Spearman_mean": 0.432704,
+      "Spearman_std": 0.007303,
+      "NDCG@20_mean": 0.839153,
+      "NDCG@20_std": 0.002353,
+      "Hit@20_mean": 1.0,
+      "Hit@20_std": 0.0
+    },
+    "BlockWiseMLP": {
+      "RMSE_mean": 2.13005,
+      "RMSE_std": 0.040034,
+      "MAE_mean": 1.591516,
+      "MAE_std": 0.019637,
+      "Spearman_mean": 0.433991,
+      "Spearman_std": 0.012972,
+      "NDCG@20_mean": 0.839224,
+      "NDCG@20_std": 0.004623,
+      "Hit@20_mean": 1.0,
+      "Hit@20_std": 0.0
+    },
+    "ResidualMLP": {
+      "RMSE_mean": 2.128796,
+      "RMSE_std": 0.041159,
+      "MAE_mean": 1.588846,
+      "MAE_std": 0.019151,
+      "Spearman_mean": 0.43668,
+      "Spearman_std": 0.010579,
+      "NDCG@20_mean": 0.840609,
+      "NDCG@20_std": 0.003035,
+      "Hit@20_mean": 1.0,
+      "Hit@20_std": 0.0
+    }
+  },
+  "outputs": {
+    "fold_metrics": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/dl_family/xgb_mlp3_cv_fold_metrics.csv",
+    "comparison": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/dl_family/xgb_mlp3_cv_comparison.csv"
+  }
+}
