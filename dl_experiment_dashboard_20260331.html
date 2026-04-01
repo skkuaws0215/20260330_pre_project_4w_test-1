@@ -21,6 +21,7 @@
     .ok { color: #42d59f; font-weight: 600; }
     .plan { color: #f7c266; font-weight: 600; }
     code { background: rgba(255,255,255,0.08); border-radius: 6px; padding: 2px 6px; }
+    .best { color: #ff6b6b; font-weight: 700; }
   </style>
 </head>
 <body>
@@ -148,15 +149,45 @@
       </p>
       <table>
         <tr><th>experiment</th><th>model</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th><th>note</th></tr>
-        <tr><td>Holdout</td><td>XGBoost</td><td>2.107</td><td>1.585</td><td>0.445</td><td>0.836</td><td>1.000</td><td>4-model baseline best</td></tr>
-        <tr><td>Holdout</td><td>FlatMLP</td><td>2.113</td><td>1.598</td><td>0.440</td><td>0.836</td><td>1.000</td><td>DL baseline</td></tr>
-        <tr><td>Holdout</td><td>VAE</td><td>2.153</td><td>1.610</td><td>0.368</td><td>0.840</td><td>1.000</td><td>ranking drop</td></tr>
-        <tr><td>Holdout</td><td>TabNet</td><td>2.538</td><td>1.968</td><td>0.168</td><td>0.716</td><td>1.000</td><td>large gap</td></tr>
-        <tr><td>Holdout</td><td>BlockWiseMLP</td><td>2.107</td><td>1.583</td><td>0.446</td><td>0.837</td><td>1.000</td><td>flat 대비 개선</td></tr>
-        <tr><td>Holdout</td><td>ResidualMLP</td><td>2.103</td><td>1.583</td><td>0.453</td><td>0.839</td><td>1.000</td><td>holdout best</td></tr>
-        <tr><td>5-fold CV(mean±std)</td><td>XGBoost_tuned</td><td>2.133±0.040</td><td>1.594±0.021</td><td>0.431±0.009</td><td>0.840±0.004</td><td>1.000±0.000</td><td>tuned params</td></tr>
-        <tr><td>5-fold CV(mean±std)</td><td>ResidualMLP</td><td>2.129±0.041</td><td>1.589±0.019</td><td>0.437±0.011</td><td>0.841±0.003</td><td>1.000±0.000</td><td>cv 우세 확인</td></tr>
+        <tr><td>Holdout</td><td>XGBoost</td><td>2.107</td><td>1.585</td><td>0.445</td><td>0.836</td><td><span class="best">1.000</span></td><td>4-model baseline best</td></tr>
+        <tr><td>Holdout</td><td>FlatMLP</td><td>2.113</td><td>1.598</td><td>0.440</td><td>0.836</td><td><span class="best">1.000</span></td><td>DL baseline</td></tr>
+        <tr><td>Holdout</td><td>VAE</td><td>2.153</td><td>1.610</td><td>0.368</td><td><span class="best">0.840</span></td><td><span class="best">1.000</span></td><td>ranking drop</td></tr>
+        <tr><td>Holdout</td><td>TabNet</td><td>2.538</td><td>1.968</td><td>0.168</td><td>0.716</td><td><span class="best">1.000</span></td><td>large gap</td></tr>
+        <tr><td>Holdout</td><td>BlockWiseMLP</td><td>2.107</td><td><span class="best">1.583</span></td><td>0.446</td><td>0.837</td><td><span class="best">1.000</span></td><td>flat 대비 개선</td></tr>
+        <tr><td>Holdout</td><td>ResidualMLP</td><td><span class="best">2.103</span></td><td><span class="best">1.583</span></td><td><span class="best">0.453</span></td><td>0.839</td><td><span class="best">1.000</span></td><td>holdout best</td></tr>
+        <tr><td>5-fold CV(mean±std)</td><td>XGBoost_tuned</td><td>2.133±0.040</td><td>1.594±0.021</td><td>0.431±0.009</td><td>0.840±0.004</td><td><span class="best">1.000±0.000</span></td><td>tuned params</td></tr>
+        <tr><td>5-fold CV(mean±std)</td><td>ResidualMLP</td><td><span class="best">2.129±0.041</span></td><td><span class="best">1.589±0.019</span></td><td><span class="best">0.437±0.011</span></td><td><span class="best">0.841±0.003</span></td><td><span class="best">1.000±0.000</span></td><td>cv 우세 확인</td></tr>
       </table>
+      <details class="muted" style="margin-top:14px;">
+        <summary><strong>주석: Holdout / CV / XGBoost_tuned 의미 · 붉은색 하이라이트 규칙</strong></summary>
+        <div style="margin-top:10px; line-height:1.55;">
+          <p><strong>Holdout</strong></p>
+          <ul style="margin:6px 0 0 1rem;">
+            <li>전체 데이터를 한 번만 <strong>train / validation(또는 test)</strong>으로 나눈 뒤, <strong>고정된 검증 구간 한 덩어리</strong>에서만 지표를 계산한 결과입니다.</li>
+            <li>여기서는 <code>train_test_split(test_size=0.2, random_state=42)</code> 등으로 만든 <strong>단일 검증 분할</strong>에 해당합니다.</li>
+            <li>장점: 해석이 단순하고 보고가 쉬움. 단점: 분할 운에 따라 수치가 들쭉날쭉할 수 있어, <strong>CV와 함께</strong> 보는 것이 안전합니다.</li>
+          </ul>
+          <p style="margin-top:12px;"><strong>5-fold CV (cross-validation)</strong></p>
+          <ul style="margin:6px 0 0 1rem;">
+            <li>데이터를 5개 폴드로 나누어, 각 폴드를 한 번씩 검증으로 쓰고 나머지로 학습하는 과정을 5번 반복합니다.</li>
+            <li>표의 <code>mean±std</code>는 <strong>5번의 검증 지표 평균과 표준편차</strong>로, holdout 한 번보다 <strong>분할 운에 대한 안정성</strong>을 보기 좋습니다.</li>
+            <li>이 표의 CV 블록은 <strong>XGBoost(tuned) vs ResidualMLP</strong>만 포함합니다(동일 폴드 비교용).</li>
+          </ul>
+          <p style="margin-top:12px;"><strong>XGBoost_tuned</strong></p>
+          <ul style="margin:6px 0 0 1rem;">
+            <li>고정 “기본” 하이퍼파라미터가 아니라, 로컬에서 <strong>CV 기반 간단 탐색(예: randomized/grid, 최대 20 trial)</strong>으로 고른 조합으로 학습한 XGBoost를 뜻합니다.</li>
+            <li>본 저장소에서는 <code>xgb_cv_tuning/xgb_best_params.json</code>에 기록된 <code>max_depth</code>, <code>learning_rate</code>, <code>n_estimators</code> 등이 그 결과입니다.</li>
+            <li>Holdout 행의 <strong>XGBoost</strong>는 동일 데이터셋 비교 맥락의 트리 기준이며, 이름에 <code>tuned</code>가 없어도 실험 시점별로 기본/튜닝 여부가 다를 수 있으니, CV 행은 명시적으로 <strong>tuned CV</strong> 스펙입니다.</li>
+          </ul>
+          <p style="margin-top:12px;"><strong>붉은색(<code>.best</code>) 표시 규칙</strong></p>
+          <ul style="margin:6px 0 0 1rem;">
+            <li><strong>같은 experiment 열 값끼리만</strong> 비교합니다. 즉 <strong>Holdout 6행 안에서</strong> 열별 최선, <strong>5-fold CV 2행 안에서</strong> 열별 최선입니다. Holdout과 CV 숫자는 직접 섞어 승패를 말하지 않습니다.</li>
+            <li><strong>RMSE, MAE:</strong> 더 <strong>작을수록</strong> 좋음 → 해당 그룹에서 최소인 셀만 표시.</li>
+            <li><strong>Spearman, NDCG@20, Hit@20:</strong> 더 <strong>클수록</strong> 좋음 → 해당 그룹에서 최대인 셀만 표시.</li>
+            <li><strong>동률</strong>이면 동률인 셀 모두 붉은색으로 표시합니다(예: Holdout에서 MAE 1.583 공동 1위, Hit@20 전원 1.000).</li>
+          </ul>
+        </div>
+      </details>
       <p class="muted">
         요약: 단일 holdout과 5-fold CV 모두에서 <strong>ResidualMLP</strong>가 안정적으로 상위권입니다.
         DL 군 전용 동일 split 비교는 아래 <strong>6)</strong> 표를 기준으로 합니다.
