@@ -259,6 +259,29 @@
         <strong>DL 군 대표 제안:</strong> 1순위 <strong>ResidualMLP</strong>, 2순위 <strong>BlockWiseMLP</strong>
         (pathway 피처가 생기면 Block-wise 재평가 권장).
       </p>
+      <details class="muted" style="margin-top:12px;">
+        <summary><strong>주석: GMT(pathway) 반영 후 BlockWise 재평가 결과 (20260401 추가)</strong></summary>
+        <div style="margin-top:10px; line-height:1.55;">
+          <p><strong>무엇을 추가했는가</strong></p>
+          <ul style="margin:6px 0 0 1rem;">
+            <li><strong>GMT:</strong> <code>nextflow/refs/h.all.v7.5.symbols.gmt</code> (MSigDB Hallmark v7.5 symbols) 사용.</li>
+            <li><strong>pathway 생성:</strong> <code>sample_pathway_features.parquet</code>에 <code>pathway__*</code> 컬럼 <strong>50개</strong> 생성 확인.</li>
+            <li><strong>학습용 입력:</strong> 기존 SMILES 기반 <code>final/pair_features_newfe_v2.parquet</code>에 <code>pathway__*</code>만 <code>sample_id</code>로 left merge한 <code>final_pathway_addon/pair_features_newfe_v2.parquet</code> 사용(chem/LINCS/target 블록 유지).</li>
+          </ul>
+          <p style="margin-top:12px;"><strong>동일 5-fold CV 결과 (XGBoost / BlockWise / Residual 비교)</strong></p>
+          <table>
+            <tr><th>model</th><th>RMSE_mean</th><th>MAE_mean</th><th>Spearman_mean</th><th>NDCG@20_mean</th><th>Hit@20_mean</th></tr>
+            <tr><td>XGBoost_tuned</td><td>2.070</td><td>1.540</td><td><strong>0.473</strong></td><td>0.840</td><td>1.000</td></tr>
+            <tr><td>BlockWiseMLP (pathway=50)</td><td><strong>2.070</strong></td><td>1.542</td><td>0.472</td><td>0.839</td><td>1.000</td></tr>
+            <tr><td>ResidualMLP</td><td>2.071</td><td><strong>1.531</strong></td><td>0.471</td><td><strong>0.841</strong></td><td>1.000</td></tr>
+          </table>
+          <p class="muted" style="margin-top:10px;">
+            해석: pathway 블록이 실제로 채워지면 BlockWiseMLP가 XGBoost와 매우 근접해져 <strong>2순위 후보의 근거가 강화</strong>됩니다.
+            다만 지표별 우위가 갈리므로(예: Spearman은 XGBoost, MAE/NDCG는 Residual) 최종 대표는 목적 지표 기준으로 확정합니다.
+            상세 비교 파일: <code>analysis_target_only/xgb_mlp3_cv_pathway_addon/comparison_vs_baseline.md</code>.
+          </p>
+        </div>
+      </details>
     </section>
 
     <section>
