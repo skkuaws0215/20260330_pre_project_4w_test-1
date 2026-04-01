@@ -115,6 +115,27 @@
           <td class="ok">Done</td>
         </tr>
       </table>
+      <details class="muted" style="margin-top:14px;">
+        <summary><strong>주석: 입력 데이터셋(<code>pair_features_newfe_v2</code>)과 모델별「핵심 설정」선정 이유</strong></summary>
+        <div style="margin-top:10px; line-height:1.55;">
+          <p><strong>입력 · <code>pair_features_newfe_v2.parquet</code> (LINCS 제외)가 의미하는 것</strong></p>
+          <ul style="margin:6px 0 0 1rem;">
+            <li><strong>무엇의 테이블인가:</strong> 새 FE 배치(예: 20260331 파이프라인 산출)에서 만든 <strong>쌍 단위(sample–drug) 피처</strong> 테이블의 한 변종입니다. <code>v2</code>는 <strong>target 관련 피처가 반영된(target-only 강화) 버전</strong>으로, <code>newfe</code> 대비 target 신호가 더 들어간 구성입니다.</li>
+            <li><strong>LINCS 제외:</strong> 학습 시 컬럼명에 <code>lincs</code>가 들어간 피처는 사용하지 않습니다. BRD–내부 약물 매핑이 확정되기 전 단계라 LINCS 브리지를 쓰지 않기로 한 정책과 맞춥니다.</li>
+            <li><strong>실제로 붙는 데이터:</strong> 실행 스크립트에서는 <strong>labels</strong>(타깃)와 <code>sample_id</code>, <code>canonical_drug_id</code>로 <strong>inner join</strong>한 뒤, 위 key·타깃을 제외한 나머지 수치 컬럼이 입력 피처가 됩니다. 대략적으로 <strong>chem 계열(지문·서술子等)</strong>, <strong><code>target_</code> 접두 타깃/경로 요약 피처</strong>, 필요 시 pathway 라벨이 들어간 컬럼 등이 섞입니다. (현재 스키마에서는 pathway 블록이 비어 있을 수 있음 — Block-wise 주석 참고.)</li>
+            <li><strong>비교 공정성:</strong> 모든 DL 행이 동일 파일을 가리키는 이유는, <strong>동일한 피처 공간·동일 join/split 정책</strong> 아래에서 “모델 구조”만 바꿔 보기 위해서입니다.</li>
+          </ul>
+          <p style="margin-top:14px;"><strong>모델별 핵심 설정 — 왜 이렇게 잡았는지</strong></p>
+          <ul style="margin:6px 0 0 1rem;">
+            <li><strong>FlatMLP — 2~3 hidden layer baseline:</strong> 가장 단순한 fully-connected 스택입니다. <strong>과도한 깊이·폭을 피해</strong> “DL 기준선”만 잡고, 이후 Residual/Block-wise와의 <strong>구조 효과</strong>만 분리해서 보기 위한 설정입니다. 별도 대규모 HPO는 하지 않았습니다.</li>
+            <li><strong>VAE — latent dim / beta / recon + pred loss:</strong> 표현을 latent로 압축하면서 회귀 타깃까지 맞추는 <strong>VAE+회귀 헤드</strong> 표준 형태입니다. latent 차원·KL(β)은 <strong>소수의 후보만</strong> 두고 Spearman 등으로 대표 설정을 고른 수준으로, 생성 품질까지 최적화하는 단계는 아닙니다.</li>
+            <li><strong>TabNet — n_d=16, n_a=16, n_steps=4 baseline:</strong> 논문·권장 초기값에 가까운 <strong>가벼운 baseline</strong>입니다. 탭넷은 튜닝에 민감하고 학습 비용이 있어, 이번 단계에서는 <strong>“구조가 이 데이터에서 이득인가”만 빠르게 점검</strong>하는 목적에 맞췄습니다.</li>
+            <li><strong>Block-wise MLP — pathway/chem/target 블록 + concat:</strong> 도메인상 서로 다른 성격의 피처를 <strong>별도 인코더로 처리</strong>한 뒤 합치려는 설계입니다. pathway 컬럼이 풍부해질수록 의미가 커지고, 없을 때는 사실상 chem vs target 분리 수준의 구조 비교가 됩니다.</li>
+            <li><strong>Residual MLP — residual block(3):</strong> 깊이를 약간 준 MLP에서 <strong>skip connection</strong>으로 학습 붕괴·포화를 완화하고, flat 대비 <strong>표현력·안정성</strong>만 바꾼 변형입니다. 블록 개수는 “baseline 수준”으로 3을 고정해 두었습니다.</li>
+          </ul>
+          <p class="muted" style="margin-top:12px;">공통: 이번 DL 군 실험은 <strong>최적 하이퍼파라미터 탐색보다 구조·가족 간 상대 비교</strong>를 우선합니다. 최종 챔피언이 정해진 뒤 SageMaker 등에서 해당 모델만 집중 튜닝하는 편이 효율적입니다.</p>
+        </div>
+      </details>
     </section>
 
     <section>
