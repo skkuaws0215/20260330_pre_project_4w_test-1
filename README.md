@@ -468,6 +468,7 @@ Delta 요약:
   - `xgb_mlp3_cv_comparison.csv`
   - `xgb_mlp3_cv_summary.json`
 - 대시보드: `dl_experiment_dashboard_20260331.html` → **7)**
+- 대시보드: `dl_experiment_dashboard_20260331.html` → **8)** 의사결정 참고 Agent 요약 의견 (DL 채택·제외·ML/Graph 관계 주석)
 
 ## `credentials` 작성 시 주의
 
