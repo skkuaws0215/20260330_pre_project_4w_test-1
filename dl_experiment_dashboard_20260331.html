@@ -343,23 +343,52 @@
     </section>
 
     <section>
-      <h2>9) 3종 모델 튜닝 계획 (XGBoost + DL 2트랙)</h2>
+      <h2>9) 3종 모델 튜닝 결과 (Stage 1 완료)</h2>
       <p class="muted">
         목적: 최종 후보 3종(<strong>XGBoost</strong>, <strong>ResidualMLP</strong>, <strong>BlockWiseMLP</strong>)을 동일 조건에서 튜닝·비교해
-        최종 제출 모델(또는 앙상블 여부) 결정을 지원합니다.
+        최종 제출 모델(또는 앙상블 여부) 결정을 지원합니다. 아래 표는 <strong>실데이터(labels.parquet)</strong> 기반 Stage 1 실행 결과입니다.
+        <strong>현재 상태: 완료(Completed)</strong>
       </p>
       <table>
         <tr><th>모델</th><th>튜닝 범위(요약)</th><th>평가 기준</th><th>상태</th><th>비고</th></tr>
-        <tr><td>XGBoost</td><td>곧 입력 예정</td><td>곧 입력 예정</td><td class="plan">Planned</td><td>후보 #1</td></tr>
-        <tr><td>ResidualMLP</td><td>곧 입력 예정</td><td>곧 입력 예정</td><td class="plan">Planned</td><td>DL 2트랙 #1</td></tr>
-        <tr><td>BlockWiseMLP</td><td>곧 입력 예정</td><td>곧 입력 예정</td><td class="plan">Planned</td><td>DL 2트랙 #2 (pathway 포함 기준)</td></tr>
+        <tr>
+          <td>XGBoost</td>
+          <td>12 config (지정 grid 내 샘플링), 5-fold CV 동일 split</td>
+          <td>Spearman mean=<span class="best">0.473117</span> / std=0.009845, RMSE mean=2.067037</td>
+          <td class="ok">완료</td>
+          <td>ML baseline, top3 config 저장</td>
+        </tr>
+        <tr>
+          <td>ResidualMLP</td>
+          <td>12 config (hidden_dim/num_layers/dropout/lr/wd), variant A/B 비교</td>
+          <td>Spearman mean=<span class="best">0.476152</span> / std=0.011203, RMSE mean=2.066046</td>
+          <td class="ok">완료</td>
+          <td><strong>DL 대표 선정</strong> (Stage 1)</td>
+        </tr>
+        <tr>
+          <td>BlockWiseMLP</td>
+          <td>12 config (4-block: pathway/chem/lincs/target), variant A/B 비교</td>
+          <td>Spearman mean=0.473404 / std=<span class="best">0.008381</span>, RMSE mean=2.071053</td>
+          <td class="ok">완료</td>
+          <td>DL 2트랙 비교 후보</td>
+        </tr>
+      </table>
+      <table style="margin-top:10px;">
+        <tr><th>Stage 1 최종 DL 선별</th><th>선정 기준</th><th>선정 결과</th></tr>
+        <tr>
+          <td>BlockWiseMLP vs ResidualMLP</td>
+          <td>1) Spearman_mean 2) fold std 3) train-validation gap</td>
+          <td><strong class="best">ResidualMLP</strong></td>
+        </tr>
       </table>
       <details class="muted" style="margin-top:12px;">
-        <summary><strong>주석: 튜닝 데이터 입력 자리 (추가 예정)</strong></summary>
+        <summary><strong>주석: Stage 1 실행 메타/산출 경로</strong></summary>
         <ul style="margin:10px 0 0 1rem; line-height:1.55;">
-          <li>사용 데이터셋 버전, split/CV 고정 조건, 탐색 파라미터 범위, trial 수, early stopping 규칙</li>
-          <li>모델별 best params, fold별 성능, mean±std, baseline 대비 delta, 선택 근거</li>
-          <li>산출 파일 경로(CSV/JSON/리포트)와 대시보드 표 연동 기준</li>
+          <li><strong>입력 고정:</strong> <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/final_pathway_addon/pair_features_newfe_v2.parquet</code> + 실 labels.parquet 사용</li>
+          <li><strong>공정성:</strong> 전 모델 동일 5-fold CV(<code>KFold(shuffle=True, random_state=42)</code>), 동일 탐색 예산(각 12 config), DL 공통 epochs/batch/patience</li>
+          <li><strong>DL 선정 규칙:</strong> Spearman_mean 우선 → fold std(안정성) → val-train gap(과적합) 보조</li>
+          <li><strong>결과 루트:</strong> <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/model_selection_stage1/</code></li>
+          <li><strong>파일:</strong> <code>xgboost/</code>, <code>blockwise_mlp/</code>, <code>residual_mlp/</code> 각 <code>cv_results.csv</code>/<code>best_config.json</code>/<code>training_log.json</code> + 루트 <code>summary.md</code></li>
         </ul>
       </details>
     </section>

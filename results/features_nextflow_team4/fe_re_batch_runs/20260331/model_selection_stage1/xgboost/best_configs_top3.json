@@ -1,0 +1,44 @@
+[
+  {
+    "rank": 1,
+    "spearman_mean": 0.47311703961305235,
+    "params": {
+      "colsample_bytree": 0.7,
+      "learning_rate": 0.05,
+      "max_depth": 4,
+      "min_child_weight": 5,
+      "n_estimators": 800,
+      "reg_alpha": 1.0,
+      "reg_lambda": 1,
+      "subsample": 0.85
+    }
+  },
+  {
+    "rank": 2,
+    "spearman_mean": 0.4723008801595919,
+    "params": {
+      "colsample_bytree": 0.5,
+      "learning_rate": 0.05,
+      "max_depth": 8,
+      "min_child_weight": 5,
+      "n_estimators": 300,
+      "reg_alpha": 0.1,
+      "reg_lambda": 5,
+      "subsample": 1.0
+    }
+  },
+  {
+    "rank": 3,
+    "spearman_mean": 0.4718101958486118,
+    "params": {
+      "colsample_bytree": 0.7,
+      "learning_rate": 0.03,
+      "max_depth": 4,
+      "min_child_weight": 5,
+      "n_estimators": 800,
+      "reg_alpha": 1.0,
+      "reg_lambda": 5,
+      "subsample": 1.0
+    }
+  }
+]

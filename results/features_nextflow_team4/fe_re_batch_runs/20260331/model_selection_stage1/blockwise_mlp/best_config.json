@@ -1,0 +1,8 @@
+{
+  "block_hidden_dim": 64,
+  "dropout": 0.2,
+  "fusion_hidden_dim": 128,
+  "lr": 0.0005,
+  "variant": "A",
+  "weight_decay": 1e-05
+}
