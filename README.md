@@ -470,6 +470,13 @@ Delta 요약:
 - 대시보드: `dl_experiment_dashboard_20260331.html` → **7)**
 - 대시보드: `dl_experiment_dashboard_20260331.html` → **8)** 의사결정 참고 Agent 요약 의견 (DL 채택·제외·ML/Graph 관계 주석)
 
+#### Pathway (Hallmark GMT) — `pathway__*` 보강 및 BlockWise 정식 블록 CV
+
+- **GMT 파일:** `nextflow/refs/h.all.v7.5.symbols.gmt` (MSigDB Hallmark v7.5 symbols). `build_pair_features_newfe_v2.py`에 `--pathway-gmt`를 주지 않으면 `sample_pathway_features.parquet`에 `pathway__*` 점수 열이 **0개**로 남는다. 표현 행렬 열이 `crispr__TP53`처럼 접두어가 있어도 **열 이름 끝 심볼**과 GMT를 맞추도록 빌드 스크립트가 처리한다.
+- **SMILES:** 정식 pair 피처는 `--drug-uri`에 **SMILES 포함** drug 테이블이 필요하다. pathway만 덧붙일 때는 기존 SMILES 기반 `final/pair_features_newfe_v2.parquet`에 `sample_pathway_features`의 `pathway__*`만 `sample_id`로 merge한 **`fe_re_batch_runs/20260331/final_pathway_addon/pair_features_newfe_v2.parquet`** 를 사용한다 (`merge_pathway_into_pair_features.py`, 감사 `final_pathway_addon/pathway_merge_audit.json`).
+- **5-fold CV (pathway 50개, BlockWise pathway 블록 > 0):** `ml/pilot_sagemaker/run_xgb_mlp3_cv_local.py` — 산출 `analysis_target_only/xgb_mlp3_cv_pathway_addon/` (요약 표: 동 폴더 `comparison_vs_baseline.md`). 이전 `dl_family/xgb_mlp3_cv_summary.json`(pathway 0)과 동일 폴드 설정으로 baseline 대비 비교 가능.
+- **운영·재현 상세:** `nextflow/README.md` → **「Pathway GMT·SMILES·학습용 addon (정리)」**.
+
 ## `credentials` 작성 시 주의
 
 - 파일 상단에 **`#` 주석을 넣지 않는 것**을 권장합니다. (일부 환경에서 AWS CLI 파싱 오류가 날 수 있음)
