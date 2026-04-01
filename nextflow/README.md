@@ -143,6 +143,14 @@ python nextflow/scripts/build_pair_features_newfe_v2.py `
 - overlap은 count + ratio를 모두 생성한다.
 - pathway relevance는 mean + hit_count를 모두 생성한다.
 
+### Pathway GMT·SMILES·학습용 addon (정리)
+
+- **`--pathway-gmt` 비어 있으면** `sample_pathway_features.parquet`는 `sample_id`만 있고 `pathway__*` 점수 열이 **0개**다. Hallmark 등 GMT는 저장소 예시로 `nextflow/refs/h.all.v7.5.symbols.gmt`를 둔다.
+- **유전자 심볼 매칭:** 표현 행렬 열이 `crispr__TP53`처럼 접두어가 있으면, 빌드 스크립트는 **열 이름 끝 토큰(TP53)** 과 GMT 유전자를 맞춘다. GMT 유전자는 파싱 시 대문자로 통일한다.
+- **`--drug-uri`는 반드시 SMILES 포함:** `canonical_drug_id` + `canonical_smiles`(또는 스크립트가 기대하는 smiles 컬럼)가 있어야 Morgan·RDKit 서술자가 유효하다. SMILES 없는 stub만 넣으면 화학 블록이 무의미해지므로 **정식 pair 산출에 쓰지 않는다.**
+- **pathway만 보강할 때:** 이미 SMILES 기반으로 만든 `final/pair_features_newfe_v2.parquet`가 있으면, 새로 만든 `sample_pathway_features.parquet`의 `pathway__*`만 `sample_id`로 left merge한 **`final_pathway_addon/pair_features_newfe_v2.parquet`** 를 학습 입력으로 쓸 수 있다. 재현 스크립트: `ml/pilot_sagemaker/merge_pathway_into_pair_features.py`. 감사·경로 요약: `final_pathway_addon/pathway_merge_audit.json`.
+- **5-fold CV (pathway 50개 포함):** `analysis_target_only/xgb_mlp3_cv_pathway_addon/` 및 `comparison_vs_baseline.md` 참고.
+
 ### LINCS BRD 매핑 입력 스키마 (고정)
 
 `normalize_lincs_mapping.py` 입력 `brd_map`은 CSV 또는 Parquet를 받을 수 있고 스키마는 아래와 같다.
