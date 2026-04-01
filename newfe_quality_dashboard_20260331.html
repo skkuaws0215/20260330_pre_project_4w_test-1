@@ -490,6 +490,52 @@
             IQR이 사실상 0이면 해당 컬럼은 <code>iqr_degenerate</code>로 표시하고 이상치 건수는 0으로 둔다.
           </li>
         </ul>
+
+        <details style="margin-top:14px;">
+          <summary><strong>리포트 요약 (20260331 스냅샷 기준)</strong></summary>
+          <p class="muted" style="margin-top:10px;">아래 수치는 <code>outlier_report.json</code> / <code>feature_outlier_summary.csv</code> 산출분이다. 연속형 분석 대상은 15컬럼(pathway 연속형은 본 parquet에 없음).</p>
+
+          <p style="margin-top:12px;"><strong>1) outlier_ratio 상위 10개 컬럼</strong></p>
+          <table>
+            <tr><th>순위</th><th>컬럼</th><th>그룹</th><th>outlier_ratio</th><th>보조 메모</th></tr>
+            <tr><td>1</td><td><code>target_gene_count</code></td><td>target_continuous</td><td>0.131 (13.1%)</td><td>max 40, p99 15</td></tr>
+            <tr><td>2</td><td><code>drug_desc_hbd</code></td><td>rdkit_descriptor</td><td>0.114</td><td>max 20, p99 6</td></tr>
+            <tr><td>3</td><td><code>drug_desc_rot_bonds</code></td><td>rdkit_descriptor</td><td>0.081</td><td>max 35, p99 13</td></tr>
+            <tr><td>4</td><td><code>drug_desc_frac_csp3</code></td><td>rdkit_descriptor</td><td>0.064</td><td>[0,1] 비율</td></tr>
+            <tr><td>5</td><td><code>drug_desc_logp</code></td><td>rdkit_descriptor</td><td>0.051</td><td>min −7.7 근처, max 8.8 근처</td></tr>
+            <tr><td>6</td><td><code>drug_desc_tpsa</code></td><td>rdkit_descriptor</td><td>0.027</td><td>max 627 vs p99 ≈224</td></tr>
+            <tr><td>7</td><td><code>drug_desc_hba</code></td><td>rdkit_descriptor</td><td>0.019</td><td>—</td></tr>
+            <tr><td>8</td><td><code>drug_desc_ring_count</code></td><td>rdkit_descriptor</td><td>0.014</td><td>—</td></tr>
+            <tr><td>9</td><td><code>drug_desc_mol_wt</code></td><td>rdkit_descriptor</td><td>0.010</td><td>max ≈1416 vs p99 ≈905</td></tr>
+            <tr><td>10</td><td><code>drug_desc_heavy_atoms</code></td><td>rdkit_descriptor</td><td>0.0076</td><td>—</td></tr>
+          </table>
+
+          <p style="margin-top:12px;"><strong>2) 그룹별 평균 outlier_ratio</strong></p>
+          <table>
+            <tr><th>그룹</th><th>평균 outlier_ratio</th><th>비고</th></tr>
+            <tr><td>rdkit_descriptor</td><td>약 0.043 (4.3%)</td><td>9컬럼, 중앙값 비율 ≈0.027</td></tr>
+            <tr><td>target_continuous</td><td>약 0.022 (2.2%)</td><td>6컬럼, 중앙값 0</td></tr>
+            <tr><td>pathway</td><td>해당 없음</td><td>본 데이터에 <code>pathway_*</code> 연속형 부재</td></tr>
+          </table>
+
+          <p style="margin-top:12px;"><strong>3) clipping / log1p 후보</strong></p>
+          <ul style="line-height:1.55;">
+            <li><code>outlier_ratio ≥ 0.05</code>인 컬럼 5개: <code>target_gene_count</code>, <code>drug_desc_hbd</code>, <code>drug_desc_rot_bonds</code>, <code>drug_desc_frac_csp3</code>, <code>drug_desc_logp</code>.</li>
+            <li>0이 많은 카운트류는 <code>log1p</code> 검토 여지, <code>drug_desc_frac_csp3</code>는 winsorize 또는 스케일만이 자연스러움.</li>
+            <li><code>drug_desc_logp</code>는 음수 가능이라 <code>log1p</code> 단독 적용은 부적합할 수 있음(이동+log 또는 clipping·강건 스케일).</li>
+            <li>p99 대비 max가 큰 <code>drug_desc_tpsa</code>, <code>drug_desc_mol_wt</code> 등은 clipping·winsorize 후보.</li>
+          </ul>
+
+          <p style="margin-top:12px;"><strong>4) ResidualMLP 관점</strong></p>
+          <p class="muted" style="margin-top:6px;">연속형은 표준화를 타므로, 이상치 비율이 크고 꼬리가 긴 열이 분산을 키우면 간접 영향 가능. 우선 점검 순서는 <code>target_gene_count</code>, <code>drug_desc_hbd</code>, <code>drug_desc_rot_bonds</code>, <code>drug_desc_logp</code>, <code>drug_desc_frac_csp3</code>, 그다음 <code>drug_desc_tpsa</code>·<code>drug_desc_mol_wt</code>. 다만 학습 입력에는 <code>drug_morgan_*</code> 등 이진 피처가 대량 포함되어 연속 소수 컬럼만의 영향은 전체 차원 대비 제한될 수 있음.</p>
+        </details>
+
+        <p style="margin-top:16px; padding:12px 14px; background:#1a2332; border-left:4px solid #6c9ef8; line-height:1.6;">
+          <strong>결론:</strong> 일부 컬럼(예: <code>target_gene_count</code>)에서 Tukey IQR 기준 이상치 비율이 약 13% 수준으로 관찰되나,
+          현재 설정에서 모델이 이미 충분히 잘 학습되고 있는 것으로 판단된다.
+          따라서 <strong>이상치 비율 자체보다는 검증 지표상 모델 성능에 실질적인 악영향이 있다고 보기 어렵다</strong>고 보았고,
+          <strong>별도의 이상치 처리(clipping, log1p, winsorize 등)는 진행하지 않기로 한다.</strong>
+        </p>
       </details>
     </section>
   </div>
