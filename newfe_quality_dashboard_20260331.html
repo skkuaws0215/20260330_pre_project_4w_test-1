@@ -486,8 +486,8 @@
             <code>python3 ml/pilot_sagemaker/report_newfe_v2_outliers.py</code>
             (기본 입력·출력 경로는 스크립트 <code>--parquet-uri</code> / <code>--out-dir</code>로 덮어쓸 수 있음).
           </li>
-          <li><strong>해석 힌트:</strong> JSON의 <code>interpretation_note</code>와 같이, 트리 계열은 스케일·꼬리에 덜 민감한 경우가 많고 MLP 등은 winsorize / <code>log1p</code> / 강건 스케일을 후보로 두면 된다.
-            IQR이 사실상 0이면 해당 컬럼은 <code>iqr_degenerate</code>로 표시하고 이상치 건수는 0으로 둔다.
+          <li><strong>해석 힌트:</strong> 트리 계열은 꼬리에 상대적으로 덜 민감한 편이고, MLP 등은 스케일·분산에 더 민감할 수 있다. 세부 변환 후보는 아래 요약 표의 「clipping / log1p 후보」를 본다.
+            IQR이 사실상 0이면 <code>iqr_degenerate</code>로 표시하고 이상치 건수는 0으로 둔다.
           </li>
         </ul>
 
@@ -518,23 +518,21 @@
             <tr><td>pathway</td><td>해당 없음</td><td>본 데이터에 <code>pathway_*</code> 연속형 부재</td></tr>
           </table>
 
-          <p style="margin-top:12px;"><strong>3) clipping / log1p 후보</strong></p>
+          <p style="margin-top:12px;"><strong>3) 변환·clipping 후보(필요 시 선택 적용)</strong></p>
           <ul style="line-height:1.55;">
-            <li><code>outlier_ratio ≥ 0.05</code>인 컬럼 5개: <code>target_gene_count</code>, <code>drug_desc_hbd</code>, <code>drug_desc_rot_bonds</code>, <code>drug_desc_frac_csp3</code>, <code>drug_desc_logp</code>.</li>
-            <li>0이 많은 카운트류는 <code>log1p</code> 검토 여지, <code>drug_desc_frac_csp3</code>는 winsorize 또는 스케일만이 자연스러움.</li>
-            <li><code>drug_desc_logp</code>는 음수 가능이라 <code>log1p</code> 단독 적용은 부적합할 수 있음(이동+log 또는 clipping·강건 스케일).</li>
-            <li>p99 대비 max가 큰 <code>drug_desc_tpsa</code>, <code>drug_desc_mol_wt</code> 등은 clipping·winsorize 후보.</li>
+            <li>우선순위가 높은 열: <code>outlier_ratio ≥ 0.05</code> 5개 — <code>target_gene_count</code>, <code>drug_desc_hbd</code>, <code>drug_desc_rot_bonds</code>, <code>drug_desc_frac_csp3</code>, <code>drug_desc_logp</code>.</li>
+            <li>카운트·0 다수 열은 <code>log1p</code>, 비율(<code>drug_desc_frac_csp3</code>)은 winsorize 또는 스케일, <code>drug_desc_logp</code>는 음수 구간 때문에 평행 이동 후 log·clipping·강건 스케일을 함께 고려. p99 대비 max가 큰 <code>drug_desc_tpsa</code>·<code>drug_desc_mol_wt</code>는 clipping·winsorize 후보.</li>
           </ul>
 
           <p style="margin-top:12px;"><strong>4) ResidualMLP 관점</strong></p>
-          <p class="muted" style="margin-top:6px;">연속형은 표준화를 타므로, 이상치 비율이 크고 꼬리가 긴 열이 분산을 키우면 간접 영향 가능. 우선 점검 순서는 <code>target_gene_count</code>, <code>drug_desc_hbd</code>, <code>drug_desc_rot_bonds</code>, <code>drug_desc_logp</code>, <code>drug_desc_frac_csp3</code>, 그다음 <code>drug_desc_tpsa</code>·<code>drug_desc_mol_wt</code>. 다만 학습 입력에는 <code>drug_morgan_*</code> 등 이진 피처가 대량 포함되어 연속 소수 컬럼만의 영향은 전체 차원 대비 제한될 수 있음.</p>
+          <p class="muted" style="margin-top:6px;">연속형은 표준화를 타므로 꼬리가 긴 열이 분산을 키우면 간접 영향이 있을 수 있다. 우선 볼 열은 위 표 상위·항목 3)과 같다. 입력에 <code>drug_morgan_*</code> 등 이진 피처가 대량 포함되므로, 연속 소수 컬럼만의 영향은 전체 차원 대비 제한될 수 있다.</p>
         </details>
 
         <p style="margin-top:16px; padding:12px 14px; background:#1a2332; border-left:4px solid #6c9ef8; line-height:1.6;">
-          <strong>결론:</strong> 일부 컬럼(예: <code>target_gene_count</code>)에서 Tukey IQR 기준 이상치 비율이 약 13% 수준으로 관찰되나,
-          현재 설정에서 모델이 이미 충분히 잘 학습되고 있는 것으로 판단된다.
-          따라서 <strong>이상치 비율 자체보다는 검증 지표상 모델 성능에 실질적인 악영향이 있다고 보기 어렵다</strong>고 보았고,
-          <strong>별도의 이상치 처리(clipping, log1p, winsorize 등)는 진행하지 않기로 한다.</strong>
+          <strong>결론:</strong> 연속형 피처 일부에서 Tukey IQR 기준 이상치 비율이 <strong>10% 이상</strong> 관찰되기도 한다(대표적으로 <code>target_gene_count</code>는 약 13%).
+          다만 <strong>CV·holdout 지표가 안정적으로 유지</strong>되고 있어, 이상치 비율만으로 성능 악화를 단정하기는 어렵다.
+          따라서 <strong>현재 단계에서는 별도 이상치 처리 없이 기존 전처리·학습 설정을 유지</strong>하는 것이 합리적이다.
+          <strong>추후 성능 개선이 필요할 경우</strong> 상단에서 정리한 후보 컬럼에 한해 <strong>선택적으로 log 변환·clipping 등</strong>을 검토한다.
         </p>
       </details>
     </section>
