@@ -390,6 +390,8 @@
           <li><strong>선정 해석(업데이트):</strong> ResidualMLP가 Spearman_mean에서 미세 우위(0.476152 vs 0.473404, +0.002748)였지만,
             과적합 신호(val-train MSE gap: 0.120905 vs -0.026954)와 fold 안정성(std: 0.011203 vs 0.008381)을 함께 반영해
             Stage 1 최종 DL 대표를 <strong>BlockWiseMLP</strong>로 조정했습니다.</li>
+          <li><strong>추가 코멘트(향후 개선):</strong> 이후 ResidualMLP의 과적합을 줄이는 튜닝(정규화/드롭아웃/학습률/early stopping 개선 등)에서
+            일반화 지표가 유의미하게 개선되면, DL 대표 모델 우선순위는 다시 조정될 수 있습니다.</li>
           <li><strong>결과 루트:</strong> <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/model_selection_stage1/</code></li>
           <li><strong>파일:</strong> <code>xgboost/</code>, <code>blockwise_mlp/</code>, <code>residual_mlp/</code> 각 <code>cv_results.csv</code>/<code>best_config.json</code>/<code>training_log.json</code> + 루트 <code>summary.md</code></li>
         </ul>
