@@ -73,6 +73,50 @@
           <li><strong>ResidualMLP — flat MLP + residual blocks:</strong> 깊은 완전연결 경로에서 <strong>skip connection</strong>으로 그래디언트·학습 안정성을 보완한 MLP. 구조만 바꿔 flat 대비 성능 개선이 있는지 보기 위한 변형입니다.</li>
         </ul>
       </details>
+      <details class="muted" style="margin-top:12px;">
+        <summary><strong>주석: 평가 지표(RMSE, MAE, Spearman, NDCG@20, Hit@20) — 기호·식·필요 조건</strong></summary>
+        <div style="margin-top:10px; line-height:1.6;">
+          <p><strong>공통 기호</strong></p>
+          <ul style="margin:6px 0 0 1rem;">
+            <li><strong>i:</strong> 검증(holdout 또는 CV의 validation fold)에 포함된 <strong>한 행(한 drug–sample 쌍)</strong> 인덱스. 집합 크기를 <strong>N</strong>이라 하면 <code>i = 1, …, N</code>.</li>
+            <li><strong>xᵢ:</strong> i번째 행의 <strong>입력 피처 벡터</strong>(join·전처리 후 수치 컬럼 전체). 회귀 식에는 보통 나타나지 않고, “모델 입력”을 가리킬 때 씁니다.</li>
+            <li><strong>yᵢ:</strong> i번째 행의 <strong>실제 타깃</strong>(본 실험에서는 <code>label_regression</code>). 관측값·정답.</li>
+            <li><strong>ŷᵢ</strong> (y-hat): 동일한 xᵢ에 대해 모델이 낸 <strong>예측 회귀값</strong>. 스크립트에서는 검증 구간에 대해 한 번에 벡터 <code>y_true</code>, <code>y_pred</code>로 계산합니다.</li>
+          </ul>
+          <p style="margin-top:12px;"><strong>RMSE (Root Mean Squared Error)</strong></p>
+          <ul style="margin:6px 0 0 1rem;">
+            <li><strong>식:</strong> <code>RMSE = √( (1/N) · Σᵢ (yᵢ − ŷᵢ)² )</code></li>
+            <li><strong>해석:</strong> 오차 제곱 평균의 제곱근이라 <strong>큰 오차에 더 민감</strong>. 단위는 타깃과 동일.</li>
+            <li><strong>필요 조건:</strong> 모든 i에 대해 yᵢ, ŷᵢ가 <strong>실수</strong>로 정의되어 있고 결측이 없을 것(본 파이프라인에서는 결측 0 처리 후 사용).</li>
+          </ul>
+          <p style="margin-top:12px;"><strong>MAE (Mean Absolute Error)</strong></p>
+          <ul style="margin:6px 0 0 1rem;">
+            <li><strong>식:</strong> <code>MAE = (1/N) · Σᵢ |yᵢ − ŷᵢ|</code></li>
+            <li><strong>해석:</strong> 절대오차 평균. <strong>이상치에 RMSE보다 덜 민감</strong>한 편.</li>
+            <li><strong>필요 조건:</strong> RMSE와 동일하게 쌍 (yᵢ, ŷᵢ)이 N개 필요.</li>
+          </ul>
+          <p style="margin-top:12px;"><strong>Spearman (Spearman rank correlation)</strong></p>
+          <ul style="margin:6px 0 0 1rem;">
+            <li><strong>식(개념):</strong> 벡터 <strong>y</strong>와 <strong>ŷ</strong>를 각각 <strong>순위</strong>로 바꾼 뒤, 그 두 순위열 간의 피어슨 상관과 동치인 <strong>순위 상관계수</strong>.</li>
+            <li><strong>해석:</strong> <strong>선형이 아니라 단조(monotonic) 관계</strong>가 맞는지에 가깝게 반영. 스케일 이동에는 불변에 가깝습니다.</li>
+            <li><strong>필요 조건:</strong> y 또는 ŷ가 <strong>상수</strong>(분산 0)이면 정의가 불안정해 <strong>NaN</strong>이 될 수 있음. N ≥ 2.</li>
+          </ul>
+          <p style="margin-top:12px;"><strong>NDCG@20 (Normalized Discounted Cumulative Gain, 컷오프 20)</strong></p>
+          <ul style="margin:6px 0 0 1rem;">
+            <li><strong>단위:</strong> 동일 <strong>sample_id</strong> 아래에 여러 <code>canonical_drug_id</code>(약물 후보)가 있을 때, <strong>한 환자(샘플) 안에서의 랭킹 품질</strong>을 봅니다.</li>
+            <li><strong>관련도(relevance):</strong> 구현에서는 그룹 내 <strong>yᵢ(실제 반응 강도)</strong>를 relevance로 쓰고, <strong>ŷᵢ</strong>로 약물을 정렬해 랭킹을 만듭니다. sklearn <code>ndcg_score</code>는 <strong>음수 relevance를 허용하지 않아</strong>, 그룹 내 최솟값이 음수이면 <strong>전체 y를 그룹별로 평행 이동</strong>해 0 이상으로 맞춘 뒤 계산합니다.</li>
+            <li><strong>식(개념):</strong> 상위 K(여기서 K=min(20, 그룹 크기))에 대해, 할인 누적 이득을 이상적 랭킹 대비로 정규화한 값. <strong>1에 가까울수록</strong> 좋은 랭킹.</li>
+            <li><strong>필요 조건:</strong> 해당 sample_id 그룹에 <strong>서로 다른 약물이 2개 이상</strong>인 행만 포함(크기 1 그룹은 스킵 후, 남은 그룹들에 대해 <strong>평균</strong>).</li>
+          </ul>
+          <p style="margin-top:12px;"><strong>Hit@20</strong></p>
+          <ul style="margin:6px 0 0 1rem;">
+            <li><strong>정의(본 저장소 구현):</strong> sample_id별로, <strong>y가 큰 순서 상위 K개</strong> 약물 인덱스 집합과 <strong>ŷ가 큰 순서 상위 K개</strong> 집합(K=min(20, 그룹 크기))의 <strong>교집합이 비어 있지 않으면 1, 아니면 0</strong>으로 두고, 그룹별로 구한 0/1을 <strong>평균</strong>합니다.</li>
+            <li><strong>해석:</strong> “진짜 좋은 약이 예측 상위권에 <strong>하나라도</strong> 걸렸는가”에 가까운 <strong>완화된 히트율</strong>.</li>
+            <li><strong>필요 조건:</strong> NDCG와 같이 <strong>그룹당 최소 2행</strong>. 그룹이 없으면 지표는 정의되지 않을 수 있습니다.</li>
+          </ul>
+          <p class="muted" style="margin-top:12px;">정리: <strong>RMSE·MAE·Spearman</strong>은 <strong>전체 검증 행 N개</strong>에 대한 <strong>쌍wise (yᵢ, ŷᵢ)</strong> 지표이고, <strong>NDCG@20·Hit@20</strong>은 <strong>sample_id별 리스트 랭킹</strong> 지표라서, “같은 숫자인데 의미가 다름”을 구분해 읽어야 합니다.</p>
+        </div>
+      </details>
       <p class="muted">이번 섹션은 현재까지 사용된 모든 DL/비교 모델의 실행/평가 상태를 통합 요약합니다.</p>
     </section>
 
