@@ -61,6 +61,17 @@
         <tr><td>BlockWiseMLP</td><td>feature block encoder + concat head</td><td class="ok">Done</td><td>동일</td><td>MLP 구조개선 #1</td></tr>
         <tr><td>ResidualMLP</td><td>flat MLP + residual blocks</td><td class="ok">Done</td><td>동일</td><td>MLP 구조개선 #2</td></tr>
       </table>
+      <details class="muted" style="margin-top:14px;">
+        <summary><strong>주석: 표의「구조/핵심 아이디어」열 설명</strong></summary>
+        <ul style="margin:10px 0 0 1rem; line-height:1.55;">
+          <li><strong>XGBoost — Tree 기반 best baseline:</strong> 그래디언트 부스팅 결정트리 앙상블. 피처 스케일에 덜 민감하고 비선형·상호작용을 자동으로 나눠 학습합니다. DL과 비교할 때 tabular 강한 전통 ML 기준선 역할입니다.</li>
+          <li><strong>FlatMLP — 기본 MLP baseline:</strong> 모든 입력 피처를 한 벡터로 이어 붙인 뒤, 완전연결층만 쌓은 다층 퍼셉트론. 구조가 단순해 DL의 출발점으로 두고, 구조 개선형 MLP와의 차이를 보기 위한 대조군입니다.</li>
+          <li><strong>VAE — Encoder/Decoder + latent regression:</strong> 입력을 저차원 잠복공간(latent)으로 압축·복원하는 변분 오토인코더에, 잠복 벡터로부터 타깃을 예측하는 회귀 헤드를 붙인 형태. 재구성·KL·예측 손실을 함께 쓰며 “표현 학습 + 회귀”를 동시에 시도합니다.</li>
+          <li><strong>TabNet — Attentive tabular DL:</strong> 단계마다 어떤 피처에 집중할지 학습하는 attention 기반 tabular 전용 신경망. 해석 가능성을 노리지만, 데이터·설정에 따라 baseline 대비 이득이 없을 수 있습니다.</li>
+          <li><strong>BlockWiseMLP — feature block encoder + concat head:</strong> pathway / chemistry / target 등 <strong>의미별로 피처를 나눠</strong> 각 블록에 작은 인코더를 두고, 블록 임베딩을 이어 붙인 뒤 최종 회귀 헤드로 예측합니다. 도메인 구조를 네트워크에 반영하려는 설계입니다. (현재 데이터에서 pathway 블록이 비면 chem·target 분리 수준만 의미 있습니다.)</li>
+          <li><strong>ResidualMLP — flat MLP + residual blocks:</strong> 깊은 완전연결 경로에서 <strong>skip connection</strong>으로 그래디언트·학습 안정성을 보완한 MLP. 구조만 바꿔 flat 대비 성능 개선이 있는지 보기 위한 변형입니다.</li>
+        </ul>
+      </details>
       <p class="muted">이번 섹션은 현재까지 사용된 모든 DL/비교 모델의 실행/평가 상태를 통합 요약합니다.</p>
     </section>
 
