@@ -249,11 +249,11 @@
       </p>
       <table>
         <tr><th>model</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th><th>DL 군 코멘트</th></tr>
-        <tr><td>ResidualMLP</td><td>2.107</td><td>1.585</td><td>0.447</td><td>0.837</td><td>1.000</td><td>1순위 대표 후보</td></tr>
-        <tr><td>BlockWiseMLP</td><td>2.108</td><td>1.582</td><td>0.443</td><td>0.835</td><td>1.000</td><td>2순위 (pathway=0 → chem/target 블록만 분리)</td></tr>
-        <tr><td>FlatMLP</td><td>2.113</td><td>1.598</td><td>0.440</td><td>0.836</td><td>1.000</td><td>baseline</td></tr>
-        <tr><td>VAE</td><td>2.153</td><td>1.610</td><td>0.368</td><td>0.840</td><td>1.000</td><td>Spearman 약함 (latent 32 선택)</td></tr>
-        <tr><td>TabNet</td><td>2.538</td><td>1.968</td><td>0.168</td><td>0.716</td><td>1.000</td><td>DL 대표 후보에서 제외 권장</td></tr>
+        <tr><td>ResidualMLP</td><td><span class="best">2.107</span></td><td>1.585</td><td><span class="best">0.447</span></td><td>0.837</td><td><span class="best">1.000</span></td><td>1순위 대표 후보</td></tr>
+        <tr><td>BlockWiseMLP</td><td>2.108</td><td><span class="best">1.582</span></td><td>0.443</td><td>0.835</td><td><span class="best">1.000</span></td><td>2순위 (pathway=0 → chem/target 블록만 분리)</td></tr>
+        <tr><td>FlatMLP</td><td>2.113</td><td>1.598</td><td>0.440</td><td>0.836</td><td><span class="best">1.000</span></td><td>baseline</td></tr>
+        <tr><td>VAE</td><td>2.153</td><td>1.610</td><td>0.368</td><td><span class="best">0.840</span></td><td><span class="best">1.000</span></td><td>Spearman 약함 (latent 32 선택)</td></tr>
+        <tr><td>TabNet</td><td>2.538</td><td>1.968</td><td>0.168</td><td>0.716</td><td><span class="best">1.000</span></td><td>DL 대표 후보에서 제외 권장</td></tr>
       </table>
       <p class="muted">
         <strong>DL 군 대표 제안:</strong> 1순위 <strong>ResidualMLP</strong>, 2순위 <strong>BlockWiseMLP</strong>
@@ -271,9 +271,9 @@
           <p style="margin-top:12px;"><strong>동일 5-fold CV 결과 (XGBoost / BlockWise / Residual 비교)</strong></p>
           <table>
             <tr><th>model</th><th>RMSE_mean</th><th>MAE_mean</th><th>Spearman_mean</th><th>NDCG@20_mean</th><th>Hit@20_mean</th></tr>
-            <tr><td>XGBoost_tuned</td><td>2.070</td><td>1.540</td><td><strong>0.473</strong></td><td>0.840</td><td>1.000</td></tr>
-            <tr><td>BlockWiseMLP (pathway=50)</td><td><strong>2.070</strong></td><td>1.542</td><td>0.472</td><td>0.839</td><td>1.000</td></tr>
-            <tr><td>ResidualMLP</td><td>2.071</td><td><strong>1.531</strong></td><td>0.471</td><td><strong>0.841</strong></td><td>1.000</td></tr>
+            <tr><td>XGBoost_tuned</td><td><span class="best">2.070</span></td><td>1.540</td><td><span class="best">0.473</span></td><td>0.840</td><td><span class="best">1.000</span></td></tr>
+            <tr><td>BlockWiseMLP (pathway=50)</td><td><span class="best">2.070</span></td><td>1.542</td><td>0.472</td><td>0.839</td><td><span class="best">1.000</span></td></tr>
+            <tr><td>ResidualMLP</td><td>2.071</td><td><span class="best">1.531</span></td><td>0.471</td><td><span class="best">0.841</span></td><td><span class="best">1.000</span></td></tr>
           </table>
           <p class="muted" style="margin-top:10px;">
             해석: pathway 블록이 실제로 채워지면 BlockWiseMLP가 XGBoost와 매우 근접해져 <strong>2순위 후보의 근거가 강화</strong>됩니다.
@@ -295,10 +295,10 @@
       </p>
       <table>
         <tr><th>model</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th></tr>
-        <tr><td>XGBoost_tuned</td><td>2.133±0.040</td><td>1.594±0.021</td><td>0.431±0.009</td><td>0.840±0.004</td><td>1.000±0.000</td></tr>
-        <tr><td>FlatMLP</td><td>2.136±0.039</td><td>1.603±0.022</td><td>0.433±0.007</td><td>0.839±0.002</td><td>1.000±0.000</td></tr>
-        <tr><td>BlockWiseMLP</td><td>2.130±0.040</td><td>1.592±0.020</td><td>0.434±0.013</td><td>0.839±0.005</td><td>1.000±0.000</td></tr>
-        <tr><td>ResidualMLP</td><td>2.129±0.041</td><td>1.589±0.019</td><td>0.437±0.011</td><td>0.841±0.003</td><td>1.000±0.000</td></tr>
+        <tr><td>XGBoost_tuned</td><td>2.133±0.040</td><td>1.594±0.021</td><td>0.431±0.009</td><td>0.840±0.004</td><td><span class="best">1.000±0.000</span></td></tr>
+        <tr><td>FlatMLP</td><td>2.136±0.039</td><td>1.603±0.022</td><td>0.433±0.007</td><td>0.839±0.002</td><td><span class="best">1.000±0.000</span></td></tr>
+        <tr><td>BlockWiseMLP</td><td>2.130±0.040</td><td>1.592±0.020</td><td>0.434±0.013</td><td>0.839±0.005</td><td><span class="best">1.000±0.000</span></td></tr>
+        <tr><td>ResidualMLP</td><td><span class="best">2.129±0.041</span></td><td><span class="best">1.589±0.019</span></td><td><span class="best">0.437±0.011</span></td><td><span class="best">0.841±0.003</span></td><td><span class="best">1.000±0.000</span></td></tr>
       </table>
       <p class="muted">
         해석: 동일 5-fold에서 Spearman 기준 <strong>ResidualMLP</strong> &gt; BlockWiseMLP &gt; FlatMLP &gt; XGBoost_tuned 순입니다.
@@ -348,7 +348,7 @@
           <p><strong>MLP Baseline 결과 (보관)</strong></p>
           <table>
             <tr><th>model</th><th>dataset</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th></tr>
-            <tr><td>MLP</td><td>newfe_v2_target_only</td><td>2.113</td><td>1.598</td><td>0.440</td><td>0.836</td><td>1.000</td></tr>
+            <tr><td>MLP</td><td>newfe_v2_target_only</td><td><span class="best">2.113</span></td><td><span class="best">1.598</span></td><td><span class="best">0.440</span></td><td><span class="best">0.836</span></td><td><span class="best">1.000</span></td></tr>
           </table>
           <p>XGBoost vs MLP, MLP·VAE·TabNet 학습곡선 등 예전에 분리 표시되던 항목은 CSV·폴더에 그대로 보관되어 있습니다.</p>
           <p>원본 상세 파일 경로는 <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/</code> 하위(`mlp_baseline`, `vae_baseline`, `tabnet_baseline`)를 참고하세요.</p>
