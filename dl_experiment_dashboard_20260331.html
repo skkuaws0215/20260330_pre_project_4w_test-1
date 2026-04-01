@@ -26,7 +26,7 @@
 <body>
   <div class="hero">
     <h1>DL Experiment Dashboard</h1>
-    <p>ML(XGBoost) 확정 이후, DL baseline(MLP / VAE / TabNet) 실험을 관리하는 전용 대시보드.</p>
+    <p>ML / DL / Graph 각 군에서 대표 모델을 고르기 위한 단계별 기록. 현재는 DL 군 실험·정리에 집중합니다.</p>
     <div class="badge">Snapshot · 20260401_v1</div>
     <a class="nav-btn" href="newfe_quality_dashboard_20260331.html">Back to New FE Quality Dashboard</a>
   </div>
@@ -35,9 +35,9 @@
     <section>
       <h2>1) 실험 목표</h2>
       <ul class="muted">
-        <li>newfe_v2(target-only) 기반으로 DL 모델 성능/안정성 평가</li>
-        <li>기준선(XGBoost) 대비 DL 구조별 개선 여부 확인</li>
-        <li>Graph 단계 전 DL 방향성(MLP 계열 확장) 최종 확정</li>
+        <li>최종 단일 모델 확정이 아니라, <strong>ML / DL / Graph 군별 대표 1–2종</strong>을 단계적으로 선정</li>
+        <li>DL 군: 동일 데이터·동일 holdout으로 FlatMLP / VAE / TabNet / BlockWise / Residual 비교 후 대표 후보 확정</li>
+        <li>이후 Graph 군 실험 후, ML 대표 vs DL 대표 vs Graph 대표로 최종 챔피언 비교</li>
       </ul>
     </section>
 
@@ -126,8 +126,31 @@
         <tr><td>5-fold CV(mean±std)</td><td>ResidualMLP</td><td>2.129±0.041</td><td>1.589±0.019</td><td>0.437±0.011</td><td>0.841±0.003</td><td>1.000±0.000</td><td>cv 우세 확인</td></tr>
       </table>
       <p class="muted">
-        요약: 단일 holdout과 5-fold CV 모두에서 <strong>ResidualMLP</strong>가 안정적으로 상위권이며,
-        BlockWiseMLP는 현재 block grouping 이슈로 후순위 검토를 유지합니다.
+        요약: 단일 holdout과 5-fold CV 모두에서 <strong>ResidualMLP</strong>가 안정적으로 상위권입니다.
+        DL 군 전용 동일 split 비교는 아래 <strong>6)</strong> 표를 기준으로 합니다.
+      </p>
+    </section>
+
+    <section>
+      <h2>6) DL family final comparison (동일 holdout, 5모델)</h2>
+      <p class="muted">
+        스크립트: <code>ml/pilot_sagemaker/run_dl_family_comparison_local.py</code><br/>
+        출력: <code>dl_family_comparison.csv</code>, <code>dl_family_summary.json</code><br/>
+        경로: <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/dl_family/</code><br/>
+        조건: <code>pair_features_newfe_v2</code> (LINCS 제외), key inner join, <code>test_size=0.2</code>, <code>random_state=42</code>.
+        VAE 행은 latent 32·64 중 validation Spearman 최고 설정을 대표로 사용.
+      </p>
+      <table>
+        <tr><th>model</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th><th>DL 군 코멘트</th></tr>
+        <tr><td>ResidualMLP</td><td>2.107</td><td>1.585</td><td>0.447</td><td>0.837</td><td>1.000</td><td>1순위 대표 후보</td></tr>
+        <tr><td>BlockWiseMLP</td><td>2.108</td><td>1.582</td><td>0.443</td><td>0.835</td><td>1.000</td><td>2순위 (pathway=0 → chem/target 블록만 분리)</td></tr>
+        <tr><td>FlatMLP</td><td>2.113</td><td>1.598</td><td>0.440</td><td>0.836</td><td>1.000</td><td>baseline</td></tr>
+        <tr><td>VAE</td><td>2.153</td><td>1.610</td><td>0.368</td><td>0.840</td><td>1.000</td><td>Spearman 약함 (latent 32 선택)</td></tr>
+        <tr><td>TabNet</td><td>2.538</td><td>1.968</td><td>0.168</td><td>0.716</td><td>1.000</td><td>DL 대표 후보에서 제외 권장</td></tr>
+      </table>
+      <p class="muted">
+        <strong>DL 군 대표 제안:</strong> 1순위 <strong>ResidualMLP</strong>, 2순위 <strong>BlockWiseMLP</strong>
+        (pathway 피처가 생기면 Block-wise 재평가 권장).
       </p>
     </section>
 

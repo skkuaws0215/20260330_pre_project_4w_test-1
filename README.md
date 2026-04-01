@@ -449,6 +449,16 @@ Delta 요약:
 - `ResidualMLP`는 Spearman/RMSE/MAE/NDCG@20에서 tuned XGBoost CV 대비 소폭 우세.
 - `BlockWiseMLP`는 block grouping 완성도 이슈로 현재 후순위, Residual 계열을 우선 확장 대상으로 유지.
 
+#### DL 군 대표 선정용 통합 비교 (동일 holdout, 5모델)
+
+- 목적: 최종 단일 모델이 아니라 **ML / DL / Graph 군별 대표 1–2종**을 고르기 위한 DL 군 정리.
+- 실행 스크립트: `ml/pilot_sagemaker/run_dl_family_comparison_local.py`
+- 비교 모델: `FlatMLP`, `VAE` (latent 32·64 중 Spearman 최고를 대표 행으로 사용), `TabNet`, `BlockWiseMLP`, `ResidualMLP`
+- 출력:
+  - `results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/dl_family/dl_family_comparison.csv`
+  - `results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/dl_family/dl_family_summary.json`
+- 대시보드: `dl_experiment_dashboard_20260331.html` → **6) DL family final comparison**
+
 ## `credentials` 작성 시 주의
 
 - 파일 상단에 **`#` 주석을 넣지 않는 것**을 권장합니다. (일부 환경에서 AWS CLI 파싱 오류가 날 수 있음)

@@ -1,0 +1,31 @@
+{
+  "purpose": "Select 1–2 representative DL models per family stage; final champion vs ML/Graph later.",
+  "dataset": "pair_features_newfe_v2.parquet (LINCS excluded)",
+  "rows_total": 14497,
+  "rows_train": 11597,
+  "rows_valid": 2900,
+  "feature_cols": 2068,
+  "split": {
+    "test_size": 0.2,
+    "random_state": 42
+  },
+  "block_grouping": {
+    "pathway_features": 0,
+    "chem_features": 2058,
+    "target_features": 10
+  },
+  "vae_representative": {
+    "latent_dim_chosen": 32,
+    "candidates_evaluated": [
+      32,
+      64
+    ]
+  },
+  "dl_family_top1_by_spearman": "ResidualMLP",
+  "dl_family_top2_by_spearman": "BlockWiseMLP",
+  "recommendation": "DL family representatives (this run): primary=ResidualMLP, secondary=BlockWiseMLP. pathway_features=0 so BlockWise splits chem vs target only; re-run when pathway columns exist.",
+  "outputs": {
+    "comparison_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/dl_family/dl_family_comparison.csv",
+    "summary_json": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/dl_family/dl_family_summary.json"
+  }
+}
