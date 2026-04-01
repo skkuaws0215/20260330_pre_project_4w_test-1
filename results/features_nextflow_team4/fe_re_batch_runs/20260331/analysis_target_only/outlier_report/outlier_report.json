@@ -1,0 +1,157 @@
+{
+  "source_parquet": "results/features_nextflow_team4/fe_re_batch_runs/20260331/final/pair_features_newfe_v2.parquet",
+  "n_rows": 25575,
+  "method": {
+    "outlier_rule": "Tukey IQR: value < Q1 - 1.5*IQR or value > Q3 + 1.5*IQR",
+    "percentiles": "Q1/Q3 via numpy percentile 25/75; p1/p50/p99 at 1/50/99",
+    "iqr_degenerate": "If IQR is ~0 relative to |Q3|, outlier_count forced to 0 (no fence spread)."
+  },
+  "scope": {
+    "included_patterns": [
+      "pathway_* (pathway block; e.g. pathway__<name> from GMT)",
+      "drug_desc_* (RDKit descriptors, continuous)",
+      "target_* (target block; binary-only columns excluded)"
+    ],
+    "excluded": [
+      "sample_id, canonical_drug_id",
+      "columns with 'lincs' in name (aligned with target-only modeling)",
+      "drug_morgan_* (binary fingerprint bits)",
+      "binary/indicator columns: non-null values only in {0, 1}"
+    ]
+  },
+  "columns_in_scope_before_continuous_filter": 19,
+  "continuous_columns_analyzed": 15,
+  "skipped_binary_or_indicator_in_scope": [
+    "target_overlap_count",
+    "target_overlap_ratio",
+    "target_pathway_score_mean",
+    "target_pathway_hit_count"
+  ],
+  "by_feature_group": {
+    "rdkit_descriptor": {
+      "n_columns": 9,
+      "mean_outlier_ratio": 0.04295861844248941,
+      "median_outlier_ratio": 0.026823069403714567,
+      "max_outlier_ratio": 0.11448680351906158
+    },
+    "target_continuous": {
+      "n_columns": 6,
+      "mean_outlier_ratio": 0.02185728250244379,
+      "median_outlier_ratio": 0.0,
+      "max_outlier_ratio": 0.13114369501466275
+    }
+  },
+  "top_outlier_ratio_columns": [
+    {
+      "column": "target_gene_count",
+      "feature_group": "target_continuous",
+      "outlier_ratio": 0.13114369501466275,
+      "outlier_count": 3354,
+      "iqr_degenerate": false
+    },
+    {
+      "column": "drug_desc_hbd",
+      "feature_group": "rdkit_descriptor",
+      "outlier_ratio": 0.11448680351906158,
+      "outlier_count": 2928,
+      "iqr_degenerate": false
+    },
+    {
+      "column": "drug_desc_rot_bonds",
+      "feature_group": "rdkit_descriptor",
+      "outlier_ratio": 0.08121212121212121,
+      "outlier_count": 2077,
+      "iqr_degenerate": false
+    },
+    {
+      "column": "drug_desc_frac_csp3",
+      "feature_group": "rdkit_descriptor",
+      "outlier_ratio": 0.06357771260997068,
+      "outlier_count": 1626,
+      "iqr_degenerate": false
+    },
+    {
+      "column": "drug_desc_logp",
+      "feature_group": "rdkit_descriptor",
+      "outlier_ratio": 0.05098729227761486,
+      "outlier_count": 1304,
+      "iqr_degenerate": false
+    },
+    {
+      "column": "drug_desc_tpsa",
+      "feature_group": "rdkit_descriptor",
+      "outlier_ratio": 0.026823069403714567,
+      "outlier_count": 686,
+      "iqr_degenerate": false
+    },
+    {
+      "column": "drug_desc_hba",
+      "feature_group": "rdkit_descriptor",
+      "outlier_ratio": 0.018690127077223853,
+      "outlier_count": 478,
+      "iqr_degenerate": false
+    },
+    {
+      "column": "drug_desc_ring_count",
+      "feature_group": "rdkit_descriptor",
+      "outlier_ratio": 0.013567937438905182,
+      "outlier_count": 347,
+      "iqr_degenerate": false
+    },
+    {
+      "column": "drug_desc_mol_wt",
+      "feature_group": "rdkit_descriptor",
+      "outlier_ratio": 0.009657869012707723,
+      "outlier_count": 247,
+      "iqr_degenerate": false
+    },
+    {
+      "column": "drug_desc_heavy_atoms",
+      "feature_group": "rdkit_descriptor",
+      "outlier_ratio": 0.007624633431085044,
+      "outlier_count": 195,
+      "iqr_degenerate": false
+    },
+    {
+      "column": "target_overlap_down_count",
+      "feature_group": "target_continuous",
+      "outlier_ratio": 0.0,
+      "outlier_count": 0,
+      "iqr_degenerate": true
+    },
+    {
+      "column": "target_overlap_down_ratio",
+      "feature_group": "target_continuous",
+      "outlier_ratio": 0.0,
+      "outlier_count": 0,
+      "iqr_degenerate": true
+    },
+    {
+      "column": "target_expr_mean",
+      "feature_group": "target_continuous",
+      "outlier_ratio": 0.0,
+      "outlier_count": 0,
+      "iqr_degenerate": true
+    },
+    {
+      "column": "target_expr_std",
+      "feature_group": "target_continuous",
+      "outlier_ratio": 0.0,
+      "outlier_count": 0,
+      "iqr_degenerate": true
+    },
+    {
+      "column": "target_gene_coverage_ratio",
+      "feature_group": "target_continuous",
+      "outlier_ratio": 0.0,
+      "outlier_count": 0,
+      "iqr_degenerate": false
+    }
+  ],
+  "interpretation_note": "Outlier ratios are row-fractions per feature under Tukey IQR. High ratios may warrant winsorization, log1p, or robust scaling for neural models; tree models are often less sensitive. Compare with training preprocessing (e.g. missing→0, standard scaling).",
+  "columns_with_outlier_ratio_ge_0.05": 5,
+  "outputs": {
+    "csv": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/outlier_report/feature_outlier_summary.csv",
+    "json": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/outlier_report/outlier_report.json"
+  }
+}

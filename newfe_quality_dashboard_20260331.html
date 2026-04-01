@@ -467,6 +467,31 @@
       </details>
       </details>
     </section>
+
+    <section>
+      <details class="qc-wrap">
+        <summary>11) newfe_v2 연속형 피처 IQR 이상치 리포트 (주석)</summary>
+        <p class="muted">
+          <strong>목적:</strong> <code>pair_features_newfe_v2.parquet</code>에서 pathway 점수·RDKit 서술자·<code>target_*</code> 연속형만 골라
+          Tukey IQR(1.5×IQR) 기준으로 행 단위 이상치 비율을 보고, 모델에 미칠 영향과 clipping / log 변환 후보를 가늠한다.
+          Morgan 지문(<code>drug_morgan_*</code>)·LINCS·키 컬럼·0/1만 갖는 지표형 컬럼은 제외한다.
+        </p>
+        <ul style="line-height:1.55;">
+          <li><strong>산출물:</strong>
+            <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/outlier_report/feature_outlier_summary.csv</code>
+            (컬럼별 <code>outlier_count</code>, <code>outlier_ratio</code>, <code>min</code>, <code>p1</code>, <code>p50</code>, <code>p99</code>, <code>max</code> 등),
+            <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/outlier_report/outlier_report.json</code> (범위·방법·그룹 요약·상위 이상치 비율 컬럼).
+          </li>
+          <li><strong>재실행:</strong> 저장소 루트에서
+            <code>python3 ml/pilot_sagemaker/report_newfe_v2_outliers.py</code>
+            (기본 입력·출력 경로는 스크립트 <code>--parquet-uri</code> / <code>--out-dir</code>로 덮어쓸 수 있음).
+          </li>
+          <li><strong>해석 힌트:</strong> JSON의 <code>interpretation_note</code>와 같이, 트리 계열은 스케일·꼬리에 덜 민감한 경우가 많고 MLP 등은 winsorize / <code>log1p</code> / 강건 스케일을 후보로 두면 된다.
+            IQR이 사실상 0이면 해당 컬럼은 <code>iqr_degenerate</code>로 표시하고 이상치 건수는 0으로 둔다.
+          </li>
+        </ul>
+      </details>
+    </section>
   </div>
 </body>
 </html>
