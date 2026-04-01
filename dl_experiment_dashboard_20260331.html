@@ -343,57 +343,141 @@
     </section>
 
     <section>
-      <h2>9) 3종 모델 튜닝 결과 (Stage 1 완료)</h2>
+      <h2>9) 튜닝 단계 요약 (데이터/의사결정 흐름)</h2>
       <p class="muted">
-        목적: 최종 후보 3종(<strong>XGBoost</strong>, <strong>ResidualMLP</strong>, <strong>BlockWiseMLP</strong>)을 동일 조건에서 튜닝·비교해
-        최종 제출 모델(또는 앙상블 여부) 결정을 지원합니다. 아래 표는 <strong>실데이터(labels.parquet)</strong> 기반 Stage 1 실행 결과입니다.
-        <strong>현재 상태: 완료(Completed)</strong>
+        아래는 GMT(pathway) 반영 입력을 고정한 상태에서 진행한 단계별 의사결정 요약입니다.
+      </p>
+      <table style="margin-top:10px;">
+        <tr><th>구분</th><th>입력 데이터</th><th>평가값(핵심)</th><th>DL 후보 운영</th><th>의사결정 상태</th></tr>
+        <tr>
+          <td>튜닝 전 (기준선)</td>
+          <td><code>final_pathway_addon/pair_features_newfe_v2.parquet</code> (GMT/pathway 반영)</td>
+          <td>XGB: Sp=0.473117, RMSE=2.067037 / Res: Sp=0.476152, gap=0.120905 / BW: Sp=0.473404, gap=-0.026954</td>
+          <td>BlockWiseMLP + ResidualMLP 병행</td>
+          <td>DL 미확정</td>
+        </tr>
+        <tr>
+          <td>1차 튜닝 (Round2)</td>
+          <td>동일 입력 고정 (GMT/pathway 반영, 재생성 없음)</td>
+          <td>XGB: Sp=0.473565, RMSE=2.065700 / Res: Sp=0.470814, gap=-0.091452 / BW: Sp=0.469690, gap=-0.045076</td>
+          <td>ResidualMLP 유지, BlockWiseMLP 제외 결정</td>
+          <td>ML: XGBoost 확정, DL 재검증 필요</td>
+        </tr>
+        <tr>
+          <td>2차 튜닝 (Round2.1)</td>
+          <td>동일 입력 고정 (GMT/pathway 반영, 재생성 없음)</td>
+          <td>Res only: Sp=0.470301, RMSE=2.075779, std=0.010706, gap=-0.081948</td>
+          <td>ResidualMLP 초소형 탐색(4 config)</td>
+          <td>ML/DL 최종 대표 확정 단계</td>
+        </tr>
+      </table>
+      <details class="muted" style="margin-top:12px;">
+        <summary><strong>주석: 데이터 고정 확인</strong></summary>
+        <p style="margin:10px 0 8px;"><strong>평가값(핵심) 정의</strong></p>
+        <table>
+          <tr><th>표기</th><th>정의</th><th>해석 가이드</th></tr>
+          <tr>
+            <td><code>Sp</code> (Spearman)</td>
+            <td>예측 순위와 실제 순위의 상관계수(평균)</td>
+            <td>클수록 좋음 (순위 일치도 향상)</td>
+          </tr>
+          <tr>
+            <td><code>RMSE</code></td>
+            <td>예측값-실측값 오차의 제곱평균제곱근</td>
+            <td>작을수록 좋음 (절대 오차 규모 감소)</td>
+          </tr>
+          <tr>
+            <td><code>std</code></td>
+            <td>5-fold에서 Spearman의 표준편차</td>
+            <td>작을수록 좋음 (fold 간 안정성 높음)</td>
+          </tr>
+          <tr>
+            <td><code>gap</code> (val-train MSE)</td>
+            <td>검증 MSE - 학습 MSE 평균</td>
+            <td>너무 큰 양수면 과적합 신호, 0 근처/완만한 음수는 일반화 관점에서 상대적으로 안정</td>
+          </tr>
+        </table>
+        <ul style="margin:10px 0 0 1rem; line-height:1.55;">
+          <li><strong>입력 고정(전 단계 공통):</strong> <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/final_pathway_addon/pair_features_newfe_v2.parquet</code> + 실 labels.parquet 사용 (GMT/pathway 반영, 재생성 없음)</li>
+          <li><strong>확인:</strong> 초기 GMT(pathway) 반영 데이터는 튜닝 단계에서 빠지지 않았고, Round2/2.1 모두 동일 파일을 사용했습니다.</li>
+        </ul>
+      </details>
+    </section>
+
+    <section>
+      <h2>9-1) 1차 튜닝 결과 (Round2)</h2>
+      <p class="muted">
+        SageMaker baseline 고정 전 미세 조정으로 3종 모델을 동일 5-fold CV 조건에서 비교한 결과입니다.
       </p>
       <table>
         <tr><th>모델</th><th>튜닝 범위(요약)</th><th>평가 기준</th><th>상태</th><th>비고</th></tr>
         <tr>
           <td>XGBoost</td>
-          <td>12 config (지정 grid 내 샘플링), 5-fold CV 동일 split</td>
-          <td>Spearman mean=<span class="best">0.473117</span> / std=0.009845, RMSE mean=2.067037</td>
+          <td>Round2 narrow 6 config (보수적 depth/regularization 강화), 5-fold CV 동일 split</td>
+          <td>Spearman mean=<span class="best">0.473565</span> / std=0.009188, RMSE mean=2.065700, MAE mean=1.534361</td>
           <td class="ok">완료</td>
-          <td>ML baseline, top3 config 저장</td>
+          <td><strong>ML baseline 확정</strong> (성능/일반화 소폭 개선)</td>
         </tr>
         <tr>
           <td>ResidualMLP</td>
-          <td>12 config (hidden_dim/num_layers/dropout/lr/wd), variant A/B 비교</td>
-          <td>Spearman mean=<span class="best">0.476152</span> / std=0.011203, RMSE mean=2.066046</td>
+          <td>Round2 narrow 7 config (regularization/clip/pathway z-score), 5-fold CV 동일 split</td>
+          <td>Spearman mean=<span class="best">0.470814</span> / std=0.010933, RMSE mean=2.074299, MAE mean=1.554629</td>
           <td class="ok">완료</td>
-          <td><strong>DL 대표 선정</strong> (Stage 1)</td>
+          <td>Round2.1(초소형) 재검증 진행</td>
         </tr>
         <tr>
           <td>BlockWiseMLP</td>
-          <td>12 config (4-block: pathway/chem/lincs/target), variant A/B 비교</td>
-          <td>Spearman mean=0.473404 / std=<span class="best">0.008381</span>, RMSE mean=2.071053</td>
+          <td>Round2 narrow 6 config (dropout/wd/lr/fusion/pathway norm), 5-fold CV 동일 split</td>
+          <td>Spearman mean=0.469690 / std=0.009156, RMSE mean=2.076859, MAE mean=1.549167</td>
           <td class="ok">완료</td>
-          <td>DL 2트랙 비교 후보</td>
-        </tr>
-      </table>
-      <table style="margin-top:10px;">
-        <tr><th>Stage 1 최종 DL 선별</th><th>선정 기준</th><th>선정 결과</th></tr>
-        <tr>
-          <td>BlockWiseMLP vs ResidualMLP</td>
-          <td>1) Spearman_mean 2) fold std 3) train-validation gap</td>
-          <td><strong class="best">BlockWiseMLP</strong></td>
+          <td>이번 단계 제외(성능 복구 우선순위 낮음)</td>
         </tr>
       </table>
       <details class="muted" style="margin-top:12px;">
-        <summary><strong>주석: Stage 1 실행 메타/산출 경로</strong></summary>
+        <summary><strong>주석: Round2 해석</strong></summary>
         <ul style="margin:10px 0 0 1rem; line-height:1.55;">
-          <li><strong>입력 고정:</strong> <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/final_pathway_addon/pair_features_newfe_v2.parquet</code> + 실 labels.parquet 사용</li>
-          <li><strong>공정성:</strong> 전 모델 동일 5-fold CV(<code>KFold(shuffle=True, random_state=42)</code>), 동일 탐색 예산(각 12 config), DL 공통 epochs/batch/patience</li>
-          <li><strong>DL 선정 규칙:</strong> Spearman_mean 우선 → fold std(안정성) → val-train gap(과적합) 보조</li>
-          <li><strong>선정 해석(업데이트):</strong> ResidualMLP가 Spearman_mean에서 미세 우위(0.476152 vs 0.473404, +0.002748)였지만,
-            과적합 신호(val-train MSE gap: 0.120905 vs -0.026954)와 fold 안정성(std: 0.011203 vs 0.008381)을 함께 반영해
-            Stage 1 최종 DL 대표를 <strong>BlockWiseMLP</strong>로 조정했습니다.</li>
-          <li><strong>추가 코멘트(향후 개선):</strong> 이후 ResidualMLP의 과적합을 줄이는 튜닝(정규화/드롭아웃/학습률/early stopping 개선 등)에서
-            일반화 지표가 유의미하게 개선되면, DL 대표 모델 우선순위는 다시 조정될 수 있습니다.</li>
-          <li><strong>결과 루트:</strong> <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/model_selection_stage1/</code></li>
-          <li><strong>파일:</strong> <code>xgboost/</code>, <code>blockwise_mlp/</code>, <code>residual_mlp/</code> 각 <code>cv_results.csv</code>/<code>best_config.json</code>/<code>training_log.json</code> + 루트 <code>summary.md</code></li>
+          <li><strong>요약:</strong> XGBoost는 Spearman/RMSE/std가 모두 소폭 개선되어 ML baseline으로 확정했습니다.</li>
+          <li><strong>DL 판단:</strong> ResidualMLP는 val-train gap 완화 신호를 보였고, BlockWiseMLP는 Round2에서 제외 결정했습니다.</li>
+        </ul>
+      </details>
+    </section>
+
+    <section>
+      <h2>9-2) 2차 튜닝 결과 (Round2.1) 및 최종 대표</h2>
+      <p class="muted">
+        Round2.1은 <strong>ResidualMLP만</strong> 대상으로 기존 best 근처 <strong>4개 config</strong>를 초소형 탐색해
+        성능 복구와 과적합 억제 유지 가능성을 재점검했습니다.
+      </p>
+      <table>
+        <tr><th>대상</th><th>탐색 범위</th><th>최적 설정(요약)</th><th>결과 지표</th><th>판정</th></tr>
+        <tr>
+          <td>ResidualMLP</td>
+          <td>hidden_dim/num_layers/dropout/lr/wd + pathway z-score + grad clip (4 config)</td>
+          <td>hidden=128, layers=3, dropout=0.2, lr=1e-4, wd=1e-3, pathway_zscore, clip=off</td>
+          <td>Spearman=0.470301, std=0.010706, RMSE=2.075779, MAE=1.550819, gap=-0.081948</td>
+          <td>std/gap 기준 충족, Spearman 복구는 제한적</td>
+        </tr>
+      </table>
+      <table style="margin-top:10px;">
+        <tr><th>최종 대표 결정</th><th>모델</th><th>근거</th></tr>
+        <tr>
+          <td>ML 대표</td>
+          <td><strong class="best">XGBoost</strong></td>
+          <td>Round2에서 Spearman/RMSE/std 동시 개선 확인</td>
+        </tr>
+        <tr>
+          <td>DL 대표</td>
+          <td><strong class="best">ResidualMLP</strong></td>
+          <td>Round2~2.1에서 과적합 완화(gap 개선)와 fold 안정성 유지 확인</td>
+        </tr>
+      </table>
+      <details class="muted" style="margin-top:12px;">
+        <summary><strong>주석: 추가사항 및 해석</strong></summary>
+        <ul style="margin:10px 0 0 1rem; line-height:1.55;">
+          <li><strong>추가사항 1:</strong> Round2.1에서 Spearman이 XGBoost 수준까지 회복되지는 않았으나, 과적합 지표(gap)는 Stage1 대비 뚜렷하게 완화되었습니다.</li>
+          <li><strong>추가사항 2:</strong> 이번 결론은 SageMaker baseline 고정을 위한 운영 의사결정이며, 이후 DL 확장 탐색 시 우선순위가 재조정될 수 있습니다.</li>
+          <li><strong>추가사항 3:</strong> BlockWiseMLP는 본 라운드에서 제외했지만 결과 파일은 보관해 후속 비교 가능성을 유지합니다.</li>
+          <li><strong>결과 경로:</strong> <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/model_selection_stage1_round2_1/</code></li>
         </ul>
       </details>
     </section>

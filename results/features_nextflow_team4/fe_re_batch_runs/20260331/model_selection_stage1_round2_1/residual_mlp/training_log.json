@@ -1,0 +1,45 @@
+{
+  "family": "residual_mlp_round2_1",
+  "rows": [
+    {
+      "config_id": 1,
+      "spearman_mean": 0.4703007225307621,
+      "spearman_std": 0.010705629693797463,
+      "rmse_mean": 2.075779353095455,
+      "rmse_std": 0.045226523613391884,
+      "mae_mean": 1.5508188962936402,
+      "val_minus_train_mse_mean": -0.08194751017732074,
+      "params_json": "{\"dropout\": 0.2, \"grad_clip\": null, \"hidden_dim\": 128, \"lr\": 0.0001, \"num_layers\": 3, \"pathway_norm\": \"pathway_zscore\", \"patience\": 5, \"weight_decay\": 0.001}"
+    },
+    {
+      "config_id": 2,
+      "spearman_mean": 0.46469331297904165,
+      "spearman_std": 0.011192154171571057,
+      "rmse_mean": 2.1098730349560526,
+      "rmse_std": 0.039470436308539705,
+      "mae_mean": 1.5969962120056151,
+      "val_minus_train_mse_mean": -0.3309778282876996,
+      "params_json": "{\"dropout\": 0.3, \"grad_clip\": 1.0, \"hidden_dim\": 128, \"lr\": 0.0001, \"num_layers\": 3, \"pathway_norm\": \"pathway_zscore\", \"patience\": 5, \"weight_decay\": 0.001}"
+    },
+    {
+      "config_id": 3,
+      "spearman_mean": 0.4640889655211681,
+      "spearman_std": 0.008576710322840556,
+      "rmse_mean": 2.1124540486938868,
+      "rmse_std": 0.03741945907937624,
+      "mae_mean": 1.5991660833358765,
+      "val_minus_train_mse_mean": -0.27986610958616664,
+      "params_json": "{\"dropout\": 0.3, \"grad_clip\": 1.0, \"hidden_dim\": 128, \"lr\": 0.0001, \"num_layers\": 2, \"pathway_norm\": \"pathway_zscore\", \"patience\": 5, \"weight_decay\": 0.001}"
+    },
+    {
+      "config_id": 4,
+      "spearman_mean": 0.37715783542258896,
+      "spearman_std": 0.012230909688448187,
+      "rmse_mean": 2.1455453117704786,
+      "rmse_std": 0.03767269054776264,
+      "mae_mean": 1.6154006719589233,
+      "val_minus_train_mse_mean": -0.22366396198247057,
+      "params_json": "{\"dropout\": 0.2, \"grad_clip\": 1.0, \"hidden_dim\": 256, \"lr\": 0.0003, \"num_layers\": 3, \"pathway_norm\": \"raw\", \"patience\": 5, \"weight_decay\": 0.0005}"
+    }
+  ]
+}

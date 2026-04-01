@@ -1,0 +1,9 @@
+{
+  "block_hidden_dim": 64,
+  "dropout": 0.2,
+  "fusion_hidden_dim": 256,
+  "lr": 0.0003,
+  "pathway_norm": "pathway_zscore",
+  "patience": 5,
+  "weight_decay": 0.0001
+}
