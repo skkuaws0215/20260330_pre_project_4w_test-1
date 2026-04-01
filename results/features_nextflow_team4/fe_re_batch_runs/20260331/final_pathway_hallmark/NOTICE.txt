@@ -1,0 +1,4 @@
+Intermediate build with --pathway-gmt (MSigDB Hallmark v7.5 symbols) and drug_stub SMILES.
+Pair-level parquet outputs were removed: chemistry is invalid (all invalid SMILES in that run).
+
+For training, use ../final_pathway_addon/pair_features_newfe_v2.parquet (pathway__* merged into the original 20260331 final pair file; Morgan/descriptor/LINCS/target unchanged).

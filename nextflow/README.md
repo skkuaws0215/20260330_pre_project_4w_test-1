@@ -120,7 +120,7 @@ python nextflow/scripts/build_pair_features_newfe_v2.py `
   --drug-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/input/20260330_bridge_v1/drug_features.parquet" `
   --lincs-drug-signature-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/input/20260330_bridge_v1/drug_features.parquet" `
   --drug-target-uri "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/input/20260331/drug_target_map.parquet" `
-  --pathway-gmt "nextflow/refs/hallmark.gmt" `
+  --pathway-gmt "nextflow/refs/h.all.v7.5.symbols.gmt" `
   --high-z-threshold 1.0 `
   --low-z-threshold -1.0 `
   --out-dir "results/features_nextflow_team4/fe_re_batch_runs/20260331"

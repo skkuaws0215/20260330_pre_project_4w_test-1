@@ -1,0 +1,15 @@
+{
+  "gmt": "nextflow/refs/h.all.v7.5.symbols.gmt",
+  "gmt_source": "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/7.5/h.all.v7.5.symbols.gmt",
+  "pathway_sets_in_gmt": 50,
+  "sample_pathway_features_parquet": "results/features_nextflow_team4/fe_re_batch_runs/20260331/final_pathway_addon/sample_pathway_features.parquet",
+  "pathway_score_columns_in_sample_file": 50,
+  "pair_features_newfe_v2_output": "results/features_nextflow_team4/fe_re_batch_runs/20260331/final_pathway_addon/pair_features_newfe_v2.parquet",
+  "pathway__columns_in_pair_file": 50,
+  "column_prefix": "pathway__",
+  "merge_rule": "Left merge original final/pair_features_newfe_v2.parquet with sample_pathway_features on sample_id; pathway__* NaN filled with 0.0. Morgan/descriptor/LINCS/target columns byte-identical to pre-merge baseline (verified on drug_morgan_* block).",
+  "build_script_change": "build_pair_features_newfe_v2.build_sample_pathway_features maps GMT gene symbols to expression columns via suffix token (e.g. crispr__TP53 -> TP53) so prefixed matrices work.",
+  "pathway_generation_run": "results/features_nextflow_team4/fe_re_batch_runs/20260331/final_pathway_hallmark/ (sample_pathway_features + component parquets; pair-level outputs intentionally omitted — see NOTICE.txt)",
+  "expression_input_for_pathway_scores": "results/features_nextflow_team4/fe_re_batch_runs/20260331/input_derived/sample_expression_crispr_full.parquet (52 samples; 23 zero-padded vs work/e9 features subset)",
+  "cv_with_pathway_addon": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/xgb_mlp3_cv_pathway_addon/"
+}

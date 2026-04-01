@@ -61,7 +61,7 @@ def _parse_gmt(path: str) -> dict[str, set[str]]:
             if len(parts) < 3:
                 continue
             pathway = parts[0]
-            genes = {g.strip() for g in parts[2:] if g.strip()}
+            genes = {str(g).strip().upper() for g in parts[2:] if str(g).strip()}
             if genes:
                 gmt[pathway] = genes
     return gmt
@@ -78,16 +78,28 @@ def build_sample_pathway_features(
     if not gmt_map:
         return sample_expr_df[[sample_id_col]].copy(), pd.DataFrame(columns=["pathway_name", "gene_symbol"])
 
+    # Map HGNC-like symbol (from GMT) to expression column (e.g. crispr__TP53 -> TP53).
+    symbol_to_col: dict[str, str] = {}
+    for c in expr_cols:
+        sym = str(c).split("__")[-1].strip().upper()
+        if sym and sym not in symbol_to_col:
+            symbol_to_col[sym] = c
+
     pathways: dict[str, np.ndarray] = {}
     members: list[dict[str, str]] = []
-    expr_col_set = set(expr_cols)
     for pathway, genes in gmt_map.items():
-        kept = sorted(expr_col_set.intersection(genes))
-        if not kept:
+        kept_cols: list[str] = []
+        for g in genes:
+            col = symbol_to_col.get(str(g).strip().upper())
+            if col is not None:
+                kept_cols.append(col)
+        kept_cols = sorted(set(kept_cols))
+        if not kept_cols:
             continue
-        for g in kept:
-            members.append({"pathway_name": pathway, "gene_symbol": g})
-        pathways[pathway] = sample_expr_df[kept].to_numpy(dtype=np.float32)
+        for col in kept_cols:
+            sym = str(col).split("__")[-1].strip().upper()
+            members.append({"pathway_name": pathway, "gene_symbol": sym})
+        pathways[pathway] = sample_expr_df[kept_cols].to_numpy(dtype=np.float32)
 
     out = sample_expr_df[[sample_id_col]].copy()
     for pathway, mat in pathways.items():
