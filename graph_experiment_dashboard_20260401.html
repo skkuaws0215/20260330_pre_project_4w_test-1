@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Graph Experiment Dashboard · 20260402_v1</title>
+  <style>
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b1020; color: #e6edf7; }
+    .hero { padding: 42px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); background: linear-gradient(120deg, #1f223f, #2d3f7a); }
+    .hero h1 { margin: 0 0 8px; font-size: 1.9rem; }
+    .hero p { margin: 0; color: #aab8d0; }
+    .badge { display: inline-block; margin-top: 12px; padding: 5px 10px; border: 1px solid #6ea8fe; border-radius: 999px; color: #9bc2ff; font-size: 0.82rem; }
+    .nav-btn { display: inline-block; margin-top: 12px; margin-left: 8px; border: 1px solid #42d59f; border-radius: 999px; color: #42d59f; padding: 5px 10px; font-size: 0.82rem; text-decoration: none; }
+    .container { max-width: 1120px; margin: 0 auto; padding: 22px; }
+    section { margin: 18px 0; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; background: rgba(255,255,255,0.02); }
+    h2 { margin: 0 0 12px; font-size: 1.2rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.92rem; }
+    th { background: rgba(110,168,254,0.13); color: #cfe2ff; }
+    .muted { color: #9fb0ca; font-size: 0.92rem; }
+    .ok { color: #42d59f; font-weight: 600; }
+    .plan { color: #f7c266; font-weight: 600; }
+    code { background: rgba(255,255,255,0.08); border-radius: 6px; padding: 2px 6px; }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>Graph Experiment Dashboard</h1>
+    <p>Graph 기반 모델 후보를 단계적으로 탐색하고, ML/DL 대표와 최종 비교할 후보군을 정리합니다.</p>
+    <div class="badge">Snapshot · 20260402_v1</div>
+    <a class="nav-btn" href="dl_experiment_dashboard_20260331.html">Go to DL Experiment Dashboard</a>
+    <a class="nav-btn" href="newfe_quality_dashboard_20260331.html">Back to New FE Quality Dashboard</a>
+  </div>
+
+  <div class="container">
+    <section>
+      <h2>1) 목적</h2>
+      <ul class="muted">
+        <li>Graph 군에서 최소 1개 대표 후보를 선정해 최종 챔피언 비교군에 포함</li>
+        <li>동일 입력/동일 split 기반으로 ML/DL과 공정 비교 가능한 기록 생성</li>
+        <li>성능뿐 아니라 안정성(std), 운영 복잡도까지 함께 판단</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>2) 현재 단계 전제</h2>
+      <table>
+        <tr><th>항목</th><th>상태</th></tr>
+        <tr><td>ML 실험</td><td>완료 (대표: <strong>XGBoost</strong>)</td></tr>
+        <tr><td>DL 실험</td><td>완료 (대표: <strong>ResidualMLP</strong>)</td></tr>
+        <tr><td>현재 단계</td><td><strong>Graph 군 대표 1종 선정</strong>을 위한 로컬 baseline 실험</td></tr>
+        <tr><td>SageMaker 사용 여부</td><td>아직 사용하지 않음 (Graph 대표 확정 후 3자 비교 단계에서 사용)</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>3) 입력/공정성 규칙</h2>
+      <table>
+        <tr><th>항목</th><th>설정</th></tr>
+        <tr><td>Feature</td><td><code>results/features_nextflow_team4/fe_re_batch_runs/20260331/final_pathway_addon/pair_features_newfe_v2.parquet</code> (고정)</td></tr>
+        <tr><td>Label</td><td>실 <code>labels.parquet</code> (고정)</td></tr>
+        <tr><td>Graph 변환</td><td>동일 feature를 graph 입력으로 변환 (node / edge 정의 필요)</td></tr>
+        <tr><td>Split</td><td>동일 5-fold CV (<code>KFold(shuffle=True, random_state=42)</code>)</td></tr>
+        <tr><td>금지사항</td><td>feature 재생성/랜덤 라벨/부분 샘플링 금지</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>4) Graph 후보 모델 (로컬 baseline)</h2>
+      <table>
+        <tr><th>후보 모델</th><th>핵심 아이디어</th><th>상태</th><th>비고</th></tr>
+        <tr><td>GraphSAGE</td><td>sample-aggregate 기반 확장성</td><td class="plan">예정</td><td>후보 1</td></tr>
+        <tr><td>GCN</td><td>기본 message passing baseline</td><td class="plan">예정</td><td>후보 2</td></tr>
+        <tr><td>GAT</td><td>attention 기반 이웃 가중 합산</td><td class="plan">예정</td><td>후보 3</td></tr>
+        <tr><td>R-GCN / Hetero GNN</td><td>관계 타입/이종 그래프 구조 반영</td><td class="plan">예정</td><td>후보 4</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>5) 평가 지표 정의</h2>
+      <table>
+        <tr><th>표기</th><th>정의</th><th>해석</th></tr>
+        <tr><td><code>Sp</code></td><td>Spearman rank correlation</td><td>클수록 좋음</td></tr>
+        <tr><td><code>RMSE</code></td><td>회귀 오차 제곱평균제곱근</td><td>작을수록 좋음</td></tr>
+        <tr><td><code>NDCG@20</code></td><td>상위 20개 랭킹 품질</td><td>클수록 좋음</td></tr>
+        <tr><td><code>Hit@20</code></td><td>상위 20개 내 hit 비율</td><td>클수록 좋음</td></tr>
+        <tr><td><code>std</code></td><td>fold 간 Spearman 표준편차</td><td>작을수록 안정적</td></tr>
+        <tr><td><code>MAE</code></td><td>평균 절대 오차</td><td>작을수록 좋음</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>6) 산출물</h2>
+      <table>
+        <tr><th>파일</th><th>설명</th></tr>
+        <tr><td><code>graph_family_comparison.csv</code></td><td>Graph 4개 모델의 fold 기준 비교표</td></tr>
+        <tr><td><code>graph_family_summary.json</code></td><td>대표 모델 선정 근거 요약(JSON)</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>7) 다음 액션</h2>
+      <ul class="muted">
+        <li>GraphSAGE/GCN/GAT/R-GCN(or Hetero) 로컬 baseline 실행</li>
+        <li>Graph 군 대표 모델 1종 선정</li>
+        <li>이후 ML(XGBoost) / DL(ResidualMLP) / Graph 대표 3개를 동일 조건으로 SageMaker 최종 비교</li>
+      </ul>
+    </section>
+  </div>
+</body>
+</html>
