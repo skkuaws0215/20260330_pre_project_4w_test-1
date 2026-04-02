@@ -1,0 +1,33 @@
+# Phase-1 fixed disease gene set (gene symbols, uppercase).
+# Replace with project-specific list if needed; one symbol per non-comment line.
+TP53
+KRAS
+EGFR
+MYC
+BRCA1
+BRCA2
+PTEN
+RB1
+CDKN2A
+APC
+VHL
+NF1
+BRAF
+PIK3CA
+NOTCH1
+CTNNB1
+SMAD4
+STK11
+ATM
+ARID1A
+KMT2D
+SETD2
+PBRM1
+TET2
+ASXL1
+RUNX1
+DNMT3A
+FLT3
+NPM1
+IDH1
+IDH2

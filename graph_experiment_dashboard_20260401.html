@@ -136,6 +136,22 @@
         <li>이후 ML(XGBoost) / DL(ResidualMLP) / Graph 대표를 동일 조건으로 SageMaker 최종 비교</li>
       </ul>
     </section>
+
+    <section>
+      <h2>8) Round1 실행 (Network Proximity)</h2>
+      <p class="muted">스키마: node = drug, gene / edge = drug–target (PPI는 <code>--ppi-edges-uri</code>로 선택) / disease gene = <code>data/graph_baseline/disease_genes_common_v1.txt</code> 고정 집합. CV는 <code>model_selection_stage1/cv_fold_indices.json</code> 재사용.</p>
+      <pre style="background:rgba(0,0,0,0.35);padding:12px;border-radius:8px;overflow:auto;font-size:0.85rem;"><code>python3 ml/pilot_sagemaker/run_network_proximity_baseline.py \
+  --labels-uri s3://.../labels.parquet \
+  --features-uri results/.../final_pathway_addon/pair_features_newfe_v2.parquet \
+  --drug-target-uri s3://.../drug_target_map.parquet \
+  --cv-fold-json results/.../model_selection_stage1/cv_fold_indices.json</code></pre>
+      <table style="margin-top:10px;">
+        <tr><th>산출물</th><th>경로</th></tr>
+        <tr><td>스키마 메타</td><td><code>results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/graph_schema.json</code></td></tr>
+        <tr><td>fold 지표 + mean + Spearman std</td><td><code>.../graph_family_comparison.csv</code></td></tr>
+        <tr><td>요약</td><td><code>.../graph_family_summary.json</code></td></tr>
+      </table>
+    </section>
   </div>
 </body>
 </html>
