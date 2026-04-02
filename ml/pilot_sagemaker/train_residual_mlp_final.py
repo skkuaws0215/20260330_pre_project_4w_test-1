@@ -214,6 +214,7 @@ def main() -> None:
 
     metrics = {
         "model": "residual_mlp",
+        "validation_type": f"Single row-level holdout (test_size={args.test_size})",
         "evaluation_note": (
             "Single random row split (test_size), same preprocessing as run_residual_mlp_cv_local per fold; "
             "not identical to 5-fold CV mean in residual_mlp_cv_summary."

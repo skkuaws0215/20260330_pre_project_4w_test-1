@@ -32,5 +32,6 @@
   },
   "sagemaker_training_job": "local-smoke-xgb",
   "sagemaker_status": "Completed",
+  "validation_type": "Single row-level holdout (test_size=0.1; valid metrics)",
   "evaluation_note": "Single holdout split (test_size); not the 5-fold CV mean in residual_mlp_cv_summary / xgb_tuned_cv_summary."
 }

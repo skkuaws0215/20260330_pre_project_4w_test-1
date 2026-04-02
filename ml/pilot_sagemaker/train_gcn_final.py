@@ -133,6 +133,7 @@ def main() -> None:
     metrics = {
         "model": "gcn",
         "baseline_tag": "A (hidden 64, lr 1e-3, weight_decay 1e-5)",
+        "validation_type": f"Single row-level holdout (test_size={args.test_size}; not drug-group CV)",
         "evaluation_note": (
             "Metrics are on a single random row split (test_size) for early stopping and reporting; "
             "they are not drug-group CV means. Model selection and local comparison use graph_family_groupcv."

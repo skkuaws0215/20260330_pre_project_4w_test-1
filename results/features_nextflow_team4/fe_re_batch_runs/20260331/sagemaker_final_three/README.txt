@@ -8,8 +8,11 @@ Purpose
   (see graph_baseline_round1/gcn_tuning_summary.json).
 
 Layout
-  final_model_comparison.csv   — one row per representative; local CV means +
-                               SageMaker job / eval / URIs (fill after jobs).
+  final_model_comparison.csv   — one row per representative. Columns include
+                               local_validation_type, local_* means,
+                               sagemaker_validation_type, sagemaker_evaluation_note
+                               (GCN: row holdout ≠ drug-group CV mean — read note),
+                               job name, cloud metrics, URIs.
   final_model_summary.json    — principles, output paths, local CV sources.
   artifacts/xgb/              — copy or sync model bundle + metrics.json here.
   artifacts/residualmlp/

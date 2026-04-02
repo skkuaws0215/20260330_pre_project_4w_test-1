@@ -91,9 +91,15 @@ def build_template_rows(residual_path: Path, graph_path: Path) -> list[dict[str,
         local_val: str,
         m: dict[str, float],
     ) -> dict[str, Any]:
+        local_vt = (
+            "5-fold drug-group CV (canonical_drug_id) — fold mean"
+            if family == "Graph"
+            else "5-fold row KFold — fold mean"
+        )
         return {
             "model_family": family,
             "representative_model": model,
+            "local_validation_type": local_vt,
             "local_selection_validation": local_val,
             "local_RMSE_mean": m["RMSE_mean"],
             "local_MAE_mean": m["MAE_mean"],
@@ -107,6 +113,8 @@ def build_template_rows(residual_path: Path, graph_path: Path) -> list[dict[str,
             "sagemaker_Spearman": "",
             "sagemaker_NDCG20": "",
             "sagemaker_Hit20": "",
+            "sagemaker_validation_type": "",
+            "sagemaker_evaluation_note": "",
             "artifact_uri": "",
             "training_logs_uri": "",
             "metrics_json_relative_path": f"artifacts/{artifact_dir}/metrics.json",
@@ -123,6 +131,22 @@ def build_template_rows(residual_path: Path, graph_path: Path) -> list[dict[str,
             gcn,
         ),
     ]
+
+
+def _infer_sagemaker_validation_type(raw: dict[str, Any]) -> str:
+    if raw.get("validation_type"):
+        return str(raw["validation_type"])
+    sp = raw.get("split") or {}
+    if sp.get("full_train") is True:
+        return "Full train on all rows (metrics on train only if valid absent)"
+    ts = sp.get("test_size")
+    if ts is not None:
+        return f"Single row-level holdout (test_size={ts}; valid metrics)"
+    if raw.get("model") == "gcn":
+        return "Single row-level holdout (see metrics rows_train/rows_valid)"
+    if raw.get("model") == "residual_mlp":
+        return "Single row-level holdout (see rows_valid in metrics)"
+    return "See metrics.json split / final_eval"
 
 
 def _read_sidecar_metrics(out_dir: Path, family_key: str) -> dict[str, Any] | None:
@@ -171,6 +195,10 @@ def apply_collect(df: pd.DataFrame, out_dir: Path) -> pd.DataFrame:
                 df.at[i, "sagemaker_Hit20"] = ev["hit20"]
             elif "Hit@20" in ev:
                 df.at[i, "sagemaker_Hit20"] = ev["Hit@20"]
+
+        df.at[i, "sagemaker_validation_type"] = _infer_sagemaker_validation_type(raw)
+        note = raw.get("evaluation_note") or raw.get("sagemaker_evaluation_note") or ""
+        df.at[i, "sagemaker_evaluation_note"] = note
     return df
 
 
@@ -210,19 +238,31 @@ def build_summary_json(
             "graph_groupcv": graph_rel,
             "gcn_hyperparams": "results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/gcn_tuning_summary.json",
         },
+        "comparison_csv_columns": {
+            "local_validation_type": "Short label for local selection metrics (CV type).",
+            "local_selection_validation": "Longer reference (JSON path / rule).",
+            "sagemaker_validation_type": "How SageMaker/final job reported metrics (e.g. row holdout vs full train).",
+            "sagemaker_evaluation_note": "Do-not-compare caveats; e.g. GCN row split vs drug-group CV mean.",
+        },
+        "post_job_workflow": [
+            "After each Training Job: aws s3 cp .../model.tar.gz locally, then sync_sagemaker_model_tar_to_final_three.py --family {xgb|residualmlp|gcn} --model-tar <path>",
+            "Then: aggregate_final_representative_outputs.py --collect",
+        ],
         "metrics_sidecar_schema": {
             "path_pattern": "artifacts/{xgb|residualmlp|gcn}/metrics.json",
             "optional_keys": [
+                "validation_type",
+                "evaluation_note",
                 "sagemaker_training_job",
                 "sagemaker_status",
                 "artifact_uri",
                 "training_logs_uri",
                 "final_eval: {rmse, mae, spearman, ndcg20, hit20}",
             ],
-            "note": "train_tabular.py writes nested train/valid; for final reporting add final_eval or copy eval block to top level.",
+            "note": "final_model_comparison.csv shows validation_type + evaluation_note beside SageMaker metrics. GCN: row holdout is not drug-group CV.",
         },
         "submit_scripts": {
-            "xgb": "ml/pilot_sagemaker/submit_final_xgb_sagemaker.py → train_tabular.py (xgboost, full_train on)",
+            "xgb": "ml/pilot_sagemaker/submit_final_xgb_sagemaker.py → train_tabular.py (xgboost, full_train off, test_size 0.1)",
             "residualmlp": "ml/pilot_sagemaker/submit_final_residual_mlp_sagemaker.py → train_residual_mlp_final.py",
             "gcn": "ml/pilot_sagemaker/submit_final_gcn_sagemaker.py → train_gcn_final.py (baseline A)",
         },
