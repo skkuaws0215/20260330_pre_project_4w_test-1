@@ -1,0 +1,5 @@
+config,hidden_dim,lr,weight_decay,Spearman_mean,Spearman_std_folds,RMSE_mean,MAE_mean,NDCG@20_mean,Hit@20_mean,partial_csv
+A,64,0.001,1e-05,0.2535836295753461,0.1026810673705039,2.5512886207234837,2.070464825630188,0.7577479162869373,0.993103448275862,results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/gcn_tune_A_groupcv_partial.csv
+B,64,0.0003,1e-05,0.1328856814193546,0.0737925118711144,3.31123353412186,2.851107120513916,0.7138250532143323,1.0,results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/gcn_tune_B_groupcv_partial.csv
+C,128,0.001,1e-05,0.1929514292417705,0.1113477645106386,2.644065899181861,2.1619110822677614,0.7503439750235974,0.993103448275862,results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/gcn_tune_C_groupcv_partial.csv
+D,64,0.001,0.0001,0.2590210928438005,0.102558652362194,2.550007726616998,2.070201277732849,0.7511922822269501,0.993103448275862,results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/gcn_tune_D_groupcv_partial.csv

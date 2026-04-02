@@ -1,0 +1,74 @@
+{
+  "preset": "gcn_groupcv_mini_tuning",
+  "cv_type": "GroupKFold by canonical_drug_id (same as graph_family_groupcv)",
+  "cv_fold_json": "results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/cv_fold_indices_drug_group.json",
+  "primary_metric": "Spearman_mean",
+  "meaningful_spearman_delta_vs_baseline_A": 0.01,
+  "baseline_config": "A",
+  "baseline_spearman_mean": 0.2535836295753461,
+  "best_config_by_spearman_mean": "D",
+  "best_spearman_mean": 0.2590210928438005,
+  "spearman_mean_delta_vs_A_by_config": {
+    "A": 0.0,
+    "B": -0.12069794815599147,
+    "C": -0.06063220033357558,
+    "D": 0.005437463268454401
+  },
+  "meaningful_improvement_over_A_configs": [],
+  "configs": [
+    {
+      "config": "A",
+      "hidden_dim": 64,
+      "lr": 0.001,
+      "weight_decay": 1e-05,
+      "Spearman_mean": 0.2535836295753461,
+      "Spearman_std_folds": 0.1026810673705039,
+      "RMSE_mean": 2.5512886207234837,
+      "MAE_mean": 2.070464825630188,
+      "NDCG@20_mean": 0.7577479162869373,
+      "Hit@20_mean": 0.993103448275862,
+      "partial_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/gcn_tune_A_groupcv_partial.csv"
+    },
+    {
+      "config": "B",
+      "hidden_dim": 64,
+      "lr": 0.0003,
+      "weight_decay": 1e-05,
+      "Spearman_mean": 0.1328856814193546,
+      "Spearman_std_folds": 0.0737925118711144,
+      "RMSE_mean": 3.31123353412186,
+      "MAE_mean": 2.851107120513916,
+      "NDCG@20_mean": 0.7138250532143323,
+      "Hit@20_mean": 1.0,
+      "partial_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/gcn_tune_B_groupcv_partial.csv"
+    },
+    {
+      "config": "C",
+      "hidden_dim": 128,
+      "lr": 0.001,
+      "weight_decay": 1e-05,
+      "Spearman_mean": 0.1929514292417705,
+      "Spearman_std_folds": 0.1113477645106386,
+      "RMSE_mean": 2.644065899181861,
+      "MAE_mean": 2.1619110822677614,
+      "NDCG@20_mean": 0.7503439750235974,
+      "Hit@20_mean": 0.993103448275862,
+      "partial_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/gcn_tune_C_groupcv_partial.csv"
+    },
+    {
+      "config": "D",
+      "hidden_dim": 64,
+      "lr": 0.001,
+      "weight_decay": 0.0001,
+      "Spearman_mean": 0.2590210928438005,
+      "Spearman_std_folds": 0.102558652362194,
+      "RMSE_mean": 2.550007726616998,
+      "MAE_mean": 2.070201277732849,
+      "NDCG@20_mean": 0.7511922822269501,
+      "Hit@20_mean": 0.993103448275862,
+      "partial_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/gcn_tune_D_groupcv_partial.csv"
+    }
+  ],
+  "comparison_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/gcn_tuning_comparison.csv",
+  "notes": "Early stopping uses validation MSE per fold, not Spearman. Interpret Spearman_mean with Spearman_std_folds; delta >= 0.01 vs A is team rule for meaningful gain."
+}
