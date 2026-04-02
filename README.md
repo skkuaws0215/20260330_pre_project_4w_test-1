@@ -382,20 +382,34 @@ python3 ml/pilot_sagemaker/build_final_ensemble_ranking.py
 - 정렬 방식: `canonical_drug_id` 기준 drug-level score를 외부 sample pair에 투영
 - 상태: **METABRIC external validation 완료**
 - 요약 수치: **METABRIC evaluation pairs = 2648**
+- 해석: 외부 검증에서는 `GCN`이 Spearman/RMSE 모두 1위를 기록해 일반화 신호가 가장 강했음
 
 **ADMET filtering**
 
 - 출력: `admet_filter_log.json`
 - 이번 run 메모: candidate drug ID와 직접 조인 가능한 분자 ADMET 테이블 부재로, **direct molecular lookup이 아닌 proxy rule-based screening** 적용
 - 요약 수치: **ADMET passed = 53 / 100**
+- 의미: Top100 후보 중 53개가 1차 게이트를 통과했으며, 현재 단계는 **proxy screening**이므로 direct molecular ADMET 확증 이전의 pre-filter 단계임
 
 **Final shortlist**
 
 - 조건: ADMET 통과 + ranking 유지
 - 출력: `final_shortlist.csv` (Top30)
 - 상태: **최종 Top 30 shortlist 생성 완료**
+- 파일 컬럼 개선: `final_shortlist.csv`에 `rank_v2`, `admet_pass`, `bucket` alias 컬럼 추가 (기존 원본 컬럼 유지)
 
 핵심 컬럼(요약): `canonical_drug_id`, `drug_rank_v2`(=`rank_v2`), `ensemble_score_v2`, `shortlist_bucket`(=`bucket`)
+
+**METABRIC 단계 모델 비교 (외부 + 내부 기준 함께 보기)**
+
+| model | METABRIC Spearman | METABRIC RMSE | 내부 TCGA/CV NDCG@20(mean) | 해석 |
+|------|-------------------:|--------------:|----------------------------:|------|
+| GCN | **0.4045 (1위)** | **1.2732 (1위)** | 0.7452 | 외부 일반화 성능 우수 |
+| Ensemble_v2 | 0.0742 (2위) | 2.7014 (2위) | N/A | 단일 GCN 대비 낮지만 절충 성능 |
+| ResidualMLP | -0.0556 (3위) | 3.3210 (3위) | **0.8401 (공동 1위)** | 내부 대비 외부 성능 하락 |
+| XGBoost | -0.0711 (4위) | 7.1289 (4위) | **0.8401 (공동 1위)** | 내부 대비 외부 성능 하락폭 큼 |
+
+> 참고: 이번 외부 요약 파일(`metabric_validation_summary.csv`)에는 NDCG가 포함되지 않아, NDCG 비교는 내부 TCGA/CV 결과를 함께 병기함.
 
 ### A/B/C 파일럿: ML 4종 병렬 Training Job
 
