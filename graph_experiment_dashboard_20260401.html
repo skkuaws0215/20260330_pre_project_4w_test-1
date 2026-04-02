@@ -26,7 +26,7 @@
 <body>
   <div class="hero">
     <h1>Graph Experiment Dashboard</h1>
-    <p>Graph 기반 모델 후보를 단계적으로 탐색하고, ML/DL 대표와 최종 비교할 후보군을 정리합니다.</p>
+    <p><strong>Graph 군</strong>은 GNN(학습 기반)만이 아니라, PPI/유전자 네트워크 상의 <strong>거리·근접도(규칙 기반)</strong> 접근도 포함합니다. 학습형과 비학습형을 동일 지표로 비교해 대표 후보를 고릅니다.</p>
     <div class="badge">Snapshot · 20260402_v1</div>
     <a class="nav-btn" href="dl_experiment_dashboard_20260331.html">Go to DL Experiment Dashboard</a>
     <a class="nav-btn" href="newfe_quality_dashboard_20260331.html">Back to New FE Quality Dashboard</a>
@@ -36,8 +36,9 @@
     <section>
       <h2>1) 목적</h2>
       <ul class="muted">
-        <li>Graph 군에서 최소 1개 대표 후보를 선정해 최종 챔피언 비교군에 포함</li>
-        <li>동일 입력/동일 split 기반으로 ML/DL과 공정 비교 가능한 기록 생성</li>
+        <li><strong>graph 기반 접근</strong>이 기존 <strong>ML(XGBoost) / DL(ResidualMLP)</strong> 대비 <strong>의미 있는 성능 개선</strong>이 있는지 확인</li>
+        <li>Graph 군에서 <strong>대표 모델 1종</strong> 선정 후 최종 챔피언 비교군에 포함</li>
+        <li><strong>규칙 기반(Network Proximity)</strong>과 <strong>학습 기반(GNN: GraphSAGE, GCN)</strong>을 동일 데이터·동일 split·동일 지표로 비교</li>
         <li>성능뿐 아니라 안정성(std), 운영 복잡도까지 함께 판단</li>
       </ul>
     </section>
@@ -59,21 +60,48 @@
         <tr><th>항목</th><th>설정</th></tr>
         <tr><td>Feature</td><td><code>results/features_nextflow_team4/fe_re_batch_runs/20260331/final_pathway_addon/pair_features_newfe_v2.parquet</code> (고정)</td></tr>
         <tr><td>Label</td><td>실 <code>labels.parquet</code> (고정)</td></tr>
-        <tr><td>Graph 변환</td><td>동일 feature를 graph 입력으로 변환 (node / edge 정의 필요)</td></tr>
+        <tr><td>Graph / Network</td><td>GNN: 동일 feature를 graph 입력으로 변환 (node / edge). Network baseline: PPI 등 고정 그래프에서 drug-target ↔ disease gene 거리·근접도 산출</td></tr>
         <tr><td>Split</td><td>동일 5-fold CV (<code>KFold(shuffle=True, random_state=42)</code>)</td></tr>
         <tr><td>금지사항</td><td>feature 재생성/랜덤 라벨/부분 샘플링 금지</td></tr>
       </table>
     </section>
 
     <section>
-      <h2>4) Graph 후보 모델 (로컬 baseline)</h2>
+      <h2>4) Graph 군 baseline (초기 3종, 로컬)</h2>
+      <p class="muted" style="margin:0 0 10px;">초기 단계는 아래 <strong>3개만</strong> 실행합니다. 동일 5-fold에서 <code>graph_family_comparison.csv</code>에 한 줄씩 기록합니다.</p>
       <table>
-        <tr><th>후보 모델</th><th>핵심 아이디어</th><th>상태</th><th>비고</th></tr>
-        <tr><td>GraphSAGE</td><td>sample-aggregate 기반 확장성</td><td class="plan">예정</td><td>후보 1</td></tr>
-        <tr><td>GCN</td><td>기본 message passing baseline</td><td class="plan">예정</td><td>후보 2</td></tr>
-        <tr><td>GAT</td><td>attention 기반 이웃 가중 합산</td><td class="plan">예정</td><td>후보 3</td></tr>
-        <tr><td>R-GCN / Hetero GNN</td><td>관계 타입/이종 그래프 구조 반영</td><td class="plan">예정</td><td>후보 4</td></tr>
+        <tr><th>#</th><th>방법</th><th>역할</th><th>핵심</th><th>상태</th></tr>
+        <tr>
+          <td>1</td>
+          <td><strong>Network Proximity</strong></td>
+          <td>rule-based baseline</td>
+          <td>drug-target vs disease gene 네트워크 <strong>거리/근접도</strong>, 무작위 대조 대비 <strong>z-score</strong>; 학습 없음</td>
+          <td class="plan">예정</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><strong>GraphSAGE</strong></td>
+          <td>GNN primary baseline</td>
+          <td>sample-aggregate; drug-gene graph + sample-side feature 결합 구조</td>
+          <td class="plan">예정</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><strong>GCN</strong></td>
+          <td>GNN secondary baseline</td>
+          <td>기본 message passing; GraphSAGE와 동일 그래프/스플릿으로 비교</td>
+          <td class="plan">예정</td>
+        </tr>
       </table>
+      <p class="muted" style="margin:12px 0 0;"><strong>주의:</strong> 초기에는 <strong>GAT / R-GCN(Hetero)</strong> 제외. GraphSAGE·GCN 결과 확인 후 필요 시 확장.</p>
+      <details class="muted" style="margin-top:12px;">
+        <summary><strong>주석: GNN vs Network Proximity 비교 목적</strong></summary>
+        <ul style="margin:10px 0 0 1rem; line-height:1.55;">
+          <li>GNN은 임베딩·메시지 패싱으로 패턴을 학습합니다.</li>
+          <li>Network Proximity는 “타깃–질병 유전자가 그래프에서 얼마나 가깝냐”는 해석 가능한 규칙만으로 스코어를 만듭니다.</li>
+          <li>동일 fold에서 둘 다 평가하면, 그래프 정보가 <strong>학습 없이도</strong> 얼마나 신호를 주는지 vs <strong>학습으로</strong> 얼마나 끌어올리는지 구분할 수 있습니다.</li>
+        </ul>
+      </details>
     </section>
 
     <section>
@@ -93,17 +121,19 @@
       <h2>6) 산출물</h2>
       <table>
         <tr><th>파일</th><th>설명</th></tr>
-        <tr><td><code>graph_family_comparison.csv</code></td><td>Graph 4개 모델의 fold 기준 비교표</td></tr>
-        <tr><td><code>graph_family_summary.json</code></td><td>대표 모델 선정 근거 요약(JSON)</td></tr>
+        <tr><td><code>graph_family_comparison.csv</code></td><td>위 3종(Network Proximity, GraphSAGE, GCN)의 fold별·평균 지표 비교 (RMSE, MAE, Spearman, NDCG@20, Hit@20, std)</td></tr>
+        <tr><td><code>graph_family_summary.json</code></td><td>Graph 군 <strong>대표 1종</strong> 선정 근거, ML/DL 대비 해석, (선택) 확장 여부(GAT/R-GCN) 메모(JSON)</td></tr>
       </table>
     </section>
 
     <section>
       <h2>7) 다음 액션</h2>
       <ul class="muted">
-        <li>GraphSAGE/GCN/GAT/R-GCN(or Hetero) 로컬 baseline 실행</li>
-        <li>Graph 군 대표 모델 1종 선정</li>
-        <li>이후 ML(XGBoost) / DL(ResidualMLP) / Graph 대표 3개를 동일 조건으로 SageMaker 최종 비교</li>
+        <li>(1) Network Proximity 로컬 계산 → 동일 5-fold CV로 지표 산출</li>
+        <li>(2) GraphSAGE → (3) GCN 순으로 동일 조건 실행</li>
+        <li><code>graph_family_comparison.csv</code>, <code>graph_family_summary.json</code> 작성 후 Graph 군 대표 1종 확정</li>
+        <li>ML/DL 스코어와 대조해 graph 접근의 추가 가치 판단</li>
+        <li>이후 ML(XGBoost) / DL(ResidualMLP) / Graph 대표를 동일 조건으로 SageMaker 최종 비교</li>
       </ul>
     </section>
   </div>
