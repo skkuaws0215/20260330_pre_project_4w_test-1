@@ -1,0 +1,132 @@
+{
+  "source_prefix": "s3://drug-discovery-joe-raw-data-team4/8/metabric/",
+  "target_prefix": "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/",
+  "required_for_true_validation": [
+    "sample_id",
+    "canonical_drug_id",
+    "label_regression"
+  ],
+  "files": {
+    "08_raw.parquet": {
+      "shape": [
+        19172,
+        1982
+      ],
+      "columns_head": [
+        "MB-0000",
+        "MB-0002",
+        "MB-0005",
+        "MB-0006",
+        "MB-0008",
+        "MB-0010",
+        "MB-0014",
+        "MB-0020",
+        "MB-0022",
+        "MB-0028",
+        "MB-0035",
+        "MB-0036",
+        "MB-0039",
+        "MB-0045",
+        "MB-0046",
+        "MB-0048",
+        "MB-0050",
+        "MB-0053",
+        "MB-0054",
+        "MB-0056",
+        "MB-0059",
+        "MB-0060",
+        "MB-0062",
+        "MB-0064",
+        "MB-0066",
+        "MB-0068",
+        "MB-0071",
+        "MB-0079",
+        "MB-0081",
+        "MB-0083",
+        "MB-0093",
+        "MB-0095",
+        "MB-0097",
+        "MB-0099",
+        "MB-0100",
+        "MB-0101",
+        "MB-0102",
+        "MB-0106",
+        "MB-0107",
+        "MB-0108"
+      ],
+      "required_cols_present": {
+        "sample_id": false,
+        "canonical_drug_id": false,
+        "label_regression": false
+      },
+      "n_required_present": 0,
+      "index_name": "None",
+      "index_dtype": "int64",
+      "mb_like_column_count": 1980
+    },
+    "54_filtered.parquet": {
+      "shape": [
+        19172,
+        1982
+      ],
+      "columns_head": [
+        "MB-0000",
+        "MB-0002",
+        "MB-0005",
+        "MB-0006",
+        "MB-0008",
+        "MB-0010",
+        "MB-0014",
+        "MB-0020",
+        "MB-0022",
+        "MB-0028",
+        "MB-0035",
+        "MB-0036",
+        "MB-0039",
+        "MB-0045",
+        "MB-0046",
+        "MB-0048",
+        "MB-0050",
+        "MB-0053",
+        "MB-0054",
+        "MB-0056",
+        "MB-0059",
+        "MB-0060",
+        "MB-0062",
+        "MB-0064",
+        "MB-0066",
+        "MB-0068",
+        "MB-0071",
+        "MB-0079",
+        "MB-0081",
+        "MB-0083",
+        "MB-0093",
+        "MB-0095",
+        "MB-0097",
+        "MB-0099",
+        "MB-0100",
+        "MB-0101",
+        "MB-0102",
+        "MB-0106",
+        "MB-0107",
+        "MB-0108"
+      ],
+      "required_cols_present": {
+        "sample_id": false,
+        "canonical_drug_id": false,
+        "label_regression": false
+      },
+      "n_required_present": 0,
+      "index_name": "None",
+      "index_dtype": "int64",
+      "mb_like_column_count": 1980
+    }
+  },
+  "verdict": "BLOCKED_FOR_TRUE_EXTERNAL_VALIDATION",
+  "next_actions": [
+    "Build mapping from METABRIC sample IDs (MB-*) to project sample_id space.",
+    "Create canonical_drug_id-linked external pair table.",
+    "Attach label_regression compatible with current training target definition.",
+    "Regenerate external pair feature table with same schema as pair_features_newfe_v2.parquet."
+  ]
+}

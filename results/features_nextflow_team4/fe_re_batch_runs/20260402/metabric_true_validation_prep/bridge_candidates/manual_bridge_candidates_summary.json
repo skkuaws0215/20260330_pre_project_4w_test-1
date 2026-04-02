@@ -1,0 +1,22 @@
+{
+  "input_sources": {
+    "ml_ready_metadata": "s3://drug-discovery-joe-raw-data-team4/ml_ready/metadata.parquet",
+    "metabric_clinical_tsv": "/Users/skku_aws2_14/Downloads/brca_metabric_clinical_data.tsv",
+    "internal_features": "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/fe_re_batch_runs/20260331/final_pathway_addon/pair_features_newfe_v2.parquet",
+    "internal_labels": "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/fe_re_batch_runs/20260331/input_derived/labels_B_graph.parquet"
+  },
+  "proposal_logic": [
+    "Candidates generated per MB sample against all internal sample_id values.",
+    "candidate_score = 0.85 * id_string_similarity + 0.15 * subtype_match_flag.",
+    "id_string_similarity uses SequenceMatcher over MB-* ID and sample_id string.",
+    "subtype_match_flag compares METABRIC Pam50 subtype vs metadata pam50 subtype (if available).",
+    "Top-K candidates kept per MB sample (default K=5).",
+    "manual_selected_* columns are for final human curation."
+  ],
+  "limitations": [
+    "Current metadata pam50_subtype is mostly null, subtype evidence is weak.",
+    "No direct canonical_drug_id axis in METABRIC matrix; this is sample bridge aid only.",
+    "Clinical receptor/survival fields are one-sided (METABRIC side) for reviewer context."
+  ],
+  "output_file": "results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/bridge_candidates/manual_bridge_candidates.csv"
+}

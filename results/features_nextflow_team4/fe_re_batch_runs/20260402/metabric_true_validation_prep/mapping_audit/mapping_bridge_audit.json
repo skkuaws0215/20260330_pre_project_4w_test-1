@@ -1,0 +1,82 @@
+{
+  "inputs": {
+    "metabric_matrix_s3": "s3://drug-discovery-joe-raw-data-team4/8/metabric/54_filtered.parquet",
+    "internal_features_s3": "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/fe_re_batch_runs/20260331/final_pathway_addon/pair_features_newfe_v2.parquet",
+    "internal_labels_s3": "s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/fe_re_batch_runs/20260331/input_derived/labels_B_graph.parquet",
+    "ml_ready_meta_s3": "s3://drug-discovery-joe-raw-data-team4/ml_ready/metadata.parquet"
+  },
+  "counts": {
+    "internal_sample_id_nunique": 52,
+    "internal_canonical_drug_id_nunique": 597,
+    "metabric_sample_column_n": 1980,
+    "direct_sample_overlap_n": 0,
+    "normalized_sample_overlap_n": 0,
+    "cell_line_overlap_with_internal_samples_n": 52
+  },
+  "examples": {
+    "internal_samples_head": [
+      "AU565",
+      "BT-20",
+      "BT-474",
+      "BT-483",
+      "BT-549",
+      "CAL-120",
+      "CAL-148",
+      "CAL-51",
+      "CAL-85-1",
+      "CAMA-1",
+      "COLO-824",
+      "DU-4475",
+      "EFM-19",
+      "EFM-192A",
+      "EVSA-T"
+    ],
+    "metabric_sample_cols_head": [
+      "MB-0000",
+      "MB-0002",
+      "MB-0005",
+      "MB-0006",
+      "MB-0008",
+      "MB-0010",
+      "MB-0014",
+      "MB-0020",
+      "MB-0022",
+      "MB-0028",
+      "MB-0035",
+      "MB-0036",
+      "MB-0039",
+      "MB-0045",
+      "MB-0046"
+    ],
+    "direct_sample_overlap_head": [],
+    "normalized_overlap_head": [],
+    "cell_line_overlap_head": [
+      "AU565",
+      "BT-20",
+      "BT-474",
+      "BT-483",
+      "BT-549",
+      "CAL-120",
+      "CAL-148",
+      "CAL-51",
+      "CAL-85-1",
+      "CAMA-1",
+      "COLO-824",
+      "DU-4475",
+      "EFM-19",
+      "EFM-192A",
+      "EVSA-T"
+    ]
+  },
+  "critical_gap": {
+    "metabric_has_canonical_drug_id_axis": false,
+    "metabric_has_pair_level_label_regression": false,
+    "reason": "Current METABRIC matrix is sample x gene expression; it does not contain canonical_drug_id pair axis used by current 3-model pipeline."
+  },
+  "verdict": "BLOCKED_NO_SAMPLE_BRIDGE_AND_NO_DRUG_AXIS",
+  "next_actions": [
+    "Define explicit bridge map: MB-* sample IDs -> project sample_id space (if biologically intended).",
+    "Construct external pair table with canonical_drug_id axis and label_regression target.",
+    "Regenerate pair_features_newfe_v2-compatible external feature table before model inference."
+  ]
+}

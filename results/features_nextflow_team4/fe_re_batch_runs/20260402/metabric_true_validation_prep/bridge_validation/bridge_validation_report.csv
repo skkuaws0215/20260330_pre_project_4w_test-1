@@ -1,0 +1,2 @@
+bridge_csv,internal_sample_id_nunique,metabric_rows_total,active_mapping_rows,coverage_ratio_active,invalid_sample_id_rows,duplicate_metabric_sample_rows,duplicate_internal_sample_rows,status
+/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/bridge_template/metabric_sample_bridge_template_prefilled.csv,52,1980,0,0.0,0,0,0,PASS

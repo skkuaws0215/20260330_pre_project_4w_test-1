@@ -1,0 +1,24 @@
+{
+  "input_candidates_csv": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/bridge_candidates/manual_bridge_candidates.csv",
+  "rules": {
+    "use_rows_where": "manual_selected == True",
+    "final_internal_sample_id_column": "manual_selected_sample_id -> sample_id in output CSV"
+  },
+  "validation": {
+    "n_rows_manual_selected_true": 0,
+    "n_unique_metabric_in_candidates_file": 2509,
+    "n_finalized_active_mappings": 0,
+    "coverage_ratio_vs_unique_mb_in_candidates": 0.0,
+    "duplicate_metabric_sample_id": false,
+    "duplicate_metabric_sample_id_count": 0,
+    "duplicate_internal_sample_id": false,
+    "duplicate_internal_sample_id_count": 0,
+    "invalid_internal_sample_id_rows": 0,
+    "duplicate_metabric_ids": [],
+    "duplicate_internal_ids": [],
+    "invalid_internal_sample_details": []
+  },
+  "status": "EMPTY",
+  "output_csv": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/bridge_finalized/finalized_metabric_sample_bridge.csv",
+  "next_step": "python3 ml/pilot_sagemaker/run_metabric_true_validation_pipeline.py --finalized-bridge-csv <path>"
+}

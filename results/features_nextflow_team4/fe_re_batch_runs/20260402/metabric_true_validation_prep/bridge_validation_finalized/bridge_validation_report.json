@@ -1,0 +1,12 @@
+{
+  "bridge_format": "finalized",
+  "bridge_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/bridge_finalized/finalized_metabric_sample_bridge.csv",
+  "internal_sample_id_nunique": 52,
+  "metabric_rows_total": 0,
+  "active_mapping_rows": 0,
+  "coverage_ratio_active": 0.0,
+  "invalid_sample_id_rows": 0,
+  "duplicate_metabric_sample_rows": 0,
+  "duplicate_internal_sample_rows": 0,
+  "status": "PASS"
+}

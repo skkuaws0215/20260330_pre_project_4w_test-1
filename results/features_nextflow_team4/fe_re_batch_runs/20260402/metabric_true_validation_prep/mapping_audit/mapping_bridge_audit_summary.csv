@@ -1,0 +1,7 @@
+metric,value
+internal_sample_id_nunique,52
+internal_canonical_drug_id_nunique,597
+metabric_sample_column_n,1980
+direct_sample_overlap_n,0
+normalized_sample_overlap_n,0
+cell_line_overlap_with_internal_samples_n,52

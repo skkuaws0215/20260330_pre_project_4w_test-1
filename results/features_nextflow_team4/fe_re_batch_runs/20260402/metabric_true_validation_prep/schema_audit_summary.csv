@@ -1,0 +1,3 @@
+file,n_rows,n_cols,mb_like_column_count,n_required_present
+08_raw.parquet,19172,1982,1980,0
+54_filtered.parquet,19172,1982,1980,0

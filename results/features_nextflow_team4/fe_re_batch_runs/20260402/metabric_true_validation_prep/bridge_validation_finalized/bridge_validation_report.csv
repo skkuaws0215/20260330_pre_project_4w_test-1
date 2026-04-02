@@ -1,0 +1,2 @@
+bridge_format,bridge_csv,internal_sample_id_nunique,metabric_rows_total,active_mapping_rows,coverage_ratio_active,invalid_sample_id_rows,duplicate_metabric_sample_rows,duplicate_internal_sample_rows,status
+finalized,results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/bridge_finalized/finalized_metabric_sample_bridge.csv,52,0,0,0.0,0,0,0,PASS

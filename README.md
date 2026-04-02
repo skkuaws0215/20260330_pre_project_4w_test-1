@@ -428,6 +428,14 @@ python3 ml/pilot_sagemaker/build_final_ensemble_ranking.py
   - `B`: 외부 라벨 정합 확인 + Spearman 중심 + 일부 일관성 지표
   - `C`: proxy external validation (현재 단계)
 
+**METABRIC true validation — 샘플 브릿지 및 파이프라인 (저장 위치 고정)**
+
+- 외부 원천(`s3://.../8/metabric/`)과 혼동되지 않도록, **모든 산출은** `s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/` 하위에만 둡니다.
+- 후보 테이블: `build_manual_bridge_candidates.py` → `bridge_candidates/manual_bridge_candidates.csv`
+- 확정 브릿지: `finalize_metabric_sample_bridge.py` (`manual_selected=True` 행만) → `bridge_finalized/finalized_metabric_sample_bridge.csv` + `finalized_metabric_sample_bridge_summary.json` (중복 MB/internal, 커버리지, `status`)
+- 검증: `validate_metabric_sample_bridge.py --format finalized --bridge-csv .../finalized_metabric_sample_bridge.csv`
+- 오케스트레이션: `run_metabric_true_validation_pipeline.py` (저장소 루트에서 실행) → `pipeline/metabric_true_validation_pipeline_manifest.json` (다음 단계: 외부 pair FE + 추론)
+
 ### A/B/C 파일럿: ML 4종 병렬 Training Job
 
 - **전제:** 아래 기본 버킷·실행 역할·SageMaker 기본 버킷(`sagemaker-ap-northeast-2-666803869796/…`)은 **팀 프로젝트(팀4) 공용 인프라**를 가정한다. 개인 AWS 계정 기준이 아니다. 다른 팀·계정이면 스크립트의 `--role`, `--code-bucket`, `--sagemaker-account-id`, 데이터 URI 오버라이드 등을 맞출 것.
