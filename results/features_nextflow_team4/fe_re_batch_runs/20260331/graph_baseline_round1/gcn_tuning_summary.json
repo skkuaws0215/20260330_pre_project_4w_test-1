@@ -15,6 +15,14 @@
     "D": 0.005437463268454401
   },
   "meaningful_improvement_over_A_configs": [],
+  "graph_family_representative_model": "GCN",
+  "lightweight_tuning_completed": true,
+  "internal_best_config_by_primary_metric": "D",
+  "spearman_mean_delta_internal_best_vs_baseline_A": 0.005437463268454401,
+  "spearman_mean_delta_internal_best_vs_baseline_A_rounded_4dp": 0.0054,
+  "meaningful_improvement_over_baseline_threshold": false,
+  "baseline_gcn_retained_as_final_graph_family_representative": true,
+  "config_E_status": "deferred_this_phase",
   "configs": [
     {
       "config": "A",
@@ -70,5 +78,5 @@
     }
   ],
   "comparison_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/gcn_tuning_comparison.csv",
-  "notes": "Early stopping uses validation MSE per fold, not Spearman. Interpret Spearman_mean with Spearman_std_folds; delta >= 0.01 vs A is team rule for meaningful gain."
+  "notes": "Graph representative: GCN. Lightweight tuning (A-D) completed on the same drug-group CV; internal best Spearman mean is config D but delta vs baseline A is below team threshold (>=0.01), so no meaningful improvement; baseline GCN hyperparameters (A) retained; config E deferred this phase. Early stopping uses validation MSE per fold, not Spearman. Interpret Spearman_mean with Spearman_std_folds."
 }

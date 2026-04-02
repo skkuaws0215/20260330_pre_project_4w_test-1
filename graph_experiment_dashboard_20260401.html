@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Graph Experiment Dashboard · 20260402_v7</title>
+  <title>Graph Experiment Dashboard · 20260402_v8</title>
   <style>
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b1020; color: #e6edf7; }
     .hero { padding: 42px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); background: linear-gradient(120deg, #1f223f, #2d3f7a); }
@@ -31,9 +31,9 @@
 <body>
   <div class="hero">
     <h1>Graph Experiment Dashboard</h1>
-    <p><strong>Graph 군</strong>은 GNN(학습 기반)만이 아니라, PPI/유전자 네트워크 상의 <strong>거리·근접도(규칙 기반)</strong> 접근도 포함합니다. <strong>로컬 검증 완료:</strong> 최종 대표는 <strong>drug-group CV Spearman mean 기준 GCN</strong>. Round1 행 단위 CV에서는 GraphSAGE가 Spearman 상위였으나 <strong>temporary candidate</strong>로만 기록 — 최종 확정은 group CV까지 본 뒤 <strong>GCN</strong>으로 정리. <strong>GCN 경량 튜닝(A–D, 동일 drug-group CV)</strong>을 수행했으나 1차 지표 Spearman mean 기준 <strong>의미 있는 개선(베이스라인 A 대비 ≥0.01)은 없음</strong> → <strong>운영·SageMaker용 GCN 하이퍼파라미터는 기존 baseline(A: hidden 64, lr 1e-3, weight_decay 1e-5) 유지</strong>. 다음 단계는 <strong>SageMaker</strong>에서 GCN 최종 실행(DL 대시보드 §0과 함께 3종).</p>
+    <p><strong>Graph 군</strong>은 GNN(학습 기반)만이 아니라, PPI/유전자 네트워크 상의 <strong>거리·근접도(규칙 기반)</strong> 접근도 포함합니다. <strong>Graph 대표 모델: GCN 유지.</strong> Round1 행 단위 CV에서는 GraphSAGE가 Spearman 상위였으나 <strong>temporary candidate</strong>로만 기록 — 최종 확정은 group CV까지 본 뒤 <strong>GCN</strong>. <strong>GCN 경량 튜닝</strong>(A–D, 동일 drug-group CV) <strong>완료</strong>: 그리드 내 Spearman mean 최고는 <strong>구성 D</strong>이나, baseline A 대비 개선은 약 <strong>+0.0054</strong>로 팀 기준(<strong>≥ +0.01</strong>)에 <strong>미달</strong> → <strong>의미 있는 개선으로 보지 않음</strong> → <strong>baseline GCN(A)을 최종 Graph 군 대표 설정으로 유지</strong>. <strong>구성 E</strong>(96 / 5e-4 / 5e-5)는 <strong>이번 단계에서 보류</strong>. 다음: <strong>SageMaker</strong>에서 GCN 최종 실행(DL 대시보드 §0과 함께 3종). 요약 JSON: <code>gcn_tuning_summary.json</code>.</p>
     <p class="muted" style="margin-top:10px;font-size:0.88rem;">로컬: 저장소 루트에서 <code>python3 serve_dashboards.py</code> 후 목차 또는 이 파일 URL로 접속. GitHub Pages는 Actions 배포 + Settings에서 Pages 소스 지정 후 팀에 URL 공유.</p>
-    <div class="badge">Snapshot · 20260402_v7 · §8 GCN 미니튜닝 + 지표 표(펼치기)</div>
+    <div class="badge">Snapshot · 20260402_v8 · §8 GCN 미니튜닝 결론(E 보류) + 지표 표(펼치기)</div>
     <a class="nav-btn" href="dl_experiment_dashboard_20260331.html">Go to DL Experiment Dashboard</a>
     <a class="nav-btn" href="newfe_quality_dashboard_20260331.html">Back to New FE Quality Dashboard</a>
     <a class="nav-btn" href="sagemaker_experiment_dashboard_20260403.html">SageMaker 통합 대시보드 (20260403)</a>
@@ -140,7 +140,7 @@
         <li>Round1: <code>graph_family_comparison.csv</code> / <code>graph_family_summary.json</code> 완료</li>
         <li>Stricter: drug-group CV로 과대평가 여부 점검 — <code>graph_family_groupcv_*</code> 완료</li>
         <li><strong>대표 확정 (적용됨):</strong> group CV Spearman mean으로 <strong>GCN</strong> 채택. GraphSAGE는 Round1 row-CV <strong>temporary candidate</strong>만 문서 보존.</li>
-        <li><strong>GCN 미니튜닝 (적용됨):</strong> A–D 그리드 완료. Spearman mean 최댓값은 구성 D(가중감쇠 1e-4)였으나 A 대비 +0.005 수준으로 <strong>≥0.01 의미 개선 규칙 미충족</strong> → <strong>baseline GCN 하이퍼파라미터(A) 유지</strong>.</li>
+        <li><strong>GCN 미니튜닝 (적용됨):</strong> A–D 그리드 완료. 내부 best는 구성 D(Spearman mean)이나 A 대비 <strong>+0.0054</strong> → <strong>≥0.01 의미 개선 규칙 미충족</strong> → <strong>baseline GCN(A) 유지</strong>. 구성 <strong>E 보류</strong>.</li>
         <li>ML/DL 스코어와 대조는 DL 대시보드 <strong>§0</strong> 통합 표 참고 (검증 방식이 행-CV vs drug-group으로 다름).</li>
         <li><strong>다음:</strong> SageMaker에서 XGBoost · ResidualMLP · GCN 최종 실행</li>
       </ul>
@@ -188,9 +188,9 @@ python3 ml/pilot_sagemaker/run_graph_gnn_cv.py --model gcn</code></pre>
         <tr><td>A (baseline)</td><td>64</td><td>1e-3</td><td>1e-5</td><td>0.254</td><td>0.103</td><td>기존 운영·SageMaker 기준</td></tr>
         <tr><td>B</td><td>64</td><td>3e-4</td><td>1e-5</td><td>0.133</td><td>0.074</td><td>Spearman 하락</td></tr>
         <tr><td>C</td><td>128</td><td>1e-3</td><td>1e-5</td><td>0.193</td><td>0.111</td><td>Spearman 하락</td></tr>
-        <tr><td>D</td><td>64</td><td>1e-3</td><td>1e-4</td><td>0.259</td><td>0.103</td><td>mean 최고이나 A 대비 +0.005 → 규칙 미충족</td></tr>
+        <tr><td>D</td><td>64</td><td>1e-3</td><td>1e-4</td><td>0.259</td><td>0.103</td><td><strong>그리드 내 Spearman mean 최고</strong> · A 대비 약 <strong>+0.0054</strong> (&lt; 0.01)</td></tr>
       </table>
-      <p class="muted" style="margin:10px 0 0;"><strong>결론:</strong> 수치상 D가 Spearman mean에서 소폭 앞서나, <strong>절대 개선폭이 0.01 미만</strong>이어서 하이퍼파라미터 변경을 정당화하지 않음. <strong>Graph 군 대표는 계속 GCN이며, 하이퍼파라미터는 baseline A로 유지.</strong> 원시 수치·delta·JSON: <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/gcn_tuning_comparison.csv</code>, <code>gcn_tuning_summary.json</code>.</p>
+      <p class="muted" style="margin:10px 0 0;"><strong>결론:</strong> <strong>Graph representative는 GCN 유지.</strong> 내부 best는 D이나 baseline A 대비 Spearman 개선이 <strong>+0.0054</strong>로 팀 기준(<strong>≥ +0.01</strong>)에 미달 → <strong>의미 있는 개선 아님</strong> → <strong>baseline GCN(A)을 최종 Graph 군 대표 설정으로 유지.</strong> <strong>구성 E</strong>(hidden 96, lr 5e-4, weight_decay 5e-5)는 <strong>이번 단계에서 실행하지 않고 보류.</strong> 원시 수치·정책 필드: <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/gcn_tuning_comparison.csv</code>, <code>gcn_tuning_summary.json</code>.</p>
       <p class="muted" style="margin:10px 0 0;font-size:0.9rem;">위 <strong>3종 표·튜닝 표</strong>의 열 의미는 <strong>아래 제목을 클릭</strong>하면 펼쳐지는 <strong>평가 지표 정의</strong>로 공유·논의할 수 있습니다.</p>
       <details class="metric-fold">
         <summary>평가 지표 정의 (위 표 열 해석) — 클릭하여 펼치기 · 다시 클릭하여 접기</summary>
@@ -211,10 +211,10 @@ python3 ml/pilot_sagemaker/run_graph_gnn_cv.py --model gcn</code></pre>
           <li>Network Proximity의 RMSE/MAE는 train 폴드에서 보정 후 valid에 적용; 비정상일 때 train 평균 예측 폴백 (<code>graph_schema_groupcv</code> 등 참고).</li>
           <li>Spearman·NDCG·Hit은 Proximity도 원시 z 기반으로 계산될 수 있음 — 구현·스키마는 <code>graph_schema*.json</code>, <code>run_network_proximity_baseline.py</code> 참고.</li>
           <li><strong>GCN 대표 확정</strong>: 본 §8의 3종 표에서 Spearman mean 최대. GraphSAGE는 Round1 row CV에서만 temporary candidate.</li>
-          <li><strong>GCN 하이퍼파라미터</strong>: 동일 drug-group CV 미니튜닝(A–D) 후에도 baseline A 대비 Spearman mean <strong>≥0.01</strong> 개선이 없어 <strong>hidden 64 · lr 1e-3 · weight_decay 1e-5 유지</strong>.</li>
+          <li><strong>GCN 하이퍼파라미터</strong>: 미니튜닝(A–D)에서 내부 best는 D이나 A 대비 약 <strong>+0.0054</strong>(&lt;0.01) → <strong>baseline A 유지</strong>. 구성 <strong>E 보류</strong>.</li>
         </ul>
       </details>
-      <p class="muted" style="margin:10px 0 0;"><strong>최종 Graph 군 대표:</strong> <strong>GCN</strong> (3종 표에서 Spearman mean 최대). <strong>하이퍼파라미터:</strong> 미니튜닝 결과에 따라 <strong>baseline 구성 A 유지</strong>(위 튜닝 표 참고). <strong>정책 요약:</strong> Round1 행 단위 CV에서는 GraphSAGE가 Spearman 기준 잠정 1위였으나 optimistic bias 가능 → <strong>GraphSAGE는 temporary candidate로만</strong> JSON·문서에 남기고, <strong>운영·SageMaker 라인업의 Graph 슬롯은 GCN</strong>으로 확정. JSON 필드 <code>temporary_graph_representative_candidate</code>는 그 이력용.</p>
+      <p class="muted" style="margin:10px 0 0;"><strong>최종 Graph 군 대표:</strong> <strong>GCN</strong> (3종 표에서 Spearman mean 최대). <strong>하이퍼파라미터:</strong> 내부 best D 대비 임계 미달로 <strong>baseline A 유지</strong>; <strong>E는 보류</strong>. Round1 행 단위 CV에서는 GraphSAGE가 잠정 1위였으나 optimistic bias 가능 → <strong>GraphSAGE는 temporary candidate로만</strong> 기록, <strong>운영·SageMaker Graph 슬롯은 GCN</strong>. <code>temporary_graph_representative_candidate</code>는 이력용.</p>
     </section>
   </div>
 </body>

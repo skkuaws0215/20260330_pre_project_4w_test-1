@@ -474,9 +474,10 @@ Delta 요약:
 
 - **확정 대표:** ML **XGBoost** (tuned) · DL **ResidualMLP** · Graph **GCN**.
 - **Graph 정책:** Spearman mean 기준 **drug-group CV**에서 GCN이 앞섬. Round1 **행 단위 CV**에서는 GraphSAGE가 잠정 1위였으나 optimistic bias 가능 → **GraphSAGE는 temporary candidate로만** 기록하고, **최종 Graph 대표는 GCN**.
+- **GCN 경량 튜닝 (동일 drug-group CV, A–D):** 튜닝 **완료**. **Graph representative는 GCN 유지.** 그리드 내 Spearman mean 최고는 **구성 D**(weight_decay 1e-4)이나, baseline **A** 대비 개선폭은 약 **+0.0054**로 팀 기준(**≥ +0.01**)에 **미달** → **의미 있는 개선으로 보지 않음** → **최종 Graph 군 대표로 쓰는 GCN은 baseline 하이퍼파라미터(A: hidden 64, lr 1e-3, weight_decay 1e-5) 유지.** **구성 E**(96 / 5e-4 / 5e-5)는 **이번 단계에서 보류.** 근거: `graph_baseline_round1/gcn_tuning_summary.json`, `gcn_tuning_comparison.csv` · 스크립트 `ml/pilot_sagemaker/run_gcn_groupcv_tuning.py`.
 - **한 장 비교표·지표·검증 타입·SageMaker 입력/설정/산출물 체크리스트:** `dl_experiment_dashboard_20260331.html` **0)**.
 - **SageMaker 통합 진행·Job 지표 채우기:** `sagemaker_experiment_dashboard_20260403.html` (**20260403_v1**) — 로컬 기준선 표 + Training Job별 TBD 표.
-- **수치 원본:** `analysis_target_only/residual_mlp_cv/residual_mlp_cv_summary.json` (ML/DL 행 5-fold mean); `graph_baseline_round1/graph_family_groupcv_summary.json` (GCN group 5-fold mean). 행 간 숫자는 검증 정의가 다르므로 직접 승패 비교 시 주의.
+- **수치 원본:** `analysis_target_only/residual_mlp_cv/residual_mlp_cv_summary.json` (ML/DL 행 5-fold mean); `graph_baseline_round1/graph_family_groupcv_summary.json` (GCN group 5-fold mean, 3종 대표 선정). GCN 하이퍼 그리드 결론은 **`graph_baseline_round1/gcn_tuning_summary.json`** (영문 policy 필드·`notes` 포함). 행 간 숫자는 검증 정의가 다르므로 직접 승패 비교 시 주의.
 
 #### Graph 군 Round1 — Network Proximity · GraphSAGE · GCN (동일 스키마·동일 `cv_fold_indices.json`)
 
@@ -504,7 +505,7 @@ Delta 요약:
   - `ml_dl_graph_family_mean_groupcv.csv`, `graph_schema_groupcv.json`
 - **Proximity 보정:** drug-group 분할에서 train-only `y ~ a·z+b`가 불안정할 수 있어, 기울기 상한·비정상 RMSE 시 train 평균 예측 폴백 (`run_network_proximity_baseline.py`).
 - **요약 JSON:** `recommended_graph_representative`(Spearman mean 최대), `temporary_graph_representative_candidate`, `representative_finalization_policy`, `gnn_transductive_caveat` 등.
-- **대시보드:** `graph_experiment_dashboard_20260401.html` (섹션 8 drug-group CV, 결과 표 아래 <strong>펼치기(details)</strong>에 지표 정의 표·요약), DL 대시보드 `dl_experiment_dashboard_20260331.html`에서 Graph 쪽 교차 링크.
+- **대시보드:** `graph_experiment_dashboard_20260401.html` (섹션 8 drug-group CV + GCN 미니튜닝 표·결론, 결과 표 아래 <strong>펼치기(details)</strong>에 지표 정의 표·요약), DL 대시보드 `dl_experiment_dashboard_20260331.html`에서 Graph 쪽 교차 링크.
 
 **대시보드 HTML이 “안 열릴” 때:** GitHub **`blob` URL**은 HTML을 **렌더하지 않습니다**. 다른 폴더에서 `python3 -m http.server`만 실행하면 **루트 HTML이 없어** 빈 화면·404가 납니다.
 

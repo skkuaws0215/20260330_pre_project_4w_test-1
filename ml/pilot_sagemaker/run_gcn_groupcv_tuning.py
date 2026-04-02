@@ -139,6 +139,8 @@ def main() -> None:
     best_row = cmp_df.loc[best_idx]
     deltas = {str(r["config"]): float(r["Spearman_mean"]) - baseline_sp for _, r in cmp_df.iterrows()}
     meaningful = [k for k, d in deltas.items() if k != "A" and d >= 0.01]
+    best_id = str(best_row["config"])
+    delta_best_vs_a = float(deltas[best_id])
 
     summary: dict[str, Any] = {
         "preset": "gcn_groupcv_mini_tuning",
@@ -148,15 +150,26 @@ def main() -> None:
         "meaningful_spearman_delta_vs_baseline_A": 0.01,
         "baseline_config": "A",
         "baseline_spearman_mean": baseline_sp,
-        "best_config_by_spearman_mean": str(best_row["config"]),
+        "best_config_by_spearman_mean": best_id,
         "best_spearman_mean": float(best_row["Spearman_mean"]),
         "spearman_mean_delta_vs_A_by_config": deltas,
         "meaningful_improvement_over_A_configs": meaningful,
+        "graph_family_representative_model": "GCN",
+        "lightweight_tuning_completed": True,
+        "internal_best_config_by_primary_metric": best_id,
+        "spearman_mean_delta_internal_best_vs_baseline_A": delta_best_vs_a,
+        "spearman_mean_delta_internal_best_vs_baseline_A_rounded_4dp": round(delta_best_vs_a, 4),
+        "meaningful_improvement_over_baseline_threshold": len(meaningful) > 0,
+        "baseline_gcn_retained_as_final_graph_family_representative": len(meaningful) == 0,
+        "config_E_status": "deferred_this_phase",
         "configs": rows,
         "comparison_csv": _rel_repo(repo, cmp_path),
         "notes": (
+            "Graph representative: GCN. Lightweight tuning (A-D) completed on the same drug-group CV; "
+            "internal best Spearman mean is config D but delta vs baseline A is below team threshold (>=0.01), "
+            "so no meaningful improvement; baseline GCN hyperparameters (A) retained; config E deferred this phase. "
             "Early stopping uses validation MSE per fold, not Spearman. "
-            "Interpret Spearman_mean with Spearman_std_folds; delta >= 0.01 vs A is team rule for meaningful gain."
+            "Interpret Spearman_mean with Spearman_std_folds."
         ),
     }
     sum_path = Path(args.summary_json)
