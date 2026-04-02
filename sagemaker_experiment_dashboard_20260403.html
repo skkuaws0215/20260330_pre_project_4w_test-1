@@ -168,9 +168,27 @@ python3 ml/pilot_sagemaker/aggregate_final_representative_outputs.py --collect</
       <table>
         <tr><th>파일</th><th>의미</th><th>비고</th></tr>
         <tr><td><code>final_ensemble_ranking_v2.csv</code></td><td>새 가중치 앙상블 점수·순위</td><td><code>ensemble_score</code> 유지 + <code>ensemble_score_v2</code>, <code>rank_v2</code>, <code>is_top100_v2</code> 추가</td></tr>
-        <tr><td><code>metabric_validation_summary.csv</code></td><td>외부 코호트 정렬 검증 요약</td><td>모델별 RMSE/MAE/Spearman</td></tr>
-        <tr><td><code>admet_filter_log.json</code></td><td>ADMET 규칙·통과/탈락 로그</td><td>이번 배치는 proxy rules (score-based)</td></tr>
-        <tr><td><code>final_shortlist.csv</code></td><td>최종 후보군</td><td>ADMET 통과 + 순위 유지, Top30</td></tr>
+        <tr><td><code>metabric_validation_summary.csv</code></td><td>METABRIC external validation 완료</td><td>모델별 RMSE/MAE/Spearman, 평가 pair 수 2648</td></tr>
+        <tr><td><code>admet_filter_log.json</code></td><td>ADMET 규칙·통과/탈락 로그</td><td>direct molecular lookup이 아닌 proxy rule-based screening</td></tr>
+        <tr><td><code>final_shortlist.csv</code></td><td>최종 후보군</td><td>Top 30 shortlist 생성 완료</td></tr>
+      </table>
+      <p class="muted" style="margin-top:10px;">
+        <strong>요약 수치:</strong> METABRIC evaluation pairs = <strong>2648</strong> · ADMET passed = <strong>53 / 100</strong> · Final shortlist = <strong>30</strong>
+      </p>
+      <h3 style="font-size:1rem;margin:14px 0 8px;">Final shortlist 핵심 컬럼 미리보기</h3>
+      <p class="muted" style="margin:0 0 8px;"><code>final_shortlist.csv</code>의 핵심 컬럼(<code>canonical_drug_id</code>, <code>rank_v2</code>, <code>ensemble_score_v2</code>, <code>bucket</code>)을 요약했습니다. 원본 컬럼명은 <code>drug_rank_v2</code>, <code>shortlist_bucket</code>입니다.</p>
+      <table>
+        <tr><th>canonical_drug_id</th><th>rank_v2</th><th>ensemble_score_v2</th><th>bucket</th></tr>
+        <tr><td>2498</td><td>1</td><td>2.7789</td><td>Top10</td></tr>
+        <tr><td>2438</td><td>2</td><td>2.7644</td><td>Top10</td></tr>
+        <tr><td>196</td><td>3</td><td>3.0275</td><td>Top10</td></tr>
+        <tr><td>1783</td><td>8</td><td>2.6365</td><td>Top10</td></tr>
+        <tr><td>263</td><td>10</td><td>3.0255</td><td>Top10</td></tr>
+        <tr><td>1852</td><td>11</td><td>2.8018</td><td>Top30</td></tr>
+        <tr><td>1449</td><td>12</td><td>2.7780</td><td>Top30</td></tr>
+        <tr><td>2002</td><td>14</td><td>2.7326</td><td>Top30</td></tr>
+        <tr><td>1047</td><td>15</td><td>2.9665</td><td>Top30</td></tr>
+        <tr><td>1806</td><td>16</td><td>2.6087</td><td>Top30</td></tr>
       </table>
     </section>
 

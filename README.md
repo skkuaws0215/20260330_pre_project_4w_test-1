@@ -380,16 +380,22 @@ python3 ml/pilot_sagemaker/build_final_ensemble_ranking.py
 - 기준: Top100(unique drug) 후보 + METABRIC-like sample set(`sample_expression_crispr_full`)
 - 출력: `metabric_validation_summary.csv` (model별 `RMSE`, `MAE`, `Spearman`)
 - 정렬 방식: `canonical_drug_id` 기준 drug-level score를 외부 sample pair에 투영
+- 상태: **METABRIC external validation 완료**
+- 요약 수치: **METABRIC evaluation pairs = 2648**
 
 **ADMET filtering**
 
 - 출력: `admet_filter_log.json`
-- 이번 run 메모: candidate drug ID와 직접 조인 가능한 분자 ADMET 테이블 부재로, score-based proxy rule gate 적용
+- 이번 run 메모: candidate drug ID와 직접 조인 가능한 분자 ADMET 테이블 부재로, **direct molecular lookup이 아닌 proxy rule-based screening** 적용
+- 요약 수치: **ADMET passed = 53 / 100**
 
 **Final shortlist**
 
 - 조건: ADMET 통과 + ranking 유지
 - 출력: `final_shortlist.csv` (Top30)
+- 상태: **최종 Top 30 shortlist 생성 완료**
+
+핵심 컬럼(요약): `canonical_drug_id`, `drug_rank_v2`(=`rank_v2`), `ensemble_score_v2`, `shortlist_bucket`(=`bucket`)
 
 ### A/B/C 파일럿: ML 4종 병렬 Training Job
 
