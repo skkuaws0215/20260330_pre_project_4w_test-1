@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Graph Experiment Dashboard · 20260402_v3</title>
+  <title>Graph Experiment Dashboard · 20260402_v4</title>
   <style>
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b1020; color: #e6edf7; }
     .hero { padding: 42px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); background: linear-gradient(120deg, #1f223f, #2d3f7a); }
@@ -29,7 +29,7 @@
     <h1>Graph Experiment Dashboard</h1>
     <p><strong>Graph 군</strong>은 GNN(학습 기반)만이 아니라, PPI/유전자 네트워크 상의 <strong>거리·근접도(규칙 기반)</strong> 접근도 포함합니다. <strong>로컬 검증 완료:</strong> 최종 대표는 <strong>drug-group CV Spearman mean 기준 GCN</strong>. Round1 행 단위 CV에서는 GraphSAGE가 Spearman 상위였으나 <strong>temporary candidate</strong>로만 기록 — 최종 확정은 group CV까지 본 뒤 <strong>GCN</strong>으로 정리. 다음 단계는 <strong>SageMaker</strong>에서 GCN 최종 실행(DL 대시보드 §0과 함께 3종).</p>
     <p class="muted" style="margin-top:10px;font-size:0.88rem;">로컬: 저장소 루트에서 <code>python3 serve_dashboards.py</code> 후 목차 또는 이 파일 URL로 접속. GitHub Pages는 Actions 배포 + Settings에서 Pages 소스 지정 후 팀에 URL 공유.</p>
-    <div class="badge">Snapshot · 20260402_v3 · 대표 GCN 확정 → SageMaker</div>
+    <div class="badge">Snapshot · 20260402_v4 · 대표 GCN → SageMaker</div>
     <a class="nav-btn" href="dl_experiment_dashboard_20260331.html">Go to DL Experiment Dashboard</a>
     <a class="nav-btn" href="newfe_quality_dashboard_20260331.html">Back to New FE Quality Dashboard</a>
   </div>
@@ -111,15 +111,8 @@
 
     <section>
       <h2>5) 평가 지표 정의</h2>
-      <table>
-        <tr><th>표기</th><th>정의</th><th>해석</th></tr>
-        <tr><td><code>Sp</code></td><td>Spearman rank correlation</td><td>클수록 좋음</td></tr>
-        <tr><td><code>RMSE</code></td><td>회귀 오차 제곱평균제곱근</td><td>작을수록 좋음</td></tr>
-        <tr><td><code>NDCG@20</code></td><td>상위 20개 랭킹 품질</td><td>클수록 좋음</td></tr>
-        <tr><td><code>Hit@20</code></td><td>상위 20개 내 hit 비율</td><td>클수록 좋음</td></tr>
-        <tr><td><code>std</code></td><td>fold 간 Spearman 표준편차</td><td>작을수록 안정적</td></tr>
-        <tr><td><code>MAE</code></td><td>평균 절대 오차</td><td>작을수록 좋음</td></tr>
-      </table>
+      <p class="muted" style="margin:0;">§9 drug-group CV 결과 표에 나오는 열 이름(Spearman, RMSE, NDCG@20 등)의 정의표는 <strong>§9 표 바로 아래 HTML 주석</strong>에 두었습니다. 브라우저 화면에는 보이지 않으며, 파일 소스 보기·편집기에서 확인하면 됩니다.</p>
+      <p class="muted" style="margin:10px 0 0;"><strong>한 줄 요약:</strong> Spearman·NDCG@20·Hit@20은 클수록, RMSE·MAE는 작을수록 좋음. <code>std</code>는 fold 간 Spearman 산포(작을수록 안정).</p>
     </section>
 
     <section>
@@ -152,6 +145,7 @@
 
     <section>
       <h2>8) Round1 실행 순서 (Proximity → GNN → 병합)</h2>
+      <p class="muted" style="margin:0 0 10px;"><strong>이 절이 의미하는 것:</strong> <em>Round1</em>은 <strong>행 단위 5-fold</strong> 인덱스(<code>model_selection_stage1/cv_fold_indices.json</code>)를 쓰는 <strong>첫 번째 그래프 베이스라인 재현 절차</strong>입니다. 아래 순서대로 스크립트를 실행하면 Network Proximity → GraphSAGE → GCN을 같은 데이터·같은 폴드로 돌리고, 마지막에 병합해 <code>graph_family_comparison.csv</code> / <code>graph_family_summary.json</code> / <code>ml_dl_graph_family_mean.csv</code>가 생깁니다. <strong>최종 Graph 대표 선정</strong>은 이 Round1만으로 끝나지 않고, §9처럼 <strong>drug-group CV</strong>까지 본 뒤 정책에 따라 확정합니다(현재: GCN).</p>
       <p class="muted">스키마: node = drug, gene / edge = drug–target (PPI는 <code>--ppi-edges-uri</code>로 선택) / disease gene = <code>data/graph_baseline/disease_genes_common_v1.txt</code> 고정. CV는 <code>model_selection_stage1/cv_fold_indices.json</code> 재사용. 라벨·피처 병합은 GNN과 동일하게 <code>graph_baseline_data.load_merged_pair_frame</code> 기준(행 수·순서 일치).</p>
       <p class="muted">저장소 기본값: <code>labels_B_graph.parquet</code>, <code>drug_target_map_20260331.parquet</code>, pathway addon 피처, <code>cv_fold_indices.json</code> — <strong>추가 인자 없이</strong> 아래만 실행하면 됩니다. S3·다른 경로는 각 스크립트의 <code>--*-uri</code>로 덮어쓰기.</p>
       <h3 style="font-size:1rem;margin:14px 0 6px;">(1) Network Proximity</h3>
@@ -183,6 +177,16 @@ python3 ml/pilot_sagemaker/run_graph_gnn_cv.py --model gcn</code></pre>
         <tr><td>GraphSAGE</td><td>2.680</td><td>2.197</td><td>0.243</td><td>0.750</td><td>1.000</td><td>0.062</td></tr>
         <tr><td>GCN</td><td>2.551</td><td>2.070</td><td><span class="best">0.254</span></td><td><span class="best">0.758</span></td><td>0.993</td><td>0.103</td></tr>
       </table>
+      <!--
+        §9 위 결과 표 열 해석용 — 구 §5) 평가 지표 정의 표와 동일
+        표기     | 정의                              | 해석
+        Sp       | Spearman rank correlation         | 클수록 좋음
+        RMSE     | 회귀 오차 제곱평균제곱근           | 작을수록 좋음
+        NDCG@20  | 상위 20개 랭킹 품질               | 클수록 좋음
+        Hit@20   | 상위 20개 내 hit 비율             | 클수록 좋음
+        std      | fold 간 Spearman 표준편차         | 작을수록 안정적
+        MAE      | 평균 절대 오차                    | 작을수록 좋음
+      -->
       <p class="muted" style="margin:10px 0 0;"><strong>최종 Graph 군 대표:</strong> <strong>GCN</strong> (위 표 Spearman mean 최대). <strong>정책 요약:</strong> Round1 행 단위 CV에서는 GraphSAGE가 Spearman 기준 잠정 1위였으나 optimistic bias 가능 → <strong>GraphSAGE는 temporary candidate로만</strong> JSON·문서에 남기고, <strong>운영·SageMaker 라인업의 Graph 슬롯은 GCN</strong>으로 확정. JSON 필드 <code>temporary_graph_representative_candidate</code>는 그 이력용.</p>
     </section>
   </div>
