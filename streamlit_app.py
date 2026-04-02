@@ -29,6 +29,35 @@ def show_html_report():
     st.components.v1.html(raw, height=960, scrolling=True)
 
 
+def page_experiment_dashboards():
+    st.header("실험 대시보드 (DL / Graph HTML)")
+    st.markdown(
+        """
+GitHub **`blob` 링크**는 HTML을 웹페이지로 그리지 않습니다.  
+**다른 폴더**에서 `python3 -m http.server`만 켜도 루트 HTML이 없어 **빈 목록·404**가 납니다.
+
+**이렇게 하세요 (저장소 루트에서):**
+        """
+    )
+    st.code("python3 serve_dashboards.py", language="bash")
+    st.info(
+        "터미널에 주소가 출력되고, 브라우저가 `index.html` 목차를 자동으로 엽니다. "
+        "같은 Wi‑Fi의 다른 사람에게는 출력되는 **LAN IP** 주소를 공유하세요."
+    )
+    st.subheader("서버를 이미 켰다면 (기본 포트 8765)")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.link_button("목차 (index)", "http://127.0.0.1:8765/index.html")
+    with c2:
+        st.link_button("DL 실험", "http://127.0.0.1:8765/dl_experiment_dashboard_20260331.html")
+    with c3:
+        st.link_button("Graph 실험", "http://127.0.0.1:8765/graph_experiment_dashboard_20260401.html")
+    st.caption(
+        "링크가 안 열리면 `serve_dashboards.py`가 **실행 중인지**, 포트가 **8765**인지 확인하세요. "
+        "팀 전체 공개 URL은 GitHub Pages(워크플로 `deploy-dashboards.yml`) 설정 후 사용합니다."
+    )
+
+
 TASK_LABELS = [
     "[Day1] 본인 전용 prefix results/features_nextflow_team4/ + README (공유 results/ 와 구분)",
     "Nextflow 피처 파이프라인 초안 (`results/` 입력, `ml_ready/` 비입력) + S3 경로 합의",
@@ -302,6 +331,7 @@ def page_flow():
 
 PAGES = {
     "홈": page_home,
+    "실험 대시보드 (DL/Graph HTML)": page_experiment_dashboards,
     "전체 요약·현황": page_status,
     "핵심 용어 (ADMET / QC3·METABRIC)": page_glossary,
     "모델 선별 (PPTX 반영)": page_models,

@@ -498,21 +498,23 @@ Delta 요약:
 - **요약 JSON:** `recommended_graph_representative`(Spearman mean 최대), `temporary_graph_representative_candidate`, `representative_finalization_policy`, `gnn_transductive_caveat` 등.
 - **대시보드:** `graph_experiment_dashboard_20260401.html` (섹션 9), DL 대시보드 `dl_experiment_dashboard_20260331.html`에서 Graph 쪽 교차 링크.
 
-**대시보드 HTML을 다른 팀에 보여줄 때 (GitHub 링크만으로는 보통 “페이지”로 안 열립니다):**
+**대시보드 HTML이 “안 열릴” 때:** GitHub **`blob` URL**은 HTML을 **렌더하지 않습니다**. 다른 폴더에서 `python3 -m http.server`만 실행하면 **루트 HTML이 없어** 빈 화면·404가 납니다.
 
-- **`/blob/main/...html` 링크:** GitHub는 HTML을 **렌더링하지 않고** 소스(태그)로만 보여 줍니다. “안 열린다”처럼 느껴지는 경우가 많습니다.
-- **`htmlpreview.github.io`:** 회사망·브라우저·서비스 장애로 **자주 실패**합니다. 메인 안내 수단으로 쓰지 않는 것을 권장합니다.
+**1) 로컬·동일 Wi‑Fi 공유 (가장 확실):** 저장소 **루트**에서:
 
-**실제로 화면으로 보게 하는 방법 (권장):**
+```bash
+python3 serve_dashboards.py
+```
 
-1. 저장소 clone 후 **저장소 루트**에서 로컬 웹 서버 실행:
-   - `python3 -m http.server 8765`
-   - 브라우저에서 `http://127.0.0.1:8765/graph_experiment_dashboard_20260401.html` 또는 `http://127.0.0.1:8765/dl_experiment_dashboard_20260331.html`
-2. 같은 Wi‑Fi의 동료에게는 본인 PC의 LAN IP로 공유: `http://<내_IP>:8765/...` (방화벽에서 포트 허용 필요).
-3. **macOS**에서만 빠르게: 루트에서 `open graph_experiment_dashboard_20260401.html` — 다만 `file://`로 열리므로 일부 브라우저에서 상대 링크 동작이 서버 방식보다 까다로울 수 있어, 가능하면 위 1번이 안전합니다.
-4. 조직에서 허용하면 **GitHub Pages**로 `main` 브랜치 `/` 또는 `/docs`에 HTML을 올리면 `https://<user>.github.io/<repo>/...` 형태로 공유할 수 있습니다.
+터미널에 `http://127.0.0.1:8765/` 및 LAN 주소가 출력되고, 브라우저가 **`index.html` 목차**를 연 뒤 DL/Graph 링크를 누르면 됩니다.  
+Streamlit을 쓰는 경우: `streamlit run streamlit_app.py` → 사이드바 **「실험 대시보드 (DL/Graph HTML)」** 에서 동일 안내·링크.
 
-**참고용(소스·diff 확인):** `https://github.com/skkuaws0215/20260330_pre_project_4w_test-1/blob/main/graph_experiment_dashboard_20260401.html` · 동일 경로에 `dl_experiment_dashboard_20260331.html`.
+**2) 팀에 고정 URL (GitHub Pages):** 저장소 **Settings → Pages → Build and deployment → Source: GitHub Actions** 로 두면, 푸시 시 `.github/workflows/deploy-dashboards.yml` 이 루트의 `*.html` 을 배포합니다.  
+배포 후 주소 형식: `https://skkuaws0215.github.io/20260330_pre_project_4w_test-1/index.html` (첫 설정·첫 배포가 끝나야 열립니다.)
+
+**3) `htmlpreview.github.io`:** 망·서비스 이슈로 실패하는 경우가 많아 의존하지 않는 것을 권장합니다.
+
+**소스만 볼 때:** `https://github.com/skkuaws0215/20260330_pre_project_4w_test-1/blob/main/graph_experiment_dashboard_20260401.html` 등.
 
 #### Pathway (Hallmark GMT) — `pathway__*` 보강 및 BlockWise 정식 블록 CV
 
