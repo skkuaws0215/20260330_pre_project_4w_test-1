@@ -1,0 +1,46 @@
+{
+  "phase": "sagemaker_final_three_representatives",
+  "purpose": "Reproducible final training for selected models only; not exploration.",
+  "representatives": {
+    "ML": "XGBoost",
+    "DL": "ResidualMLP",
+    "Graph": "GCN (group CV selection; hyperparams baseline A per gcn_tuning_summary.json)"
+  },
+  "execution_principles": [
+    "Local CV results remain the rationale for model selection; SageMaker runs do not re-tune for new champions.",
+    "SageMaker runs only the three representatives; no additional model search in this phase.",
+    "Same data joins, keys, and metric definitions as local experiments; document any URI changes.",
+    "Graph: GCN with drug-group CV policy; use hidden_dim=64, lr=1e-3, weight_decay=1e-5 unless team policy changes."
+  ],
+  "outputs": {
+    "comparison_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260331/sagemaker_final_three/final_model_comparison.csv",
+    "summary_json": "results/features_nextflow_team4/fe_re_batch_runs/20260331/sagemaker_final_three/final_model_summary.json",
+    "artifact_subdirs": [
+      "results/features_nextflow_team4/fe_re_batch_runs/20260331/sagemaker_final_three/artifacts/xgb",
+      "results/features_nextflow_team4/fe_re_batch_runs/20260331/sagemaker_final_three/artifacts/residualmlp",
+      "results/features_nextflow_team4/fe_re_batch_runs/20260331/sagemaker_final_three/artifacts/gcn"
+    ],
+    "logs_dir": "results/features_nextflow_team4/fe_re_batch_runs/20260331/sagemaker_final_three/logs"
+  },
+  "local_cv_sources": {
+    "ml_dl": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/residual_mlp_cv/residual_mlp_cv_summary.json",
+    "graph_groupcv": "results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/graph_family_groupcv_summary.json",
+    "gcn_hyperparams": "results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/gcn_tuning_summary.json"
+  },
+  "metrics_sidecar_schema": {
+    "path_pattern": "artifacts/{xgb|residualmlp|gcn}/metrics.json",
+    "optional_keys": [
+      "sagemaker_training_job",
+      "sagemaker_status",
+      "artifact_uri",
+      "training_logs_uri",
+      "final_eval: {rmse, mae, spearman, ndcg20, hit20}"
+    ],
+    "note": "train_tabular.py writes nested train/valid; for final reporting add final_eval or copy eval block to top level."
+  },
+  "submit_scripts": {
+    "xgb": "ml/pilot_sagemaker/submit_final_xgb_sagemaker.py (PyTorch image + train_tabular.py xgboost)",
+    "residualmlp": "TBD: add SageMaker training entry mirroring run_residual_mlp_cv_local.py hyperparams",
+    "gcn": "TBD: add SageMaker training entry mirroring run_graph_gnn_cv.py --model gcn + group-CV hyperparams (baseline A)"
+  }
+}

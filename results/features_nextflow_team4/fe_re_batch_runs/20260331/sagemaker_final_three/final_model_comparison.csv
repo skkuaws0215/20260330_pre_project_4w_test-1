@@ -1,0 +1,4 @@
+model_family,representative_model,local_selection_validation,local_RMSE_mean,local_MAE_mean,local_Spearman_mean,local_NDCG20_mean,local_Hit20_mean,sagemaker_training_job,sagemaker_status,sagemaker_RMSE,sagemaker_MAE,sagemaker_Spearman,sagemaker_NDCG20,sagemaker_Hit20,artifact_uri,training_logs_uri,metrics_json_relative_path
+ML,XGBoost,5-fold row KFold (same as residual_mlp_cv_summary),2.133085,1.594438,0.430751,0.839619,1.0,,TBD,,,,,,,,artifacts/xgb/metrics.json
+DL,ResidualMLP,5-fold row KFold (same as residual_mlp_cv_summary),2.128796,1.588846,0.43668,0.840609,1.0,,TBD,,,,,,,,artifacts/residualmlp/metrics.json
+Graph,GCN,5-fold GroupKFold by canonical_drug_id (graph_family_groupcv),2.5512886207234837,2.070464825630188,0.2535836298737356,0.7577479162869373,0.993103448275862,,TBD,,,,,,,,artifacts/gcn/metrics.json

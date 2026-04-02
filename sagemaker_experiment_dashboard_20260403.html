@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SageMaker 통합 실험 대시보드 · 20260403_v1</title>
+  <title>SageMaker 통합 실험 대시보드 · 20260403_v2</title>
   <style>
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0a0f18; color: #e6edf7; }
     .hero { padding: 42px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); background: linear-gradient(120deg, #152238, #1e3d52 45%, #1a4d3a); }
@@ -31,9 +31,9 @@
 <body>
   <div class="hero">
     <h1>SageMaker 통합 실험 대시보드</h1>
-    <p><strong>ML · DL · Graph</strong> 군별 대표(<strong>XGBoost · ResidualMLP · GCN</strong>)를 SageMaker에서 실행하고, 산출 지표·아티팩트를 한곳에 모읍니다. 본 페이지는 <strong>20260403_v1</strong> 기준 초안이며, Training Job이 생성되면 아래 표를 수치·링크로 채웁니다.</p>
+    <p><strong>ML · DL · Graph</strong> 군별 대표(<strong>XGBoost · ResidualMLP · GCN</strong>)를 SageMaker에서 실행하고, 산출 지표·아티팩트·로그를 한곳에 모읍니다. <strong>최종 실행 단계</strong>이며 추가 탐색은 하지 않습니다. 로컬 CV는 선정 근거로만 유지합니다. 통합 산출 번들: <code>sagemaker_final_three/</code> (<strong>§2.5</strong>).</p>
     <p class="muted" style="margin-top:10px;font-size:0.88rem;">로컬 목차: <code>python3 serve_dashboards.py</code> 또는 <code>http://127.0.0.1:8000/sagemaker_experiment_dashboard_20260403.html</code></p>
-    <div class="badge">Snapshot · 20260403_v1 · SageMaker 통합 진행</div>
+    <div class="badge">Snapshot · 20260403_v2 · sagemaker_final_three 번들</div>
     <a class="nav-btn" href="index.html">Index</a>
     <a class="nav-btn" href="dl_experiment_dashboard_20260331.html">DL 대시보드 (로컬 §0)</a>
     <a class="nav-btn" href="graph_experiment_dashboard_20260402.html">Graph 대시보드</a>
@@ -60,6 +60,25 @@
       </table>
       <p class="muted" style="margin:10px 0 0;">Graph만 검증 정의가 다르므로 행 간 숫자는 DL 대시보드 <strong>§0</strong>에 적어 둔 대로 해석합니다. 로컬 상세: <code>dl_experiment_dashboard_20260331.html</code> 맨 위 §0.</p>
       <p class="muted" style="margin:10px 0 0;"><strong>Graph GCN:</strong> Representative <strong>GCN</strong> 유지. <strong>Lightweight tuning completed</strong> (A–D, same drug-group CV). Internal best Spearman mean: config <strong>D</strong>, but delta vs baseline A ≈ <strong>+0.0054</strong> &lt; team threshold <strong>0.01</strong> → <strong>no meaningful improvement</strong> → <strong>baseline GCN (config A: hidden 64, lr 1e-3, weight_decay 1e-5) retained</strong> for SageMaker. Config <strong>E deferred</strong> this phase. Source: <code>graph_baseline_round1/gcn_tuning_summary.json</code> — Graph 대시보드 §8.</p>
+    </section>
+
+    <section>
+      <h2>2.5) 최종 3종 산출 번들 (<code>sagemaker_final_three</code>)</h2>
+      <p class="muted" style="margin:0 0 10px;">재현 가능한 <strong>대표 모델만</strong> 정리합니다. 동일 데이터·평가 기준 유지; Graph는 group CV로 선정된 GCN(baseline A).</p>
+      <table>
+        <tr><th>파일 / 경로</th><th>역할</th></tr>
+        <tr><td><code>results/…/sagemaker_final_three/final_model_comparison.csv</code></td><td>모델군별 1행: 로컬 CV mean + SageMaker job·지표·아티팩트·로그 URI(잡 후 입력)</td></tr>
+        <tr><td><code>results/…/sagemaker_final_three/final_model_summary.json</code></td><td>실행 원칙, 로컬 근거 JSON 경로, <code>artifacts/*</code>·<code>logs/</code> 위치, sidecar <code>metrics.json</code> 스키마</td></tr>
+        <tr><td><code>artifacts/xgb/</code> · <code>artifacts/residualmlp/</code> · <code>artifacts/gcn/</code></td><td>모델 아티팩트 + (선택) <code>metrics.json</code> — Training Job 산출물 복사·동기화</td></tr>
+        <tr><td><code>logs/</code></td><td>CloudWatch 로그 링크 또는 저장한 텍스트</td></tr>
+        <tr><td><code>sagemaker_final_three/README.txt</code></td><td>운영 안내</td></tr>
+      </table>
+      <pre style="background:rgba(0,0,0,0.35);padding:12px;border-radius:8px;overflow:auto;font-size:0.85rem;margin-top:10px;"><code># 로컬 선정 수치로 비교표·요약 JSON 갱신
+python3 ml/pilot_sagemaker/aggregate_final_representative_outputs.py
+
+# 각 artifacts/*/metrics.json 채운 뒤 SageMaker 열 병합
+python3 ml/pilot_sagemaker/aggregate_final_representative_outputs.py --collect</code></pre>
+      <p class="muted" style="margin:10px 0 0;">XGBoost 제출 예: <code>ml/pilot_sagemaker/submit_final_xgb_sagemaker.py</code>. ResidualMLP·GCN용 SageMaker 엔트리는 저장소에 맞춰 추가 후 동일 폴더 규칙을 따르세요.</p>
     </section>
 
     <section>
@@ -107,7 +126,7 @@
       <h2>4) 업데이트 방법 (팀 합의 후 고정)</h2>
       <ul class="muted">
         <li><strong>수동:</strong> Job 종료 후 CloudWatch/SageMaker 콘솔에서 지표를 확인하고, 이 HTML의 §3 표 셀을 직접 수정 후 커밋</li>
-        <li><strong>반자동:</strong> Job이 쓰는 <code>metrics.json</code> 스키마를 정한 뒤, 소규모 스크립트로 표를 재생성해 HTML 일부를 치환</li>
+        <li><strong>반자동:</strong> <code>sagemaker_final_three/artifacts/*/metrics.json</code>을 채운 뒤 <code>aggregate_final_representative_outputs.py --collect</code>로 <code>final_model_comparison.csv</code> 갱신 후, 필요 시 이 HTML §3와 맞춤</li>
         <li><strong>공통:</strong> 인스턴스 타입·입력 채널·하이퍼파라미터는 팀 노션/README의 SageMaker 절과 맞출 것 (DL 대시보드 §0 체크리스트 참고)</li>
       </ul>
     </section>
