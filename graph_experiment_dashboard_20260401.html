@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Graph Experiment Dashboard · 20260402_v2</title>
+  <title>Graph Experiment Dashboard · 20260402_v3</title>
   <style>
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b1020; color: #e6edf7; }
     .hero { padding: 42px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); background: linear-gradient(120deg, #1f223f, #2d3f7a); }
@@ -27,9 +27,9 @@
 <body>
   <div class="hero">
     <h1>Graph Experiment Dashboard</h1>
-    <p><strong>Graph 군</strong>은 GNN(학습 기반)만이 아니라, PPI/유전자 네트워크 상의 <strong>거리·근접도(규칙 기반)</strong> 접근도 포함합니다. 학습형과 비학습형을 동일 지표로 비교해 대표 후보를 고릅니다.</p>
+    <p><strong>Graph 군</strong>은 GNN(학습 기반)만이 아니라, PPI/유전자 네트워크 상의 <strong>거리·근접도(규칙 기반)</strong> 접근도 포함합니다. <strong>로컬 검증 완료:</strong> 최종 대표는 <strong>drug-group CV Spearman mean 기준 GCN</strong>. Round1 행 단위 CV에서는 GraphSAGE가 Spearman 상위였으나 <strong>temporary candidate</strong>로만 기록 — 최종 확정은 group CV까지 본 뒤 <strong>GCN</strong>으로 정리. 다음 단계는 <strong>SageMaker</strong>에서 GCN 최종 실행(DL 대시보드 §0과 함께 3종).</p>
     <p class="muted" style="margin-top:10px;font-size:0.88rem;">로컬: 저장소 루트에서 <code>python3 serve_dashboards.py</code> 후 목차 또는 이 파일 URL로 접속. GitHub Pages는 Actions 배포 + Settings에서 Pages 소스 지정 후 팀에 URL 공유.</p>
-    <div class="badge">Snapshot · 20260402_v2 · drug-group CV 반영</div>
+    <div class="badge">Snapshot · 20260402_v3 · 대표 GCN 확정 → SageMaker</div>
     <a class="nav-btn" href="dl_experiment_dashboard_20260331.html">Go to DL Experiment Dashboard</a>
     <a class="nav-btn" href="newfe_quality_dashboard_20260331.html">Back to New FE Quality Dashboard</a>
   </div>
@@ -39,7 +39,7 @@
       <h2>1) 목적</h2>
       <ul class="muted">
         <li><strong>graph 기반 접근</strong>이 기존 <strong>ML(XGBoost) / DL(ResidualMLP)</strong> 대비 <strong>의미 있는 성능 개선</strong>이 있는지 확인</li>
-        <li>Graph 군에서 <strong>대표 모델 1종</strong> 선정 후 최종 챔피언 비교군에 포함</li>
+        <li>Graph 군 <strong>대표 모델: GCN</strong> (group CV 확정) — SageMaker에서 ML/DL 대표와 병행 최종 실행</li>
         <li><strong>규칙 기반(Network Proximity)</strong>과 <strong>학습 기반(GNN: GraphSAGE, GCN)</strong>을 동일 데이터·동일 split·동일 지표로 비교</li>
         <li>성능뿐 아니라 안정성(std), 운영 복잡도까지 함께 판단</li>
       </ul>
@@ -51,13 +51,14 @@
         <tr><th>항목</th><th>상태</th></tr>
         <tr><td>ML 실험</td><td>완료 (대표: <strong>XGBoost</strong>)</td></tr>
         <tr><td>DL 실험</td><td>완료 (대표: <strong>ResidualMLP</strong>)</td></tr>
-        <tr><td>현재 단계</td><td><strong>Graph 군 대표 1종 선정</strong>을 위한 로컬 baseline 실험</td></tr>
-        <tr><td>SageMaker 사용 여부</td><td>아직 사용하지 않음 (Graph 대표 확정 후 3자 비교 단계에서 사용)</td></tr>
+        <tr><td>현재 단계</td><td>로컬 baseline·drug-group CV <strong>완료</strong> · Graph 대표 <strong>GCN</strong> 확정</td></tr>
+        <tr><td>SageMaker</td><td><strong>다음:</strong> XGBoost + ResidualMLP + GCN 최종 실행 (DL 대시보드 §0 체크리스트)</td></tr>
       </table>
     </section>
 
     <section>
       <h2>3) 입력/공정성 규칙</h2>
+      <!-- §3 표: 피처·라벨·drug-target·Round1 vs drug-group split 정의. SageMaker 입력 고정 시 이 표와 동일 URI·join·스키마를 재사용할 것. -->
       <table>
         <tr><th>항목</th><th>설정</th></tr>
         <tr><td>Feature</td><td><code>results/.../final_pathway_addon/pair_features_newfe_v2.parquet</code> (고정)</td></tr>
@@ -92,9 +93,9 @@
         <tr>
           <td>3</td>
           <td><strong>GCN</strong></td>
-          <td>GNN secondary baseline</td>
-          <td>기본 message passing; GraphSAGE와 동일 그래프/스플릿으로 비교</td>
-          <td class="ok">Round1 실행됨</td>
+          <td><strong>Graph 군 확정 대표</strong> (SageMaker)</td>
+          <td>기본 message passing; drug-group CV에서 Spearman mean 최고 → <strong>최종 대표</strong>. GraphSAGE는 Round1 row-CV temporary만.</td>
+          <td class="ok">Round1 + group CV 완료 · 대표 확정</td>
         </tr>
       </table>
       <p class="muted" style="margin:12px 0 0;"><strong>주의:</strong> 초기에는 <strong>GAT / R-GCN(Hetero)</strong> 제외. GraphSAGE·GCN 결과 확인 후 필요 시 확장.</p>
@@ -123,6 +124,7 @@
 
     <section>
       <h2>6) 산출물</h2>
+      <!-- §6 표: 로컬 실험이 만든 파일명·역할. merge 스크립트 산출 vs groupcv 파일명 구분. SageMaker 산출물 네이밍은 별도 job 규약으로 맞추되 지표 정의는 동일. -->
       <table>
         <tr><th>파일</th><th>설명</th></tr>
         <tr><td><code>graph_family_comparison.csv</code></td><td>위 3종의 <strong>fold 1~5 행</strong> + 각 모델별 <code>fold=mean</code>(5-fold 산술평균) + <code>fold=spearman_std</code>(fold 간 Spearman 표준편차). 대표 선정 시 <strong>Spearman mean</strong>을 1차 기준으로 사용.</td></tr>
@@ -142,9 +144,9 @@
       <ul class="muted">
         <li>Round1: <code>graph_family_comparison.csv</code> / <code>graph_family_summary.json</code> 완료</li>
         <li>Stricter: drug-group CV로 과대평가 여부 점검 — <code>graph_family_groupcv_*</code> 완료</li>
-        <li><strong>대표 확정 정책:</strong> Round1의 GraphSAGE는 <strong>temporary candidate</strong>만 유지. Graph 군 대표는 group CV에서도 경쟁력이 있을 때 확정(<code>graph_family_groupcv_summary.json</code>의 <code>representative_finalization_policy</code> 참고).</li>
-        <li>ML/DL 스코어와 대조해 graph 접근의 추가 가치 판단</li>
-        <li>이후 ML(XGBoost) / DL(ResidualMLP) / Graph 대표를 동일 조건으로 SageMaker 최종 비교</li>
+        <li><strong>대표 확정 (적용됨):</strong> group CV Spearman mean으로 <strong>GCN</strong> 채택. GraphSAGE는 Round1 row-CV <strong>temporary candidate</strong>만 문서 보존.</li>
+        <li>ML/DL 스코어와 대조는 DL 대시보드 <strong>§0</strong> 통합 표 참고 (검증 방식이 행-CV vs drug-group으로 다름).</li>
+        <li><strong>다음:</strong> SageMaker에서 XGBoost · ResidualMLP · GCN 최종 실행</li>
       </ul>
     </section>
 
@@ -181,7 +183,7 @@ python3 ml/pilot_sagemaker/run_graph_gnn_cv.py --model gcn</code></pre>
         <tr><td>GraphSAGE</td><td>2.680</td><td>2.197</td><td>0.243</td><td>0.750</td><td>1.000</td><td>0.062</td></tr>
         <tr><td>GCN</td><td>2.551</td><td>2.070</td><td><span class="best">0.254</span></td><td><span class="best">0.758</span></td><td>0.993</td><td>0.103</td></tr>
       </table>
-      <p class="muted" style="margin:10px 0 0;"><strong>권장 대표(동일 규칙: Spearman mean 최대):</strong> 이 스냅샷에서는 <strong>GCN</strong>. JSON의 <code>temporary_graph_representative_candidate</code>는 여전히 Round1 기준 <strong>GraphSAGE</strong>를 가리키며, 최종 운영 대표는 정책에 따라 group CV 결과를 우선합니다.</p>
+      <p class="muted" style="margin:10px 0 0;"><strong>최종 Graph 군 대표:</strong> <strong>GCN</strong> (위 표 Spearman mean 최대). <strong>정책 요약:</strong> Round1 행 단위 CV에서는 GraphSAGE가 Spearman 기준 잠정 1위였으나 optimistic bias 가능 → <strong>GraphSAGE는 temporary candidate로만</strong> JSON·문서에 남기고, <strong>운영·SageMaker 라인업의 Graph 슬롯은 GCN</strong>으로 확정. JSON 필드 <code>temporary_graph_representative_candidate</code>는 그 이력용.</p>
     </section>
   </div>
 </body>

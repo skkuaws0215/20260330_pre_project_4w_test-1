@@ -470,6 +470,13 @@ Delta 요약:
 - 대시보드: `dl_experiment_dashboard_20260331.html` → **7)**
 - 대시보드: `dl_experiment_dashboard_20260331.html` → **8)** 의사결정 참고 Agent 요약 의견 (DL 채택·제외·ML/Graph 관계 주석)
 
+#### 로컬 검증·문서화 완료 — 군별 대표 & SageMaker 최종 3종
+
+- **확정 대표:** ML **XGBoost** (tuned) · DL **ResidualMLP** · Graph **GCN**.
+- **Graph 정책:** Spearman mean 기준 **drug-group CV**에서 GCN이 앞섬. Round1 **행 단위 CV**에서는 GraphSAGE가 잠정 1위였으나 optimistic bias 가능 → **GraphSAGE는 temporary candidate로만** 기록하고, **최종 Graph 대표는 GCN**.
+- **한 장 비교표·지표·검증 타입·SageMaker 입력/설정/산출물 체크리스트:** `dl_experiment_dashboard_20260331.html` **0)**.
+- **수치 원본:** `analysis_target_only/residual_mlp_cv/residual_mlp_cv_summary.json` (ML/DL 행 5-fold mean); `graph_baseline_round1/graph_family_groupcv_summary.json` (GCN group 5-fold mean). 행 간 숫자는 검증 정의가 다르므로 직접 승패 비교 시 주의.
+
 #### Graph 군 Round1 — Network Proximity · GraphSAGE · GCN (동일 스키마·동일 `cv_fold_indices.json`)
 
 - 대시보드: `graph_experiment_dashboard_20260401.html`
@@ -481,7 +488,7 @@ Delta 요약:
 - **Network Proximity:** `run_network_proximity_baseline.py` — **rule-based, non-sample-specific** drug-level z-score. 검증 폴드에서 **RMSE/MAE**는 train에서 적합한 `y ~ a·z+b`로 스케일 맞춘 예측으로 계산하고, **Spearman/NDCG/Hit**는 원시 z로 계산(`graph_schema.json`의 `proximity_calibration` 참고).
 - **GraphSAGE / GCN:** `run_graph_gnn_cv.py --model sage|gcn` → `graph_gnn_*_partial.csv`.
 - **병합:** `merge_graph_family_outputs.py` → `graph_family_comparison.csv`, `graph_family_summary.json`, 그리고 ML/DL 대표와 한 줄 비교용 **`ml_dl_graph_family_mean.csv`** (소스: `analysis_target_only/residual_mlp_cv/residual_mlp_cv_summary.json`의 XGBoost·ResidualMLP + Graph 대표).
-- **Round1 정책:** `graph_family_summary.json`에 `temporary_graph_representative_candidate: "GraphSAGE"` 및 행 단위 CV·공유 drug node로 인한 optimistic bias 가능성을 명시. Graph 군 **최종 대표는 drug-group CV 결과를 함께 본 뒤** 확정.
+- **Round1 vs 최종:** `graph_family_summary.json`에 Round1 기준 `temporary_graph_representative_candidate: "GraphSAGE"`(행 단위 CV 이력). **최종 Graph 군 대표는 `graph_family_groupcv_summary.json` 기준 GCN**으로 확정(SageMaker Graph 슬롯).
 - `s3://` URI는 `s3fs` 설치·자격 증명이 있으면 그대로 사용 가능.
 - Python: `ml/pilot_sagemaker/requirements.txt` (`torch`, `s3fs`).
 
