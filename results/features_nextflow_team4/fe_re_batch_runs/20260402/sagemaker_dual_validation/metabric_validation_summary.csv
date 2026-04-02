@@ -1,0 +1,5 @@
+model,n_pairs,RMSE,MAE,Spearman,validation_cohort,alignment_note
+XGBoost,2648,7.128933369292016,7.003744797642184,-0.07108890427418381,METABRIC-like(sample_expression_crispr_full sample set),top100 unique-drug set aligned by canonical_drug_id; per-drug model score projected to external sample pairs
+ResidualMLP,2648,3.3209889336821425,3.1253180808232717,-0.0556019314013151,METABRIC-like(sample_expression_crispr_full sample set),top100 unique-drug set aligned by canonical_drug_id; per-drug model score projected to external sample pairs
+GCN,2648,1.2732004059703455,0.914277209251939,0.40449331045109743,METABRIC-like(sample_expression_crispr_full sample set),top100 unique-drug set aligned by canonical_drug_id; per-drug model score projected to external sample pairs
+Ensemble_v2,2648,2.701437706442023,2.369674898831038,0.07424540652605745,METABRIC-like(sample_expression_crispr_full sample set),top100 unique-drug set aligned by canonical_drug_id; per-drug model score projected to external sample pairs

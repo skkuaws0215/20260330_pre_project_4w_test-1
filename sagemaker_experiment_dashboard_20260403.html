@@ -33,7 +33,7 @@
     <h1>SageMaker 통합 실험 대시보드</h1>
     <p><strong>ML · DL · Graph</strong> 군별 대표(<strong>XGBoost · ResidualMLP · GCN</strong>)를 SageMaker에서 실행하고, 산출 지표·아티팩트·로그를 한곳에 모읍니다. <strong>최종 실행 단계</strong>이며 추가 탐색은 하지 않습니다. 로컬 CV는 선정 근거로만 유지합니다. 통합 산출 번들: <code>sagemaker_final_three/</code> (<strong>§2.5</strong>).</p>
     <p class="muted" style="margin-top:10px;font-size:0.88rem;">로컬 목차: <code>python3 serve_dashboards.py</code> 또는 <code>http://127.0.0.1:8000/sagemaker_experiment_dashboard_20260403.html</code></p>
-    <div class="badge">Snapshot · 20260403_v5 · final 3 jobs completed + local next steps</div>
+    <div class="badge">Snapshot · 20260403_v6 · dual validation + metabric/admet updates</div>
     <a class="nav-btn" href="index.html">Index</a>
     <a class="nav-btn" href="dl_experiment_dashboard_20260331.html">DL 대시보드 (로컬 §0)</a>
     <a class="nav-btn" href="graph_experiment_dashboard_20260402.html">Graph 대시보드</a>
@@ -156,10 +156,22 @@ python3 ml/pilot_sagemaker/aggregate_final_representative_outputs.py --collect</
     <section>
       <h2>4.5) 향후 단계 (로컬, SageMaker 미사용)</h2>
       <ul class="muted">
-        <li><strong>Step 1 — Ensemble/Ranking 고정:</strong> <code>final_ensemble_ranking.csv</code> 기준으로 Top100 후보군 확정 (가중치: XGB 0.5 / ResidualMLP 0.3 / GCN 0.2)</li>
-        <li><strong>Step 2 — 후보 검증:</strong> Top100의 target/pathway 근거·중복 약물 편향 점검, 필요 시 규칙 기반 재정렬 (재학습 없음)</li>
-        <li><strong>Step 3 — 리포트 패키징:</strong> 최종 비교표(<code>final_model_comparison.csv</code>) + 앙상블 랭킹(<code>final_ensemble_ranking.csv</code>) + 해석 노트로 의사결정본 생성</li>
+        <li><strong>Step 1 (완료) — Ensemble v2:</strong> <code>final_ensemble_ranking_v2.csv</code> 생성 (가중치: XGB 0.5 / ResidualMLP 0.4 / GCN 0.1, <code>rank_v2</code>·<code>is_top100_v2</code> 포함)</li>
+        <li><strong>Step 2 (완료) — METABRIC external validation:</strong> <code>metabric_validation_summary.csv</code> 생성 (Top100 unique drug 기준 정렬·평가)</li>
+        <li><strong>Step 3 (완료) — ADMET filtering:</strong> <code>admet_filter_log.json</code> 생성. 이번 run은 후보 drug ID와 직접 매칭되는 분자 ADMET 테이블 부재로 score-based proxy gate를 적용함</li>
+        <li><strong>Step 4 (완료) — Final shortlist:</strong> <code>final_shortlist.csv</code> 생성 (ADMET 통과 + rank 유지, Top30)</li>
       </ul>
+    </section>
+
+    <section>
+      <h2>4.6) 20260402 Post-Analysis Outputs</h2>
+      <table>
+        <tr><th>파일</th><th>의미</th><th>비고</th></tr>
+        <tr><td><code>final_ensemble_ranking_v2.csv</code></td><td>새 가중치 앙상블 점수·순위</td><td><code>ensemble_score</code> 유지 + <code>ensemble_score_v2</code>, <code>rank_v2</code>, <code>is_top100_v2</code> 추가</td></tr>
+        <tr><td><code>metabric_validation_summary.csv</code></td><td>외부 코호트 정렬 검증 요약</td><td>모델별 RMSE/MAE/Spearman</td></tr>
+        <tr><td><code>admet_filter_log.json</code></td><td>ADMET 규칙·통과/탈락 로그</td><td>이번 배치는 proxy rules (score-based)</td></tr>
+        <tr><td><code>final_shortlist.csv</code></td><td>최종 후보군</td><td>ADMET 통과 + 순위 유지, Top30</td></tr>
+      </table>
     </section>
 
     <section>

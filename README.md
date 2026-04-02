@@ -360,6 +360,37 @@ python3 ml/pilot_sagemaker/build_final_ensemble_ranking.py
   - `results/features_nextflow_team4/fe_re_batch_runs/20260331/sagemaker_final_three/final_ensemble_ranking.csv`
   - 컬럼: `pred_xgb`, `pred_residualmlp`, `pred_gcn`, `ensemble_score`, `rank`, `is_top100`
 
+#### 20260402 Post-Analysis 완료 (ensemble v2 → METABRIC → ADMET → shortlist)
+
+- 산출 경로: `results/features_nextflow_team4/fe_re_batch_runs/20260402/sagemaker_dual_validation/`
+- 생성 파일:
+  - `final_ensemble_ranking_v2.csv`
+  - `metabric_validation_summary.csv`
+  - `admet_filter_log.json`
+  - `final_shortlist.csv`
+
+**Ensemble v2**
+
+- 입력: 기존 예측 테이블(`sample_id`, `canonical_drug_id`)
+- 가중치: `XGBoost 0.5`, `ResidualMLP 0.4`, `GCN 0.1`
+- 추가 컬럼: `ensemble_score_v2`, `rank_v2`, `is_top100_v2`
+
+**METABRIC external validation**
+
+- 기준: Top100(unique drug) 후보 + METABRIC-like sample set(`sample_expression_crispr_full`)
+- 출력: `metabric_validation_summary.csv` (model별 `RMSE`, `MAE`, `Spearman`)
+- 정렬 방식: `canonical_drug_id` 기준 drug-level score를 외부 sample pair에 투영
+
+**ADMET filtering**
+
+- 출력: `admet_filter_log.json`
+- 이번 run 메모: candidate drug ID와 직접 조인 가능한 분자 ADMET 테이블 부재로, score-based proxy rule gate 적용
+
+**Final shortlist**
+
+- 조건: ADMET 통과 + ranking 유지
+- 출력: `final_shortlist.csv` (Top30)
+
 ### A/B/C 파일럿: ML 4종 병렬 Training Job
 
 - **전제:** 아래 기본 버킷·실행 역할·SageMaker 기본 버킷(`sagemaker-ap-northeast-2-666803869796/…`)은 **팀 프로젝트(팀4) 공용 인프라**를 가정한다. 개인 AWS 계정 기준이 아니다. 다른 팀·계정이면 스크립트의 `--role`, `--code-bucket`, `--sagemaker-account-id`, 데이터 URI 오버라이드 등을 맞출 것.
