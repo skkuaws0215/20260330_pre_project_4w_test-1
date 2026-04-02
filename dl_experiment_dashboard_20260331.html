@@ -47,7 +47,7 @@
         <tr><td>DL</td><td>ResidualMLP</td><td>5-fold row KFold · <code>residual_mlp_cv_summary</code></td><td>2.129</td><td>1.589</td><td>0.437</td><td>0.841</td></tr>
         <tr><td>Graph</td><td>GCN</td><td>5-fold GroupKFold(by drug) · <code>graph_family_groupcv_summary.json</code></td><td>2.551</td><td>2.070</td><td>0.254</td><td>0.758</td></tr>
       </table>
-      <p class="muted" style="margin-top:8px;">GraphSAGE (Round1 row-CV temporary candidate만): 동일 group CV Spearman mean ≈ 0.243 — 상세는 Graph 대시보드 §9.</p>
+      <p class="muted" style="margin-top:8px;">GraphSAGE (Round1 row-CV temporary candidate만): 동일 group CV Spearman mean ≈ 0.243 — 상세는 Graph 대시보드 §8.</p>
       <h3 style="font-size:1rem;margin:18px 0 8px;">SageMaker 최종 실행 — 입력 / 설정 / 산출물 체크리스트</h3>
       <table>
         <tr><th>모델</th><th>입력 (기본 로컬 경로)</th><th>설정·스크립트 참고</th><th>산출물 (예시)</th></tr>
@@ -80,7 +80,7 @@
         <li>DL 군: 동일 데이터·동일 holdout으로 FlatMLP / VAE / TabNet / BlockWise / Residual 비교 후 대표 후보 확정</li>
         <li>이후 Graph 군 실험 후, ML 대표 vs DL 대표 vs Graph 대표로 최종 챔피언 비교</li>
       </ul>
-      <p class="muted" style="margin:14px 0 0;">Graph 군은 별도 대시보드에서 다룹니다. Round1(행 단위 5-fold)에서 GraphSAGE가 잠정 후보더라도, <strong><code>canonical_drug_id</code> 기준 drug-group CV</strong>로 분할 누설·낙관 편향을 점검한 뒤 대표를 확정합니다. 산출: <code>graph_family_groupcv_comparison.csv</code>, <code>graph_family_groupcv_summary.json</code> — 상세는 <a href="graph_experiment_dashboard_20260402.html" style="color:#9bc2ff;">Graph Experiment Dashboard</a> (섹션 9).</p>
+      <p class="muted" style="margin:14px 0 0;">Graph 군은 별도 대시보드에서 다룹니다. Round1(행 단위 5-fold)에서 GraphSAGE가 잠정 후보더라도, <strong><code>canonical_drug_id</code> 기준 drug-group CV</strong>로 분할 누설·낙관 편향을 점검한 뒤 대표를 확정합니다. 산출: <code>graph_family_groupcv_comparison.csv</code>, <code>graph_family_groupcv_summary.json</code> — 상세는 <a href="graph_experiment_dashboard_20260402.html" style="color:#9bc2ff;">Graph Experiment Dashboard</a> (섹션 8).</p>
     </section>
 
     <section>
@@ -378,7 +378,7 @@
           <p><strong>ML·Graph와의 관계</strong></p>
           <ul>
             <li><strong>ML 군:</strong> 정렬·해석·운운 측면에서 <strong>XGBoost</strong>가 대표 후보로 자연스러움. DL 결과가 우세하다 해도 트리 기반은 벤치마크·SHAP 등으로 병행 가치가 큼.</li>
-            <li><strong>Graph 군:</strong> 로컬에서 Proximity / GraphSAGE / GCN 완료. <strong>대표는 drug-group CV 기준 GCN</strong>(§0, Graph 대시보드 §9). GraphSAGE는 Round1 row-CV temporary candidate만.</li>
+            <li><strong>Graph 군:</strong> 로컬에서 Proximity / GraphSAGE / GCN 완료. <strong>대표는 drug-group CV 기준 GCN</strong>(§0, Graph 대시보드 §8). GraphSAGE는 Round1 row-CV temporary candidate만.</li>
             <li><strong>의사결정 순서 (현재):</strong> 군별 대표 확정(§0) → SageMaker에서 3종 최종 학습·지표 정리 → 필요 시 동일 holdout/정책으로 챔피언 비교.</li>
           </ul>
         </div>
