@@ -27,9 +27,19 @@ Sidecar metrics.json (per artifact folder)
     sagemaker_training_job, sagemaker_status, artifact_uri, training_logs_uri
     final_eval: { "rmse", "mae", "spearman", "ndcg20", "hit20" }
 
-XGBoost SageMaker submit (existing)
-  ml/pilot_sagemaker/submit_final_xgb_sagemaker.py
+SageMaker submit (AWS)
+  XGBoost:     ml/pilot_sagemaker/submit_final_xgb_sagemaker.py
+               (full_train off, test_size 0.1 — valid metrics in metrics.json;
+                same tuned xgb_* hyperparams as local summary)
+  ResidualMLP: ml/pilot_sagemaker/submit_final_residual_mlp_sagemaker.py
+  GCN:         ml/pilot_sagemaker/submit_final_gcn_sagemaker.py
+               (bundles graph_baseline_data, run_graph_gnn_cv, proximity, disease genes)
 
-ResidualMLP / GCN
-  Add dedicated Training Job scripts aligned with local entry points; then
-  place metrics.json + artifacts under the subdirs above.
+Sync model.tar.gz into this tree
+  python3 ml/pilot_sagemaker/sync_sagemaker_model_tar_to_final_three.py \
+    --family xgb|residualmlp|gcn --model-tar /path/to/model.tar.gz
+
+Local reproduction (no AWS)
+  See README "군별 대표 3종" — run train_tabular.py, train_residual_mlp_final.py,
+  train_gcn_final.py with SM_MODEL_DIR pointing at artifacts/* and the same
+  default parquet paths as SageMaker staging.

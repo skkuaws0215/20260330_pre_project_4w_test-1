@@ -197,6 +197,17 @@ def main() -> None:
     else:
         metrics["valid"] = None
 
+    metrics["sagemaker_training_job"] = os.environ.get("TRAINING_JOB_NAME", "")
+    metrics["sagemaker_status"] = "Completed" if os.environ.get("TRAINING_JOB_NAME") else "local"
+    if not do_full_train:
+        metrics["evaluation_note"] = (
+            "Single holdout split (test_size); not the 5-fold CV mean in residual_mlp_cv_summary / xgb_tuned_cv_summary."
+        )
+    else:
+        metrics["evaluation_note"] = (
+            "full_train on all rows; valid metrics absent. Train metrics only unless a separate eval split is added."
+        )
+
     feature_importance_rows = []
     if args.model == "xgboost":
         booster = model.get_booster()

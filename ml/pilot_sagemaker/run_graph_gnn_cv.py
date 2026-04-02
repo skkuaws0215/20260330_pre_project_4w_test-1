@@ -225,6 +225,8 @@ def train_one_fold(
     sample_id_col: str,
     args: argparse.Namespace,
     device: torch.device,
+    save_checkpoint_path: Path | None = None,
+    checkpoint_extras: dict[str, Any] | None = None,
 ) -> tuple[np.ndarray, dict[str, float]]:
     torch.manual_seed(args.seed)
     X_tr, X_va = X[tr_idx].copy(), X[va_idx].copy()
@@ -294,6 +296,21 @@ def train_one_fold(
         p_va = head(torch.cat([h[d_va], x_va], dim=-1)).squeeze(-1).cpu().numpy()
     df_va = df.iloc[va_idx].reset_index(drop=True)
     m = fold_metrics(df_va, sample_id_col, y_va, p_va)
+    if save_checkpoint_path is not None:
+        save_checkpoint_path = Path(save_checkpoint_path)
+        save_checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+        payload: dict[str, Any] = {
+            "model_name": model_name,
+            "h0": h0.detach().cpu(),
+            "gnn_state_dict": {k: v.cpu() for k, v in gnn.state_dict().items()},
+            "head_state_dict": {k: v.cpu() for k, v in head.state_dict().items()},
+            "hidden_dim": args.hidden_dim,
+            "pair_feat_dim": int(X.shape[1]),
+            "n_graph_nodes": int(a_hat.shape[0]),
+        }
+        if checkpoint_extras:
+            payload.update(checkpoint_extras)
+        torch.save(payload, save_checkpoint_path)
     return p_va, m
 
 

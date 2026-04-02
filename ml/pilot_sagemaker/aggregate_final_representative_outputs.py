@@ -154,6 +154,8 @@ def apply_collect(df: pd.DataFrame, out_dir: Path) -> pd.DataFrame:
             df.at[i, "training_logs_uri"] = raw["training_logs_uri"]
 
         ev = raw.get("final_eval") or raw.get("sagemaker_eval") or raw.get("valid")
+        if ev is None and isinstance(raw.get("train"), dict):
+            ev = raw["train"]
         if isinstance(ev, dict):
             if "rmse" in ev:
                 df.at[i, "sagemaker_RMSE"] = ev["rmse"]
@@ -220,10 +222,11 @@ def build_summary_json(
             "note": "train_tabular.py writes nested train/valid; for final reporting add final_eval or copy eval block to top level.",
         },
         "submit_scripts": {
-            "xgb": "ml/pilot_sagemaker/submit_final_xgb_sagemaker.py (PyTorch image + train_tabular.py xgboost)",
-            "residualmlp": "TBD: add SageMaker training entry mirroring run_residual_mlp_cv_local.py hyperparams",
-            "gcn": "TBD: add SageMaker training entry mirroring run_graph_gnn_cv.py --model gcn + group-CV hyperparams (baseline A)",
+            "xgb": "ml/pilot_sagemaker/submit_final_xgb_sagemaker.py → train_tabular.py (xgboost, full_train on)",
+            "residualmlp": "ml/pilot_sagemaker/submit_final_residual_mlp_sagemaker.py → train_residual_mlp_final.py",
+            "gcn": "ml/pilot_sagemaker/submit_final_gcn_sagemaker.py → train_gcn_final.py (baseline A)",
         },
+        "sync_artifacts": "ml/pilot_sagemaker/sync_sagemaker_model_tar_to_final_three.py --family {xgb|residualmlp|gcn} --model-tar /path/to/model.tar.gz",
     }
 
 

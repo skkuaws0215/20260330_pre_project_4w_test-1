@@ -1,0 +1,28 @@
+{
+  "model": "residual_mlp",
+  "evaluation_note": "Single random row split (test_size), same preprocessing as run_residual_mlp_cv_local per fold; not identical to 5-fold CV mean in residual_mlp_cv_summary.",
+  "rows_total": 14497,
+  "rows_train": 13047,
+  "rows_valid": 1450,
+  "n_features": 2118,
+  "inputs": {
+    "features": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260331/final_pathway_addon/pair_features_newfe_v2.parquet",
+    "labels": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260331/input_derived/labels_B_graph.parquet"
+  },
+  "sagemaker_training_job": "local-smoke-resmlp",
+  "sagemaker_status": "Completed",
+  "final_eval": {
+    "rmse": 2.104746395609586,
+    "mae": 1.5760934352874756,
+    "spearman": 0.46716389918442375,
+    "ndcg20": 0.8231232665609187,
+    "hit20": 1.0
+  },
+  "validation_fold_metrics_row": {
+    "RMSE": 2.104746395609586,
+    "MAE": 1.5760934352874756,
+    "Spearman": 0.46716389918442375,
+    "NDCG@20": 0.8231232665609187,
+    "Hit@20": 1.0
+  }
+}

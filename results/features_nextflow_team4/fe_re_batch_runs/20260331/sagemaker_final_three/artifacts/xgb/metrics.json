@@ -1,0 +1,36 @@
+{
+  "model": "xgboost",
+  "rows_total": 14497,
+  "rows_train": 13047,
+  "rows_valid": 1450,
+  "n_features_numeric": 2118,
+  "n_features_total": 2118,
+  "smiles": {
+    "enabled": false,
+    "column": "drug__smiles",
+    "n_features_hashed": 0
+  },
+  "train": {
+    "rmse": 1.9993519822317445,
+    "mae": 1.4523596861815098,
+    "spearman": 0.5112033526467722
+  },
+  "split": {
+    "test_size": 0.1,
+    "seed": 42,
+    "full_train": false
+  },
+  "exclude_lincs": true,
+  "inputs": {
+    "features_s3": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260331/final_pathway_addon/pair_features_newfe_v2.parquet",
+    "labels_s3": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260331/input_derived/labels_B_graph.parquet"
+  },
+  "valid": {
+    "rmse": 2.10384121922113,
+    "mae": 1.5774826009145795,
+    "spearman": 0.4696691971537973
+  },
+  "sagemaker_training_job": "local-smoke-xgb",
+  "sagemaker_status": "Completed",
+  "evaluation_note": "Single holdout split (test_size); not the 5-fold CV mean in residual_mlp_cv_summary / xgb_tuned_cv_summary."
+}

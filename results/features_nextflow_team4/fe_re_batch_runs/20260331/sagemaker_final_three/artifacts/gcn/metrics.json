@@ -1,0 +1,24 @@
+{
+  "model": "gcn",
+  "baseline_tag": "A (hidden 64, lr 1e-3, weight_decay 1e-5)",
+  "evaluation_note": "Metrics are on a single random row split (test_size) for early stopping and reporting; they are not drug-group CV means. Model selection and local comparison use graph_family_groupcv.",
+  "rows_total": 14497,
+  "rows_train": 13047,
+  "rows_valid": 1450,
+  "sagemaker_training_job": "local-smoke-gcn",
+  "sagemaker_status": "Completed",
+  "final_eval": {
+    "rmse": 1.445439266109901,
+    "mae": 1.0596996545791626,
+    "spearman": 0.8507270324197764,
+    "ndcg20": 0.9629064622749846,
+    "hit20": 1.0
+  },
+  "validation_metrics": {
+    "RMSE": 1.445439266109901,
+    "MAE": 1.0596996545791626,
+    "Spearman": 0.8507270324197764,
+    "NDCG@20": 0.9629064622749846,
+    "Hit@20": 1.0
+  }
+}
