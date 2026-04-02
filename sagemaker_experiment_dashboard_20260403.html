@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SageMaker 통합 실험 대시보드 · 20260403_v1</title>
+  <style>
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0a0f18; color: #e6edf7; }
+    .hero { padding: 42px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); background: linear-gradient(120deg, #152238, #1e3d52 45%, #1a4d3a); }
+    .hero h1 { margin: 0 0 8px; font-size: 1.9rem; }
+    .hero p { margin: 0; color: #aab8d0; }
+    .badge { display: inline-block; margin-top: 12px; padding: 5px 10px; border: 1px solid #42d59f; border-radius: 999px; color: #7ee0b8; font-size: 0.82rem; }
+    .nav-btn { display: inline-block; margin-top: 12px; margin-left: 8px; border: 1px solid #6ea8fe; border-radius: 999px; color: #9bc2ff; padding: 5px 10px; font-size: 0.82rem; text-decoration: none; }
+    .container { max-width: 1120px; margin: 0 auto; padding: 22px; }
+    section { margin: 18px 0; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; background: rgba(255,255,255,0.02); }
+    h2 { margin: 0 0 12px; font-size: 1.2rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.92rem; }
+    th { background: rgba(110,168,254,0.13); color: #cfe2ff; }
+    .muted { color: #9fb0ca; font-size: 0.92rem; }
+    .ok { color: #42d59f; font-weight: 600; }
+    .plan { color: #f7c266; font-weight: 600; }
+    .tbd { color: #8899b5; font-style: italic; }
+    code { background: rgba(255,255,255,0.08); border-radius: 6px; padding: 2px 6px; }
+    .best { color: #ff6b6b; font-weight: 700; }
+    details.sm-fold { margin-top: 12px; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 12px 14px; background: rgba(255,255,255,0.04); }
+    details.sm-fold summary { cursor: pointer; color: #9bc2ff; font-weight: 600; font-size: 0.95rem; }
+    details.sm-fold[open] summary { margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>SageMaker 통합 실험 대시보드</h1>
+    <p><strong>ML · DL · Graph</strong> 군별 대표(<strong>XGBoost · ResidualMLP · GCN</strong>)를 SageMaker에서 실행하고, 산출 지표·아티팩트를 한곳에 모읍니다. 본 페이지는 <strong>20260403_v1</strong> 기준 초안이며, Training Job이 생성되면 아래 표를 수치·링크로 채웁니다.</p>
+    <p class="muted" style="margin-top:10px;font-size:0.88rem;">로컬 목차: <code>python3 serve_dashboards.py</code> 또는 <code>http://127.0.0.1:8000/sagemaker_experiment_dashboard_20260403.html</code></p>
+    <div class="badge">Snapshot · 20260403_v1 · SageMaker 통합 진행</div>
+    <a class="nav-btn" href="index.html">Index</a>
+    <a class="nav-btn" href="dl_experiment_dashboard_20260331.html">DL 대시보드 (로컬 §0)</a>
+    <a class="nav-btn" href="graph_experiment_dashboard_20260402.html">Graph 대시보드</a>
+  </div>
+
+  <div class="container">
+    <section>
+      <h2>1) 목적</h2>
+      <ul class="muted">
+        <li>로컬에서 확정한 3종 대표를 <strong>동일 데이터 정책(S3 URI·전처리·시드)</strong>으로 SageMaker에서 재현·확장</li>
+        <li>Job별 <strong>검증 지표</strong>(RMSE, MAE, Spearman, NDCG@20, Hit@20 등)과 <strong>모델 아티팩트 경로</strong>를 이 대시보드에 반영</li>
+        <li>ML/DL은 행 단위 CV와의 정렬, Graph는 drug-group CV 정책과의 정렬을 주석·표로 유지</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>2) 로컬 기준선 — 통합 표 수치 (fold mean, 소수 3자리)</h2>
+      <p class="muted" style="margin:0 0 10px;">출처: <code>residual_mlp_cv_summary.json</code> (ML/DL), <code>graph_family_groupcv_summary.json</code> (Graph). SageMaker 실행 후 동일 지표를 채워 <strong>로컬 vs 클라우드</strong>를 나란히 비교할 수 있습니다.</p>
+      <table>
+        <tr><th>family</th><th>model</th><th>validation</th><th>RMSE</th><th>MAE</th><th>Sp</th><th>NDCG@20</th></tr>
+        <tr><td>ML</td><td>XGBoost tuned</td><td>row 5-fold</td><td>2.133</td><td>1.594</td><td>0.431</td><td>0.840</td></tr>
+        <tr><td>DL</td><td>ResidualMLP</td><td>row 5-fold</td><td>2.129</td><td>1.589</td><td>0.437</td><td>0.841</td></tr>
+        <tr><td>Graph</td><td>GCN</td><td>drug GroupKFold 5</td><td>2.551</td><td>2.070</td><td>0.254</td><td>0.758</td></tr>
+      </table>
+      <p class="muted" style="margin:10px 0 0;">Graph만 검증 정의가 다르므로 행 간 숫자는 DL 대시보드 <strong>§0</strong>에 적어 둔 대로 해석합니다. 로컬 상세: <code>dl_experiment_dashboard_20260331.html</code> 맨 위 §0.</p>
+    </section>
+
+    <section>
+      <h2>3) SageMaker 실행·지표 (채우기)</h2>
+      <p class="muted" style="margin:0 0 10px;">Training Job이 생성되면 아래 행에 <strong>job 이름</strong>, <strong>상태</strong>, <strong>지표 JSON/로그 S3 키</strong>, 필요 시 <strong>검증 fold mean</strong>을 기입합니다. 초기에는 <span class="tbd">TBD</span>로 둡니다.</p>
+      <table>
+        <tr><th>family</th><th>representative</th><th>Training job / experiment</th><th>상태</th><th>지표 산출물 (S3 또는 로컬 경로)</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th></tr>
+        <tr>
+          <td>ML</td>
+          <td>XGBoost</td>
+          <td class="tbd">TBD</td>
+          <td class="plan">대기</td>
+          <td class="tbd">예: s3://…/xgb/metrics.json</td>
+          <td class="tbd">—</td>
+          <td class="tbd">—</td>
+          <td class="tbd">—</td>
+          <td class="tbd">—</td>
+        </tr>
+        <tr>
+          <td>DL</td>
+          <td>ResidualMLP</td>
+          <td class="tbd">TBD</td>
+          <td class="plan">대기</td>
+          <td class="tbd">예: s3://…/resmlp/metrics.json</td>
+          <td class="tbd">—</td>
+          <td class="tbd">—</td>
+          <td class="tbd">—</td>
+          <td class="tbd">—</td>
+        </tr>
+        <tr>
+          <td>Graph</td>
+          <td>GCN</td>
+          <td class="tbd">TBD</td>
+          <td class="plan">대기</td>
+          <td class="tbd">예: s3://…/gcn/metrics.json</td>
+          <td class="tbd">—</td>
+          <td class="tbd">—</td>
+          <td class="tbd">—</td>
+          <td class="tbd">—</td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>4) 업데이트 방법 (팀 합의 후 고정)</h2>
+      <ul class="muted">
+        <li><strong>수동:</strong> Job 종료 후 CloudWatch/SageMaker 콘솔에서 지표를 확인하고, 이 HTML의 §3 표 셀을 직접 수정 후 커밋</li>
+        <li><strong>반자동:</strong> Job이 쓰는 <code>metrics.json</code> 스키마를 정한 뒤, 소규모 스크립트로 표를 재생성해 HTML 일부를 치환</li>
+        <li><strong>공통:</strong> 인스턴스 타입·입력 채널·하이퍼파라미터는 팀 노션/README의 SageMaker 절과 맞출 것 (DL 대시보드 §0 체크리스트 참고)</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>5) 지표 열 짧은 정의 (회의용)</h2>
+      <details class="sm-fold">
+        <summary>Sp, RMSE, NDCG@20 등 — 클릭하여 펼치기</summary>
+        <table style="margin-top:8px;">
+          <tr><th>표기</th><th>정의</th><th>해석</th></tr>
+          <tr><td>Sp / Spearman</td><td>Spearman rank correlation</td><td>클수록 좋음</td></tr>
+          <tr><td>RMSE</td><td>회귀 오차 제곱평균제곱근</td><td>작을수록 좋음</td></tr>
+          <tr><td>MAE</td><td>평균 절대 오차</td><td>작을수록 좋음</td></tr>
+          <tr><td>NDCG@20</td><td>sample_id 내 상위 20 랭킹 품질</td><td>클수록 좋음</td></tr>
+        </table>
+        <p class="muted" style="margin:10px 0 0;">Graph 군 로컬 표는 drug-group CV 기준. SageMaker에서 다른 검증을 쓰면 §3 행에 검증 유형을 명시하세요.</p>
+      </details>
+    </section>
+  </div>
+</body>
+</html>

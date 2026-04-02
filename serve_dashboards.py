@@ -55,6 +55,7 @@ def main() -> None:
     print(f"  → 목차:       {local}index.html")
     print(f"  → DL:         {local}dl_experiment_dashboard_20260331.html")
     print(f"  → Graph:      {local}graph_experiment_dashboard_20260401.html")
+    print(f"  → SageMaker:  {local}sagemaker_experiment_dashboard_20260403.html")
     lan = _lan_ipv4()
     if lan and args.bind == "0.0.0.0":
         print(f"  → 같은 Wi-Fi: http://{lan}:{args.port}/")

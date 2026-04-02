@@ -475,6 +475,7 @@ Delta 요약:
 - **확정 대표:** ML **XGBoost** (tuned) · DL **ResidualMLP** · Graph **GCN**.
 - **Graph 정책:** Spearman mean 기준 **drug-group CV**에서 GCN이 앞섬. Round1 **행 단위 CV**에서는 GraphSAGE가 잠정 1위였으나 optimistic bias 가능 → **GraphSAGE는 temporary candidate로만** 기록하고, **최종 Graph 대표는 GCN**.
 - **한 장 비교표·지표·검증 타입·SageMaker 입력/설정/산출물 체크리스트:** `dl_experiment_dashboard_20260331.html` **0)**.
+- **SageMaker 통합 진행·Job 지표 채우기:** `sagemaker_experiment_dashboard_20260403.html` (**20260403_v1**) — 로컬 기준선 표 + Training Job별 TBD 표.
 - **수치 원본:** `analysis_target_only/residual_mlp_cv/residual_mlp_cv_summary.json` (ML/DL 행 5-fold mean); `graph_baseline_round1/graph_family_groupcv_summary.json` (GCN group 5-fold mean). 행 간 숫자는 검증 정의가 다르므로 직접 승패 비교 시 주의.
 
 #### Graph 군 Round1 — Network Proximity · GraphSAGE · GCN (동일 스키마·동일 `cv_fold_indices.json`)

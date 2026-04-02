@@ -52,6 +52,7 @@ GitHub **`blob` 링크**는 HTML을 웹페이지로 그리지 않습니다.
         st.link_button("DL 실험", "http://127.0.0.1:8765/dl_experiment_dashboard_20260331.html")
     with c3:
         st.link_button("Graph 실험", "http://127.0.0.1:8765/graph_experiment_dashboard_20260401.html")
+    st.link_button("SageMaker 통합 (20260403)", "http://127.0.0.1:8765/sagemaker_experiment_dashboard_20260403.html")
     st.caption(
         "링크가 안 열리면 `serve_dashboards.py`가 **실행 중인지**, 포트가 **8765**인지 확인하세요. "
         "팀 전체 공개 URL은 GitHub Pages(워크플로 `deploy-dashboards.yml`) 설정 후 사용합니다."
