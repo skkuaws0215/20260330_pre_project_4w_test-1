@@ -212,6 +212,41 @@ python3 ml/pilot_sagemaker/aggregate_final_representative_outputs.py --collect</
     </section>
 
     <section>
+      <h2>4.8) "진짜 METABRIC 검증" 체크리스트 (필수/누수 점검)</h2>
+      <table>
+        <tr><th>체크 항목</th><th>필수 기준</th><th>현재 상태</th><th>신뢰도 영향</th></tr>
+        <tr><td>External cohort 정의</td><td>METABRIC 원본 코호트 ID/분할 근거 명시</td><td>METABRIC-like(`sample_expression_crispr_full`)만 명시</td><td>중간</td></tr>
+        <tr><td>필수 키 컬럼</td><td><code>canonical_drug_id</code>, sample key, target label 컬럼 고정</td><td><code>canonical_drug_id</code> align 확인, label 정의 문서화 보강 필요</td><td>높음</td></tr>
+        <tr><td>라벨 정합성</td><td>내부/외부 라벨 스케일 및 생물학적 의미 일치</td><td>drug-level score를 external pair에 투영한 proxy 평가</td><td>높음</td></tr>
+        <tr><td>정렬 키/조인 품질</td><td>one-to-one 또는 허용 다대일 규칙 명시 + drop 로그</td><td>Top100 unique-drug align 로그 있음(2648 pairs)</td><td>중간</td></tr>
+        <tr><td>누수(leakage) 점검</td><td>학습에 쓰인 sample/drug가 외부 평가에 재등장하지 않음</td><td>drug-level projection 구조라 엄밀 분리 증빙 추가 필요</td><td>높음</td></tr>
+        <tr><td>평가 지표 완결성</td><td>Spearman/Kendall/TopK overlap/NDCG 등 일관 세트</td><td>현재 외부 요약은 RMSE/MAE/Spearman 중심</td><td>중간</td></tr>
+      </table>
+      <p class="muted" style="margin-top:8px;">
+        <strong>현재 판정:</strong> 방법론상 <strong>Proxy External Validation</strong> 단계.
+        <strong>신뢰도 레벨 C (탐색/스크리닝 용)</strong> — 임상·의사결정 확정 전에 진짜 METABRIC split 기반 재평가가 필요합니다.
+      </p>
+    </section>
+
+    <section>
+      <h2>4.9) 내부↔외부 Rank Consistency 진단표</h2>
+      <table>
+        <tr><th>model</th><th>외부 Spearman (label vs pred)</th><th>Kendall tau (내부↔외부 rank)</th><th>TopK overlap@10</th><th>TopK overlap@30</th><th>판정</th></tr>
+        <tr><td>GCN</td><td>0.4045</td><td class="tbd">N/A (raw external rank table 미생성)</td><td class="tbd">N/A</td><td class="tbd">N/A</td><td>외부 상관 우수, 일관성 정량은 추가 계산 필요</td></tr>
+        <tr><td>Ensemble_v2</td><td>0.0742</td><td class="tbd">N/A</td><td class="tbd">N/A</td><td class="tbd">N/A</td><td>보통, 추가 진단 필요</td></tr>
+        <tr><td>ResidualMLP</td><td>-0.0556</td><td class="tbd">N/A</td><td class="tbd">N/A</td><td class="tbd">N/A</td><td>내부 대비 외부 역전 신호</td></tr>
+        <tr><td>XGBoost</td><td>-0.0711</td><td class="tbd">N/A</td><td class="tbd">N/A</td><td class="tbd">N/A</td><td>내부 대비 외부 역전 신호</td></tr>
+      </table>
+      <p class="muted" style="margin-top:8px;">
+        <strong>왜 N/A인가?</strong> 현재 산출물은 외부 요약(<code>metabric_validation_summary.csv</code>) 중심이라, 모델별 raw external rank list가 없습니다.
+        다음 실행에서 <code>model, canonical_drug_id, external_rank, internal_rank</code> 테이블을 함께 저장하면 Kendall/TopK overlap을 즉시 계산할 수 있습니다.
+      </p>
+      <p class="muted" style="margin-top:8px;">
+        <strong>권장 신뢰도 레벨 운영:</strong> A=진짜 METABRIC split + 누수검증 + 일관성 지표 완결, B=외부 라벨 정합 확인 + 일부 지표, C=proxy 검증(현재).
+      </p>
+    </section>
+
+    <section>
       <h2>5) 지표 열 짧은 정의 (회의용)</h2>
       <details class="sm-fold">
         <summary>Sp, RMSE, NDCG@20 등 — 클릭하여 펼치기</summary>

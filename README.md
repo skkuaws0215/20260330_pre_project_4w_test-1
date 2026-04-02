@@ -411,6 +411,23 @@ python3 ml/pilot_sagemaker/build_final_ensemble_ranking.py
 
 > 참고: 이번 외부 요약 파일(`metabric_validation_summary.csv`)에는 NDCG가 포함되지 않아, NDCG 비교는 내부 TCGA/CV 결과를 함께 병기함.
 
+**"진짜 METABRIC 검증" 체크리스트 (운영 기준)**
+
+- 필수 컬럼: `canonical_drug_id`, external sample key, target label, prediction score
+- 라벨 정합: 내부/외부의 label 정의·스케일·방향성 동일성 확인
+- 정렬 키 품질: join cardinality(one-to-one/one-to-many)와 drop/mismatch 로그 저장
+- 누수 점검: train에 쓰인 sample/drug가 external 평가에 중복되지 않음을 증빙
+- 지표 완결: `Spearman`, `Kendall tau`, `TopK overlap@K`, (가능 시) `NDCG@K`
+
+**내부↔외부 rank consistency 진단 운영**
+
+- 현재 상태: 외부 요약 파일이 aggregate(`metabric_validation_summary.csv`) 중심이라 `Kendall/TopK overlap` 계산용 raw external rank table이 없음
+- 다음 실행 권장 산출: `model, canonical_drug_id, internal_rank, external_rank, internal_score, external_score`
+- 신뢰도 레벨:
+  - `A`: 진짜 METABRIC split + 누수검증 통과 + Spearman/Kendall/TopK 완결
+  - `B`: 외부 라벨 정합 확인 + Spearman 중심 + 일부 일관성 지표
+  - `C`: proxy external validation (현재 단계)
+
 ### A/B/C 파일럿: ML 4종 병렬 Training Job
 
 - **전제:** 아래 기본 버킷·실행 역할·SageMaker 기본 버킷(`sagemaker-ap-northeast-2-666803869796/…`)은 **팀 프로젝트(팀4) 공용 인프라**를 가정한다. 개인 AWS 계정 기준이 아니다. 다른 팀·계정이면 스크립트의 `--role`, `--code-bucket`, `--sagemaker-account-id`, 데이터 URI 오버라이드 등을 맞출 것.
