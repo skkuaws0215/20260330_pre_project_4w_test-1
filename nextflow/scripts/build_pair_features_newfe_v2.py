@@ -386,6 +386,117 @@ def _summary(df: pd.DataFrame, cols: list[str]) -> dict[str, Any]:
     return out
 
 
+def build_pair_features_newfe_v2_from_frames(
+    pairs_df: pd.DataFrame,
+    sample_expr_df: pd.DataFrame,
+    drug_df: pd.DataFrame,
+    lincs_drug_df: pd.DataFrame,
+    drug_target_df: pd.DataFrame,
+    *,
+    pathway_gmt: str,
+    sample_id_col: str = "sample_id",
+    drug_id_col: str = "canonical_drug_id",
+    smiles_col: str = "canonical_smiles",
+    target_gene_col: str = "target_gene_symbol",
+    high_z_threshold: float = 1.0,
+    low_z_threshold: float = -1.0,
+    morgan_radius: int = 2,
+    morgan_nbits: int = 2048,
+    reverse_topk_small: int = 50,
+    reverse_topk_large: int = 100,
+    include_pair_lincs: bool = True,
+) -> dict[str, Any]:
+    """
+    Same merge logic as main(): pathway + drug chem + [LINCS] + target -> pair_features_newfe_v2.
+    Inputs must already satisfy column requirements (validated by caller or main).
+    If include_pair_lincs is False, LINCS block is skipped (matches training without LINCS features).
+    """
+    pairs_df = pairs_df[[sample_id_col, drug_id_col]].drop_duplicates().copy()
+    pairs_df[sample_id_col] = pairs_df[sample_id_col].astype(str).str.strip()
+    pairs_df[drug_id_col] = pairs_df[drug_id_col].astype(str).str.strip()
+    sample_expr_df = sample_expr_df.copy()
+    sample_expr_df[sample_id_col] = sample_expr_df[sample_id_col].astype(str).str.strip()
+    drug_df = drug_df.copy()
+    drug_df[drug_id_col] = drug_df[drug_id_col].astype(str).str.strip()
+    if include_pair_lincs:
+        lincs_drug_df = lincs_drug_df.copy()
+        lincs_drug_df[drug_id_col] = lincs_drug_df[drug_id_col].astype(str).str.strip()
+    drug_target_df = drug_target_df.copy()
+    drug_target_df[drug_id_col] = drug_target_df[drug_id_col].astype(str).str.strip()
+
+    gmt_map = _parse_gmt(pathway_gmt)
+    sample_pathway_df, pathway_member_df = build_sample_pathway_features(
+        sample_expr_df=sample_expr_df,
+        sample_id_col=sample_id_col,
+        gmt_map=gmt_map,
+    )
+
+    drug_chem_df, chem_qc = build_drug_chem_features(
+        drug_df=drug_df,
+        drug_id_col=drug_id_col,
+        smiles_col=smiles_col,
+        radius=morgan_radius,
+        nbits=morgan_nbits,
+    )
+
+    if include_pair_lincs:
+        pair_lincs_df = build_pair_lincs_features(
+            pairs_df=pairs_df,
+            sample_expr_df=sample_expr_df,
+            lincs_drug_df=lincs_drug_df,
+            sample_id_col=sample_id_col,
+            drug_id_col=drug_id_col,
+            topk_small=reverse_topk_small,
+            topk_large=reverse_topk_large,
+        )
+    else:
+        pair_lincs_df = pd.DataFrame(columns=[sample_id_col, drug_id_col])
+
+    pair_target_df, target_qc = build_target_features(
+        pairs_df=pairs_df,
+        sample_expr_df=sample_expr_df,
+        drug_target_df=drug_target_df,
+        sample_pathway_df=sample_pathway_df,
+        pathway_member_df=pathway_member_df,
+        sample_id_col=sample_id_col,
+        drug_id_col=drug_id_col,
+        target_gene_col=target_gene_col,
+        high_z=high_z_threshold,
+        low_z=low_z_threshold,
+    )
+
+    pair_features_newfe = (
+        pairs_df.merge(sample_pathway_df, on=sample_id_col, how="left")
+        .merge(drug_chem_df, on=drug_id_col, how="left")
+    )
+    if include_pair_lincs:
+        pair_features_newfe = pair_features_newfe.merge(
+            pair_lincs_df, on=[sample_id_col, drug_id_col], how="left"
+        )
+    pair_features_newfe_v2 = pair_features_newfe.merge(
+        pair_target_df,
+        on=[sample_id_col, drug_id_col],
+        how="left",
+    )
+
+    for df in (pair_features_newfe, pair_features_newfe_v2, pair_target_df):
+        num_cols = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c])]
+        df[num_cols] = df[num_cols].fillna(0.0)
+
+    return {
+        "pairs_df": pairs_df,
+        "sample_pathway_df": sample_pathway_df,
+        "pathway_member_df": pathway_member_df,
+        "drug_chem_df": drug_chem_df,
+        "pair_lincs_df": pair_lincs_df,
+        "pair_target_df": pair_target_df,
+        "pair_features_newfe": pair_features_newfe,
+        "pair_features_newfe_v2": pair_features_newfe_v2,
+        "chem_qc": chem_qc,
+        "target_qc": target_qc,
+    }
+
+
 def main() -> None:
     args = parse_args()
     logging.basicConfig(
@@ -413,73 +524,35 @@ def main() -> None:
         if miss:
             raise ValueError(f"{name} missing required columns: {miss}")
 
-    pairs_df = pairs_df[[args.sample_id_col, args.drug_id_col]].drop_duplicates().copy()
-    pairs_df[args.sample_id_col] = pairs_df[args.sample_id_col].astype(str).str.strip()
-    pairs_df[args.drug_id_col] = pairs_df[args.drug_id_col].astype(str).str.strip()
-    sample_expr_df[args.sample_id_col] = sample_expr_df[args.sample_id_col].astype(str).str.strip()
-    drug_df[args.drug_id_col] = drug_df[args.drug_id_col].astype(str).str.strip()
-    lincs_drug_df[args.drug_id_col] = lincs_drug_df[args.drug_id_col].astype(str).str.strip()
-    drug_target_df[args.drug_id_col] = drug_target_df[args.drug_id_col].astype(str).str.strip()
-
-    LOGGER.info("Building sample pathway features")
-    gmt_map = _parse_gmt(args.pathway_gmt)
-    sample_pathway_df, pathway_member_df = build_sample_pathway_features(
-        sample_expr_df=sample_expr_df,
+    LOGGER.info("Building merged pair features (pathway + chem + LINCS + target)")
+    built = build_pair_features_newfe_v2_from_frames(
+        pairs_df,
+        sample_expr_df,
+        drug_df,
+        lincs_drug_df,
+        drug_target_df,
+        pathway_gmt=args.pathway_gmt,
         sample_id_col=args.sample_id_col,
-        gmt_map=gmt_map,
-    )
-
-    LOGGER.info("Building drug chemistry features (Morgan + RDKit descriptors)")
-    drug_chem_df, chem_qc = build_drug_chem_features(
-        drug_df=drug_df,
         drug_id_col=args.drug_id_col,
         smiles_col=args.smiles_col,
-        radius=args.morgan_radius,
-        nbits=args.morgan_nbits,
-    )
-
-    LOGGER.info("Building pair LINCS interaction features")
-    pair_lincs_df = build_pair_lincs_features(
-        pairs_df=pairs_df,
-        sample_expr_df=sample_expr_df,
-        lincs_drug_df=lincs_drug_df,
-        sample_id_col=args.sample_id_col,
-        drug_id_col=args.drug_id_col,
-        topk_small=args.reverse_topk_small,
-        topk_large=args.reverse_topk_large,
-    )
-
-    LOGGER.info("Building target interaction features")
-    pair_target_df, target_qc = build_target_features(
-        pairs_df=pairs_df,
-        sample_expr_df=sample_expr_df,
-        drug_target_df=drug_target_df,
-        sample_pathway_df=sample_pathway_df,
-        pathway_member_df=pathway_member_df,
-        sample_id_col=args.sample_id_col,
-        drug_id_col=args.drug_id_col,
         target_gene_col=args.target_gene_col,
-        high_z=args.high_z_threshold,
-        low_z=args.low_z_threshold,
+        high_z_threshold=args.high_z_threshold,
+        low_z_threshold=args.low_z_threshold,
+        morgan_radius=args.morgan_radius,
+        morgan_nbits=args.morgan_nbits,
+        reverse_topk_small=args.reverse_topk_small,
+        reverse_topk_large=args.reverse_topk_large,
     )
-
-    LOGGER.info("Merging 3-feature baseline (newfe)")
-    pair_features_newfe = (
-        pairs_df.merge(sample_pathway_df, on=args.sample_id_col, how="left")
-        .merge(drug_chem_df, on=args.drug_id_col, how="left")
-        .merge(pair_lincs_df, on=[args.sample_id_col, args.drug_id_col], how="left")
-    )
-    LOGGER.info("Merging target feature extension (newfe_v2)")
-    pair_features_newfe_v2 = pair_features_newfe.merge(
-        pair_target_df,
-        on=[args.sample_id_col, args.drug_id_col],
-        how="left",
-    )
-
-    # Missing policy for v1 robustness: fill numeric NaN with 0.
-    for df in [pair_features_newfe, pair_features_newfe_v2, pair_target_df]:
-        num_cols = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c])]
-        df[num_cols] = df[num_cols].fillna(0.0)
+    pairs_df = built["pairs_df"]
+    sample_pathway_df = built["sample_pathway_df"]
+    pathway_member_df = built["pathway_member_df"]
+    drug_chem_df = built["drug_chem_df"]
+    pair_lincs_df = built["pair_lincs_df"]
+    pair_target_df = built["pair_target_df"]
+    pair_features_newfe = built["pair_features_newfe"]
+    pair_features_newfe_v2 = built["pair_features_newfe_v2"]
+    chem_qc = built["chem_qc"]
+    target_qc = built["target_qc"]
 
     out_sample_pathway = out_dir / "sample_pathway_features.parquet"
     out_drug_chem = out_dir / "drug_chem_features.parquet"

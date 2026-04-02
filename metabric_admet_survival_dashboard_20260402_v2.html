@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>METABRIC · ADMET · Survival relevance · 20260402 v2</title>
+  <style>
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b1020; color: #e6edf7; }
+    .hero { padding: 42px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); background: linear-gradient(120deg, #1a2a4a, #2d1f4a 50%, #1a4d4a); }
+    .hero h1 { margin: 0 0 8px; font-size: 1.85rem; }
+    .hero p { margin: 0; color: #aab8d0; max-width: 58rem; }
+    .badge { display: inline-block; margin-top: 12px; padding: 5px 12px; border: 1px solid #c084fc; border-radius: 999px; color: #d8b4fe; font-size: 0.82rem; }
+    .nav-btn { display: inline-block; margin-top: 12px; margin-left: 8px; border: 1px solid #6ea8fe; border-radius: 999px; color: #9bc2ff; padding: 5px 10px; font-size: 0.82rem; text-decoration: none; }
+    .container { max-width: 1120px; margin: 0 auto; padding: 22px; }
+    section { margin: 18px 0; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; background: rgba(255,255,255,0.02); }
+    h2 { margin: 0 0 12px; font-size: 1.2rem; color: #e6edf7; }
+    h3 { font-size: 1rem; margin: 14px 0 8px; color: #cfe2ff; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.9rem; }
+    th { background: rgba(110,168,254,0.13); color: #cfe2ff; }
+    .muted { color: #9fb0ca; font-size: 0.92rem; line-height: 1.55; }
+    .ok { color: #42d59f; font-weight: 600; }
+    .warn { color: #f7c266; }
+    code { background: rgba(255,255,255,0.08); border-radius: 6px; padding: 2px 6px; font-size: 0.86rem; }
+    .best { color: #ff6b6b; font-weight: 700; }
+    .km-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-top: 12px; }
+    .km-grid figure { margin: 0; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; background: rgba(0,0,0,0.2); }
+    .km-grid img { width: 100%; height: auto; border-radius: 6px; }
+    .km-grid figcaption { margin-top: 8px; font-size: 0.82rem; color: #9fb0ca; }
+    ul.tight { margin: 8px 0; padding-left: 1.2rem; }
+    ul.tight li { margin: 6px 0; }
+    .proxy-scope {
+      border: 2px dashed rgba(250, 204, 21, 0.55);
+      background: rgba(234, 179, 8, 0.1);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin: 0;
+    }
+    .proxy-scope > h2:first-of-type { margin-top: 4px; }
+    .proxy-banner {
+      margin: 0 0 14px;
+      padding: 10px 12px;
+      background: rgba(234, 179, 8, 0.2);
+      border: 1px solid rgba(250, 204, 21, 0.5);
+      border-radius: 8px;
+      color: #fef08a;
+      font-size: 0.88rem;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+    .caution-label {
+      margin: 14px 0 0;
+      padding: 14px 16px;
+      border: 2px solid rgba(248, 113, 113, 0.65);
+      border-left: 5px solid #f87171;
+      background: rgba(248, 113, 113, 0.1);
+      border-radius: 10px;
+      color: #fecaca;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .caution-label h3 { margin: 0 0 10px; font-size: 1rem; color: #fca5a5; }
+    .caution-label ul { margin: 8px 0 0; padding-left: 1.2rem; color: #fecaca; }
+    .caution-label li { margin: 6px 0; }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>METABRIC · ADMET · Survival-linked clinical relevance</h1>
+    <p><strong>외부 코호트 관점 정리 대시보드 (20260402 v2).</strong> <strong>§2</strong>는 실제 METABRIC OS 등을 쓴 <strong>Survival-linked</strong> 축이고, <strong>§3–§5</strong>는 점선 박스로 표시한 <strong>proxy</strong> 기반 보조 분석(METABRIC-like 정렬·native 랭킹 맥락·ADMET proxy 게이트)입니다. 약물 반응 라벨의 “정답 맞추기” 외부 검증과는 목적이 다릅니다.</p>
+    <p class="muted" style="margin-top:10px;font-size:0.88rem;">로컬: 저장소 루트에서 <code>python3 serve_dashboards.py</code> 후 <code>/metabric_admet_survival_dashboard_20260402_v2.html</code> 로 접속.</p>
+    <div class="badge">Snapshot · 20260402 v2 · §2 실제 생존축 / §3–5 proxy 박스</div>
+    <a class="nav-btn" href="index.html">Index</a>
+    <a class="nav-btn" href="sagemaker_experiment_dashboard_20260403.html">SageMaker 통합 대시보드</a>
+    <a class="nav-btn" href="dl_experiment_dashboard_20260331.html">DL 대시보드 (§0b native 정책)</a>
+  </div>
+
+  <div class="container">
+    <section>
+      <h2>1) 왜 METABRIC <strong>survival-linked clinical relevance</strong>를 탐색했는가</h2>
+      <ul class="muted tight">
+        <li><strong>Drug-response 외부 검증의 한계:</strong> 학습 라벨은 주로 TCGA/LINCS 계열의 <strong>반응·민감도 proxy</strong>에 가깝습니다. METABRIC에서 동일 정의의 “약물 반응 정답”을 깨끗하게 맞추는 것은 라벨·실험 설계·치료 이력 정합이 어렵습니다.</li>
+        <li><strong>임상 질문으로의 확장:</strong> 모델이 뽑은 약물·경로 신호가 <strong>환자 생존과 통계적으로 연결되는지</strong>는 “이 코호트에서 이 신호가 의미 있나?”라는 <strong>별도의 임상적 가설</strong>입니다. 이는 곧바로 인과(치료 효과)를 주장하지 않으며, <strong>탐색적 연관성(screening)</strong>입니다.</li>
+        <li><strong>이번 구현:</strong> 모델별 top drug set에 대해 샘플별 점수를 요약하고, cBioPortal형 <strong>Overall Survival</strong>과 조인한 뒤 high vs low에서 <strong>Kaplan–Meier · log-rank · Cox</strong>를 수행합니다. 산출: <code>metabric_survival_validation_summary.csv</code>, <code>metabric_survival_validation_report.json</code>, <code>km_plots/</code> — 수치·플롯은 <strong>§2</strong>에 정리합니다.</li>
+        <li><strong>주의:</strong> 현재 생존 분석은 <strong>native 랭킹 서브셋(n=40 샘플 × 50약)</strong> 기준이며, 다중비교 미보정·소표본으로 <strong>해석은 가설 생성용</strong>입니다.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>2) Survival-linked clinical relevance — 모델별 수치 (n=40, top-K=10)</h2>
+      <p class="muted" style="margin:0 0 10px;"><strong>실제 METABRIC OS 축.</strong> 출처: <code>…/metabric_survival_validation/metabric_survival_validation_summary.csv</code>. 각 모델 점수로 뽑은 top-10 약물 집합에 대해, 샘플별 <strong>해당 모델 예측의 평균</strong>으로 high/low(중앙값 분할)를 정의하고 OS와 비교. <strong>약물 반응 라벨 검증이 아님</strong>.</p>
+      <table>
+        <tr><th>model top set</th><th>log-rank <em>p</em></th><th>Cox HR (high vs low)</th><th>Cox <em>p</em></th><th>해석 요지</th></tr>
+        <tr><td>XGB <code>pred_xgb</code></td><td>0.036</td><td>2.55</td><td>0.036</td><td>이 서브셋·정의 하에서 high 점수군의 위험(hazard)이 더 높게 추정됨(탐색). XGB는 샘플 내 약물별 예측이 동일한 경우가 많아 사실상 “샘플별 XGB 점수” 분할에 가까울 수 있음.</td></tr>
+        <tr><td>GCN <code>pred_gcn</code></td><td>0.083</td><td>2.20</td><td>0.082</td><td>같은 설계에서 중간적 유의 수준; 인과 해석 금지.</td></tr>
+        <tr><td>Ensemble <code>ensemble_score</code></td><td>0.744</td><td>1.15</td><td>0.735</td><td>이번 분할에서는 생존 차이 신호 약함.</td></tr>
+        <tr><td>ResidualMLP <code>pred_residualmlp</code></td><td>0.831</td><td>1.10</td><td>0.825</td><td>유의 차이 없음에 가까움.</td></tr>
+      </table>
+      <h3>생존 지표가 의미하는 것</h3>
+      <ul class="muted tight">
+        <li><strong>log-rank <em>p</em>:</strong> 두 KM 곡선( high vs low )이 <strong>우연만으로 같아 보일 확률</strong>에 대한 검정. 작을수록 곡선 분리가 통계적으로 이례적.</li>
+        <li><strong>Cox HR (high vs low):</strong> high 그룹이 low 대비 <strong>순간 위험률이 몇 배</strong>로 추정되는지(비례위험 가정 하). &gt;1이면 high에서 사건(사망) 위험이 더 큼으로 <strong>모형이 추정</strong>할 뿐, 치료 효과가 아님.</li>
+        <li><strong>Cox <em>p</em>:</strong> HR이 1과 다른지에 대한 Wald/유사검정 <em>p</em> (penalized Cox 사용).</li>
+      </ul>
+      <p class="muted" style="margin-top:10px;"><strong>모델 비교 요약:</strong> 동일 파이프라인·동일 <em>n</em>에서 log-rank <em>p</em>가 가장 작은 것은 <strong class="ok">XGB top set</strong>이었습니다. 다만 표본·다중비교·분할 정의에 민감하므로 <strong>확증 연구 없이 순위만 강조하지 말 것</strong>.</p>
+
+      <div class="caution-label">
+        <h3>주의!!! 라벨 정의와 모델 우위 (§2 표 해석)</h3>
+        <p style="margin:0;">위 표는 <strong>생존(survival)과 강하게 정렬된 METABRIC 쪽 입력·라벨 체계</strong>에서 나온 결과로 읽는 것이 타당합니다. 그 설정에서는 임상 유사(clinical-like) 신호에 민감한 <strong>XGB</strong>가 상대적으로 유리한 log-rank·Cox 수치를 받은 것으로 해석할 수 있습니다.</p>
+        <ul>
+          <li>현재 파이프라인에 결합된 METABRIC 경로에는 <strong>약물 반응(drug response) 형태의 정식 외부 라벨이 충분히 있지 않았고</strong>, 대신 <strong>생존 연계 값이 강하게 실린 데이터</strong>가 들어갔다고 볼 수 있어, <strong>Survival-linked 지표가 상대적으로 높게 관측</strong>될 여지가 있습니다.</li>
+          <li><strong>임상 종점·라벨 정의가 바뀌면</strong> (동일 아키텍처라도) <strong>모델 간 상대 우위가 달라질 수 있다</strong>는 점만 기억할 것 — 본 대시보드는 추가 실험 로드맵을 약속하지 않습니다.</li>
+          <li><strong>§2 생존 연계 분석</strong>은 <strong>§3–§5 proxy 보조 분석</strong>과 질문이 다릅니다(OS 탐색 vs 투영·게이트·랭킹 맥락). 섞어서 “최종 승자 모델”로 단정하지 말 것.</li>
+        </ul>
+      </div>
+
+      <h3>Kaplan–Meier 플롯</h3>
+      <div class="km-grid">
+        <figure>
+          <img src="results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/metabric_survival_validation/km_plots/km_xgb_top_set.png" alt="KM XGB top set" loading="lazy" />
+          <figcaption>XGB top set · log-rank <em>p</em>≈0.036</figcaption>
+        </figure>
+        <figure>
+          <img src="results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/metabric_survival_validation/km_plots/km_gcn_top_set.png" alt="KM GCN top set" loading="lazy" />
+          <figcaption>GCN top set · log-rank <em>p</em>≈0.083</figcaption>
+        </figure>
+        <figure>
+          <img src="results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/metabric_survival_validation/km_plots/km_ensemble_top_set.png" alt="KM Ensemble top set" loading="lazy" />
+          <figcaption>Ensemble top set · log-rank <em>p</em>≈0.744</figcaption>
+        </figure>
+        <figure>
+          <img src="results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/metabric_survival_validation/km_plots/km_residualmlp_top_set.png" alt="KM ResidualMLP top set" loading="lazy" />
+          <figcaption>ResidualMLP top set · log-rank <em>p</em>≈0.831</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- PROXY DATA 블록: §3 — METABRIC-like 투영 정렬(2648 pairs). 실제 코호트-native drug response 검증 아님. -->
+    <section>
+      <div class="proxy-scope">
+        <p class="proxy-banner">【PROXY DATA】 아래부터 §3 전체 — sample pair 투영·METABRIC-like 라벨. 실제 METABRIC 임상 라벨 전체를 그대로 쓴 검증이 아닙니다.</p>
+        <h2>3) METABRIC-like proxy validation — 모델별 수치 (2648 pairs)</h2>
+        <p class="muted" style="margin:0 0 10px;">출처: <code>results/features_nextflow_team4/fe_re_batch_runs/20260402/sagemaker_dual_validation/metabric_validation_summary.csv</code>. Top100 unique drug의 모델 점수를 외부 sample pair에 투영한 평가(<strong>METABRIC-like</strong> 코호트). <span class="warn">신뢰도 C(프록시)</span> — SageMaker 대시보드 §4.5와 동일 전제.</p>
+        <table>
+          <tr><th>model</th><th>n_pairs</th><th>RMSE</th><th>MAE</th><th>Spearman</th></tr>
+          <tr><td>XGBoost</td><td>2648</td><td>7.129</td><td>7.004</td><td>−0.071</td></tr>
+          <tr><td>ResidualMLP</td><td>2648</td><td>3.321</td><td>3.125</td><td>−0.056</td></tr>
+          <tr><td>GCN</td><td>2648</td><td class="best">1.273</td><td class="best">0.914</td><td class="best">0.404</td></tr>
+          <tr><td>Ensemble_v2</td><td>2648</td><td>2.701</td><td>2.370</td><td>0.074</td></tr>
+        </table>
+        <h3>지표가 각 모델에서 의미하는 것</h3>
+        <ul class="muted tight">
+          <li><strong>RMSE / MAE:</strong> 외부 pair에서 모델이 낸 연속 예측과 proxy 라벨(투영된 정답) 사이의 오차 크기. <strong>작을수록 스케일 상 오차는 작음</strong>. 단, 라벨이 proxy이므로 절대값보다 <strong>모델 간 상대 비교</strong>에 유용합니다.</li>
+          <li><strong>Spearman:</strong> 외부에서 예측 순위와 라벨 순위의 <strong>단조 일치</strong> 정도. 1에 가까울수록 “순위를 잘 맞춘다”는 뜻이며, 음수는 <strong>역전</strong> 신호입니다. 이번 표에서는 <strong>GCN만 강한 양의 상관</strong>, XGB/ResidualMLP는 약한 음의 상관입니다.</li>
+          <li><strong>모델별 해석 요약:</strong> <strong>GCN</strong> — 외부 proxy에서 오차·순위 모두 유리. <strong>Ensemble_v2</strong> — 단일 GCN과 XGB/MLP 절충 형태로 Spearman은 소폭 양수. <strong>ResidualMLP / XGBoost</strong> — 내부 CV에서는 NDCG 등이 강할 수 있으나, 이 METABRIC-like 투영 설정에서는 <strong>일반화 신호가 약화</strong>된 것으로 읽힙니다(내부 지표는 SageMaker 대시보드 §4.4 참고).</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PROXY DATA 블록: §4 — no-LINCS native 랭킹은 외부 추론 정책·피처 결합 맥락; drug response 정답 라벨과 동일하지 않을 수 있음. -->
+    <section>
+      <div class="proxy-scope">
+        <p class="proxy-banner">【PROXY DATA】 아래부터 §4 전체 — 코호트-native 피처·랭킹 정책 맥락. “약물 반응 정답” 외부 검증으로 단정하지 않습니다.</p>
+        <h2>4) METABRIC-native cohort (no-LINCS) — 공식 external inference 랭킹</h2>
+        <p class="muted">운영 기준 랭킹: <code>…/native_pair_features_run/metabric_native_ensemble_ranking_no_lincs.csv</code> (피처: <code>metabric_native_pair_features_no_lincs.parquet</code>). with-LINCS native 랭킹은 비교·감사용. 상세는 <a href="dl_experiment_dashboard_20260331.html#metabric-native-external-policy" style="color:#fde047;">DL 대시보드 §0b</a>.</p>
+      </div>
+    </section>
+
+    <!-- PROXY DATA 블록: §5 — ADMET score-based proxy rule. 분자 ADMET 직접 조인 아님. -->
+    <section>
+      <div class="proxy-scope">
+        <p class="proxy-banner">【PROXY DATA】 아래부터 §5 전체 — score-based ADMET proxy 게이트. 분자 구조 직접 ADMET가 아닙니다.</p>
+        <h2>5) ADMET 게이트 (proxy rule 기반)</h2>
+        <p class="muted" style="margin:0 0 10px;">이번 post-analysis 파이프라인에서 Top100 후보에 대해 <strong>score-based proxy rule</strong>로 1차 스크리닝을 적용했습니다. <strong>분자 구조에 직접 join된 ADMET 테이블이 없을 때</strong>의 임시 게이트이며, 임상·합성 전에는 <strong>direct molecular ADMET</strong>가 필요합니다.</p>
+        <table>
+          <tr><th>항목</th><th>수치</th><th>의미</th></tr>
+          <tr><td>평가 후보 규모</td><td>Top100 unique drugs</td><td>앙상블 v2 랭킹 상위 고유 약물 집합</td></tr>
+          <tr><td>ADMET proxy 통과</td><td><strong>53 / 100</strong></td><td>규칙을 모두 만족한 후보 비율(프록시)</td></tr>
+          <tr><td>Final shortlist</td><td><strong>30</strong></td><td>통과자 중 rank 유지로 잘린 운영 후보 리스트</td></tr>
+          <tr><td>산출물</td><td colspan="2"><code>admet_filter_log.json</code>, <code>final_shortlist.csv</code> (<code>results/…/fe_re_batch_runs/20260331/sagemaker_final_three/</code> 등 post-analysis 경로와 동일 흐름 — SageMaker 대시보드 §4.3)</td></tr>
+        </table>
+        <p class="muted" style="margin-top:10px;"><strong>모델별 ADMET 수치?</strong> ADMET는 <strong>약물(화합물) 단위 게이트</strong>라서 모델마다 별도의 “ADMET 점수”가 있는 형태가 아닙니다. 대신 shortlist 각 행에 <strong>모델 예측(pred_xgb, pred_residualmlp, pred_gcn)과 admet_pass가 함께</strong> 있어, “어떤 모델 점수 프로파일의 약물이 통과했는지”를 표로 볼 수 있습니다(SageMaker 대시보드 §4.3 미리보기 표 참고).</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>6) 한눈에 보는 파이프라인 위치</h2>
+      <p class="muted" style="margin:0;">① SageMaker 3모델 학습·로컬 앙상블 → ② <strong>Survival-linked relevance</strong>(실제 OS, <strong>§2</strong>) → ③ METABRIC-like <strong>proxy</strong> 정렬 평가(<strong>§3</strong>) → ④ METABRIC-native no-LINCS 랭킹 맥락(<strong>§4</strong>) → ⑤ ADMET proxy 게이트·shortlist(<strong>§5</strong>, SageMaker §4.3과 동일 흐름). <strong>§3</strong>은 “proxy 라벨과의 일치”, <strong>§2</strong>는 “OS와의 탐색적 연관”이라 질문이 다릅니다.</p>
+    </section>
+  </div>
+</body>
+</html>

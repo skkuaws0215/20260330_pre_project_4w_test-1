@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SageMaker 통합 실험 대시보드 · 20260403_v4</title>
+  <title>SageMaker 통합 실험 대시보드 · 20260403_v7</title>
   <style>
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0a0f18; color: #e6edf7; }
     .hero { padding: 42px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); background: linear-gradient(120deg, #152238, #1e3d52 45%, #1a4d3a); }
@@ -26,6 +26,19 @@
     details.sm-fold { margin-top: 12px; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 12px 14px; background: rgba(255,255,255,0.04); }
     details.sm-fold summary { cursor: pointer; color: #9bc2ff; font-weight: 600; font-size: 0.95rem; }
     details.sm-fold[open] summary { margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .callout-metabric-proxy {
+      background: rgba(234, 179, 8, 0.16);
+      border: 1px solid rgba(250, 204, 21, 0.65);
+      border-left: 4px solid #facc15;
+      color: #fef9c3;
+      padding: 12px 14px;
+      border-radius: 8px;
+      margin: 12px 0 16px;
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+    .callout-metabric-proxy strong { color: #fef08a; }
+    .callout-metabric-proxy a { color: #fde047; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -33,10 +46,11 @@
     <h1>SageMaker 통합 실험 대시보드</h1>
     <p><strong>ML · DL · Graph</strong> 군별 대표(<strong>XGBoost · ResidualMLP · GCN</strong>)를 SageMaker에서 실행하고, 산출 지표·아티팩트·로그를 한곳에 모읍니다. <strong>최종 실행 단계</strong>이며 추가 탐색은 하지 않습니다. 로컬 CV는 선정 근거로만 유지합니다. 통합 산출 번들: <code>sagemaker_final_three/</code> (<strong>§2.5</strong>).</p>
     <p class="muted" style="margin-top:10px;font-size:0.88rem;">로컬 목차: <code>python3 serve_dashboards.py</code> 또는 <code>http://127.0.0.1:8000/sagemaker_experiment_dashboard_20260403.html</code></p>
-    <div class="badge">Snapshot · 20260403_v6 · dual validation + metabric/admet updates</div>
+    <div class="badge">Snapshot · 20260403_v7 · §4 하위 4.1–4.6 재번호 + §4.4 proxy 경고</div>
     <a class="nav-btn" href="index.html">Index</a>
     <a class="nav-btn" href="dl_experiment_dashboard_20260331.html">DL 대시보드 (로컬 §0)</a>
     <a class="nav-btn" href="graph_experiment_dashboard_20260402.html">Graph 대시보드</a>
+    <a class="nav-btn" href="metabric_admet_survival_dashboard_20260402_v2.html">METABRIC·ADMET·Survival (20260402 v2)</a>
   </div>
 
   <div class="container">
@@ -145,7 +159,17 @@ python3 ml/pilot_sagemaker/aggregate_final_representative_outputs.py --collect</
     </section>
 
     <section>
-      <h2>4) 업데이트 방법 (팀 합의 후 고정)</h2>
+      <h2>4) 후속 운영·외부 검증 (하위 목차)</h2>
+      <p class="muted" style="margin:0;">이 절은 SageMaker 이후 로컬 post-analysis·METABRIC·ADMET·랭킹 일관성을 묶습니다. 하위 단계 번호는 순서대로 <strong>4.1</strong> ~ <strong>4.6</strong>입니다.</p>
+      <ul class="muted" style="margin:10px 0 0;">
+        <li><strong>4.1</strong> 업데이트 방법 · <strong>4.2</strong> 향후 단계(Ensemble/METABRIC/ADMET/shortlist)</li>
+        <li><strong>4.3</strong> 20260402 Post-Analysis 산출물 표 · <strong>4.4</strong> METABRIC/ADMET 방법·결과 해석</li>
+        <li><strong>4.5</strong> 진짜 METABRIC 검증 체크리스트 · <strong>4.6</strong> 내부↔외부 rank consistency</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>4.1) 업데이트 방법 (팀 합의 후 고정)</h2>
       <ul class="muted">
         <li><strong>수동:</strong> Job 종료 후 CloudWatch/SageMaker 콘솔에서 지표를 확인하고, 이 HTML의 §3 표 셀을 직접 수정 후 커밋</li>
         <li><strong>반자동:</strong> <code>sagemaker_final_three/artifacts/*/metrics.json</code>을 채운 뒤 <code>aggregate_final_representative_outputs.py --collect</code>로 <code>final_model_comparison.csv</code> 갱신 후, 필요 시 이 HTML §3와 맞춤</li>
@@ -154,7 +178,7 @@ python3 ml/pilot_sagemaker/aggregate_final_representative_outputs.py --collect</
     </section>
 
     <section>
-      <h2>4.5) 향후 단계 (로컬, SageMaker 미사용)</h2>
+      <h2>4.2) 향후 단계 (로컬, SageMaker 미사용)</h2>
       <ul class="muted">
         <li><strong>Step 1 (완료) — Ensemble v2:</strong> <code>final_ensemble_ranking_v2.csv</code> 생성 (가중치: XGB 0.5 / ResidualMLP 0.4 / GCN 0.1, <code>rank_v2</code>·<code>is_top100_v2</code> 포함)</li>
         <li><strong>Step 2 (완료) — METABRIC external validation:</strong> <code>metabric_validation_summary.csv</code> 생성 (Top100 unique drug 기준 정렬·평가)</li>
@@ -164,7 +188,7 @@ python3 ml/pilot_sagemaker/aggregate_final_representative_outputs.py --collect</
     </section>
 
     <section>
-      <h2>4.6) 20260402 Post-Analysis Outputs</h2>
+      <h2>4.3) 20260402 Post-Analysis Outputs</h2>
       <table>
         <tr><th>파일</th><th>의미</th><th>비고</th></tr>
         <tr><td><code>final_ensemble_ranking_v2.csv</code></td><td>새 가중치 앙상블 점수·순위</td><td><code>ensemble_score</code> 유지 + <code>ensemble_score_v2</code>, <code>rank_v2</code>, <code>is_top100_v2</code> 추가</td></tr>
@@ -189,7 +213,14 @@ python3 ml/pilot_sagemaker/aggregate_final_representative_outputs.py --collect</
     </section>
 
     <section>
-      <h2>4.7) METABRIC/ADMET 방법과 결과 해석</h2>
+      <h2>4.4) METABRIC/ADMET 방법과 결과 해석</h2>
+      <div class="callout-metabric-proxy">
+        <strong>중요 (프록시·비실제 METABRIC):</strong> 아래 표의 METABRIC Spearman·RMSE 등은 <strong>실제 METABRIC 임상·발현 코호트 전체를 그대로 쓴 값이 아닙니다.</strong>
+        내부 외부 샘플 세트(<code>METABRIC-like</code>, <code>sample_expression_crispr_full</code> 등)에 약물 단위 점수를 <strong>투영(projection)</strong>한 <strong>가상에 가까운 proxy 설정</strong>에서 나온 수치입니다.
+        <strong>앞으로는 실제 METABRIC 데이터</strong> 기반 파이프라인(코호트-native FE, 공식 랭킹, 생존 연계 등)으로 진행합니다.
+        <strong>갱신된 정리·수치·해석</strong>은 다음 대시보드에 반영했습니다:
+        <a href="metabric_admet_survival_dashboard_20260402_v2.html"><code>metabric_admet_survival_dashboard_20260402_v2.html</code> (20260402 v2)</a>
+      </div>
       <h3 style="font-size:1rem;margin:8px 0 8px;">방법</h3>
       <ul class="muted">
         <li><strong>METABRIC external validation:</strong> <code>final_ensemble_ranking_v2.csv</code>의 Top100 unique drug를 기준으로 <code>canonical_drug_id</code> align 후, drug-level score를 외부 sample pair에 투영하여 평가 (총 2648 pairs)</li>
@@ -212,7 +243,7 @@ python3 ml/pilot_sagemaker/aggregate_final_representative_outputs.py --collect</
     </section>
 
     <section>
-      <h2>4.8) "진짜 METABRIC 검증" 체크리스트 (필수/누수 점검)</h2>
+      <h2>4.5) "진짜 METABRIC 검증" 체크리스트 (필수/누수 점검)</h2>
       <table>
         <tr><th>체크 항목</th><th>필수 기준</th><th>현재 상태</th><th>신뢰도 영향</th></tr>
         <tr><td>External cohort 정의</td><td>METABRIC 원본 코호트 ID/분할 근거 명시</td><td>METABRIC-like(`sample_expression_crispr_full`)만 명시</td><td>중간</td></tr>
@@ -229,7 +260,7 @@ python3 ml/pilot_sagemaker/aggregate_final_representative_outputs.py --collect</
     </section>
 
     <section>
-      <h2>4.9) 내부↔외부 Rank Consistency 진단표</h2>
+      <h2>4.6) 내부↔외부 Rank Consistency 진단표</h2>
       <table>
         <tr><th>model</th><th>외부 Spearman (label vs pred)</th><th>Kendall tau (내부↔외부 rank)</th><th>TopK overlap@10</th><th>TopK overlap@30</th><th>판정</th></tr>
         <tr><td>GCN</td><td>0.4045</td><td class="tbd">N/A (raw external rank table 미생성)</td><td class="tbd">N/A</td><td class="tbd">N/A</td><td>외부 상관 우수, 일관성 정량은 추가 계산 필요</td></tr>

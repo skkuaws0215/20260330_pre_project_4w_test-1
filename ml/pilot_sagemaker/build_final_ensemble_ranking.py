@@ -15,6 +15,17 @@ from run_network_proximity_baseline import build_adjacency, load_disease_genes, 
 KEY_COLS = ["sample_id", "canonical_drug_id"]
 
 
+def _feature_frame_for_model_cols(feats: pd.DataFrame, cols: list[str]) -> pd.DataFrame:
+    """Columns expected by a checkpoint, in order; missing names (e.g. omitted LINCS) -> 0.0."""
+    out: dict[str, pd.Series] = {}
+    for c in cols:
+        if c in feats.columns:
+            out[c] = feats[c]
+        else:
+            out[c] = pd.Series(0.0, index=feats.index, dtype=np.float64)
+    return pd.DataFrame(out, index=feats.index)
+
+
 class ResidualBlock(nn.Module):
     def __init__(self, dim: int):
         super().__init__()
@@ -65,7 +76,7 @@ def _predict_xgb(feats: pd.DataFrame, artifact_path: Path) -> pd.DataFrame:
     bundle = joblib.load(artifact_path)
     model = bundle["model"]
     cols = bundle["feature_columns"]
-    X = feats[cols].apply(pd.to_numeric, errors="coerce").fillna(0.0)
+    X = _feature_frame_for_model_cols(feats, cols).apply(pd.to_numeric, errors="coerce").fillna(0.0)
     pred = model.predict(X)
     return feats[KEY_COLS].assign(pred_xgb=pred.astype(float))
 
@@ -74,7 +85,12 @@ def _predict_residual_mlp(feats: pd.DataFrame, ckpt_path: Path) -> pd.DataFrame:
     ckpt = torch.load(ckpt_path, map_location="cpu")
     cols = ckpt["feat_cols"]
     cont_idx = list(ckpt.get("cont_idx", []))
-    X = feats[cols].apply(pd.to_numeric, errors="coerce").fillna(0.0).to_numpy(dtype=np.float32)
+    X = (
+        _feature_frame_for_model_cols(feats, cols)
+        .apply(pd.to_numeric, errors="coerce")
+        .fillna(0.0)
+        .to_numpy(dtype=np.float32)
+    )
     if cont_idx:
         mean = np.asarray(ckpt["scaler_mean"], dtype=np.float32)
         scale = np.asarray(ckpt["scaler_scale"], dtype=np.float32)
@@ -120,7 +136,12 @@ def _predict_gcn(
     a_hat, _s = adj_to_tensors(safe_adj, nodes, torch.device("cpu"))
 
     feat_cols = ckpt["feat_cols"]
-    X = feats[feat_cols].apply(pd.to_numeric, errors="coerce").fillna(0.0).to_numpy(dtype=np.float32)
+    X = (
+        _feature_frame_for_model_cols(feats, feat_cols)
+        .apply(pd.to_numeric, errors="coerce")
+        .fillna(0.0)
+        .to_numpy(dtype=np.float32)
+    )
     dids = feats["canonical_drug_id"].astype(str).str.strip()
     drug_idx = np.array([id2i[f"D:{d}"] for d in dids], dtype=np.int64)
 

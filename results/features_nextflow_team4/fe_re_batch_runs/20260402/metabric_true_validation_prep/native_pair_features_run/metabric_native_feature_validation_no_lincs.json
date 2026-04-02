@@ -1,0 +1,56 @@
+{
+  "gene_mapping": {
+    "n_reference_gene_columns": 17916,
+    "n_reference_columns_with_matrix_gene_match": 17252,
+    "n_metabric_matrix_rows": 19172,
+    "n_distinct_gene_symbols_in_order": 19172
+  },
+  "omit_lincs_features": true,
+  "train_full_schema_n_columns": 2125,
+  "train_aligned_schema_n_columns": 2120,
+  "train_schema_lincs_column_names": [
+    "lincs_cosine",
+    "lincs_pearson",
+    "lincs_spearman",
+    "lincs_reverse_score_top50",
+    "lincs_reverse_score_top100"
+  ],
+  "metabric_vs_train_aligned_columns_match": true,
+  "metabric_column_order_list_equals_train_no_lincs": true,
+  "lincs_columns_present_in_metabric_output": [],
+  "lincs_columns_present_count": 0,
+  "missing_columns_vs_raw_fe": [],
+  "extra_columns_vs_train_aligned_before_align": [],
+  "alignment": {
+    "missing_columns_filled_zero": [],
+    "extra_columns_dropped_from_output": [],
+    "n_missing_filled": 0,
+    "n_extra_dropped": 0
+  },
+  "pathway_coverage": {
+    "n_pathway_score_columns": 50,
+    "pathway_column_head": [
+      "pathway__HALLMARK_TNFA_SIGNALING_VIA_NFKB",
+      "pathway__HALLMARK_HYPOXIA",
+      "pathway__HALLMARK_CHOLESTEROL_HOMEOSTASIS",
+      "pathway__HALLMARK_MITOTIC_SPINDLE",
+      "pathway__HALLMARK_WNT_BETA_CATENIN_SIGNALING",
+      "pathway__HALLMARK_TGF_BETA_SIGNALING",
+      "pathway__HALLMARK_IL6_JAK_STAT3_SIGNALING",
+      "pathway__HALLMARK_DNA_REPAIR",
+      "pathway__HALLMARK_G2M_CHECKPOINT",
+      "pathway__HALLMARK_APOPTOSIS",
+      "pathway__HALLMARK_NOTCH_SIGNALING",
+      "pathway__HALLMARK_ADIPOGENESIS",
+      "pathway__HALLMARK_ESTROGEN_RESPONSE_EARLY",
+      "pathway__HALLMARK_ESTROGEN_RESPONSE_LATE",
+      "pathway__HALLMARK_ANDROGEN_RESPONSE"
+    ]
+  },
+  "pathway_columns_in_aligned_schema": 50,
+  "lincs_overlap": {
+    "skipped_omit_lincs_features": true,
+    "note": "LINCS pair block not computed; train schema lincs_* columns excluded from output."
+  },
+  "transform_only_compliance": "Model scaler/encoding: not applied in this script; use checkpoint.joblib / checkpoint.pt when running inference. Cohort z-score here is FE-only (optional)."
+}

@@ -1,0 +1,216 @@
+{
+  "validation_type": "METABRIC survival-linked clinical relevance",
+  "explicitly_not": "drug response / label external validation",
+  "s3_and_clinical_field_reference": {
+    "bucket": "drug-discovery-joe-raw-data-team4",
+    "prefix_8": "s3://drug-discovery-joe-raw-data-team4/8/",
+    "metabric_expression": {
+      "08_raw.parquet": "s3://drug-discovery-joe-raw-data-team4/8/metabric/08_raw.parquet",
+      "54_filtered.parquet": "s3://drug-discovery-joe-raw-data-team4/8/metabric/54_filtered.parquet",
+      "shape_note": "Rows ~19k genes/features; columns ~2k METABRIC sample IDs (MB-xxxx). No OS/clinical columns in-matrix."
+    },
+    "team_preprocessed_mirror": {
+      "note": "README lists results/metabric/08_raw.parquet and 54_filtered.parquet under shared results/ (same scientific content as 8/metabric)."
+    },
+    "survival_and_clinical_fields": {
+      "source": "Not present in 8/metabric parquets. Use cBioPortal METABRIC (study brca_metabric) clinical export, e.g. data_clinical_sample / merged TSV.",
+      "overall_survival_time_months": {
+        "example_column": "Overall Survival (Months)",
+        "description": "Follow-up time in months for overall survival endpoint."
+      },
+      "overall_survival_event": {
+        "example_column": "Overall Survival Status",
+        "encoding_note": "Often 0:LIVING (censored) vs 1:DECEASED (event); script parses DECEASED/LIVING tokens."
+      },
+      "sample_key": {
+        "example_column": "Sample ID",
+        "join_to_native_ranking": "Must match sample_id in metabric_native_ensemble_ranking_no_lincs.csv (MB-xxxx)."
+      },
+      "auxiliary_clinical": [
+        "Pam50 + Claudin-low subtype",
+        "ER Status",
+        "PR Status",
+        "HER2 Status",
+        "3-Gene classifier subtype",
+        "Tumor Stage",
+        "Neoplasm Histologic Grade"
+      ]
+    }
+  },
+  "inputs": {
+    "ensemble_ranking_csv": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_ensemble_ranking_no_lincs.csv",
+    "pair_features_parquet": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_pair_features_no_lincs.parquet",
+    "clinical_tsv": "/Users/skku_aws2_14/Downloads/brca_metabric_clinical_data.tsv"
+  },
+  "parameters": {
+    "top_k_drugs": 10,
+    "top_drug_selection": "lowest mean within-sample rank of model score (per sample, rank 1 = highest score)",
+    "survival_group_score": "per model: mean of that model's prediction column over the top-K drugs (sample-specific)",
+    "pathway_supplement": "mean of pathway__* columns over top-K pairs reported as secondary medians (may be drug-invariant in some FE builds)"
+  },
+  "per_model_analyses": [
+    {
+      "model_ranking_source": "xgb_top_set",
+      "ranking_score_column": "pred_xgb",
+      "top_drug_ids": [
+        1011,
+        1016,
+        1004,
+        1007,
+        1001,
+        1015,
+        1006,
+        1012,
+        1005,
+        1018
+      ],
+      "n_samples": 40,
+      "activation_definition": "mean pred_xgb over top-K drug pairs (sample-specific)",
+      "pathway_activation_median_high_group": 8.288473327411339e-05,
+      "pathway_activation_median_low_group": 0.02966514229774475,
+      "median_model_score_high_group": -0.504721806384623,
+      "median_model_score_low_group": -1.3135284036397934,
+      "logrank_p_value": 0.036086290717120564,
+      "cox_hr_high_vs_low": 2.5520781819586174,
+      "cox_hr_ci_lower": 1.0651928796566528,
+      "cox_hr_ci_upper": 6.114482335751806,
+      "cox_p_value": 0.035585469959984704,
+      "cox_fit_note": null,
+      "km_plot_path": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/metabric_survival_validation/km_plots/km_xgb_top_set.png"
+    },
+    {
+      "model_ranking_source": "residualmlp_top_set",
+      "ranking_score_column": "pred_residualmlp",
+      "top_drug_ids": [
+        1001,
+        1020,
+        1005,
+        1018,
+        1017,
+        1047,
+        1029,
+        1043,
+        1036,
+        1030
+      ],
+      "n_samples": 40,
+      "activation_definition": "mean pred_residualmlp over top-K drug pairs (sample-specific)",
+      "pathway_activation_median_high_group": 0.04447980225086212,
+      "pathway_activation_median_low_group": 8.288473327411339e-05,
+      "median_model_score_high_group": 31.796676063537596,
+      "median_model_score_low_group": 23.605849170684813,
+      "logrank_p_value": 0.8313589209877142,
+      "cox_hr_high_vs_low": 1.0967035675168468,
+      "cox_hr_ci_lower": 0.4843722243140222,
+      "cox_hr_ci_upper": 2.4831289959029963,
+      "cox_p_value": 0.8247888485554242,
+      "cox_fit_note": null,
+      "km_plot_path": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/metabric_survival_validation/km_plots/km_residualmlp_top_set.png"
+    },
+    {
+      "model_ranking_source": "gcn_top_set",
+      "ranking_score_column": "pred_gcn",
+      "top_drug_ids": [
+        1047,
+        1043,
+        1030,
+        1025,
+        1048,
+        1039,
+        1049,
+        1052,
+        1050,
+        1014
+      ],
+      "n_samples": 40,
+      "activation_definition": "mean pred_gcn over top-K drug pairs (sample-specific)",
+      "pathway_activation_median_high_group": 0.029468029737472534,
+      "pathway_activation_median_low_group": 0.0036811616737395525,
+      "median_model_score_high_group": 3.901941406726837,
+      "median_model_score_low_group": 3.835905122756958,
+      "logrank_p_value": 0.08325155793415366,
+      "cox_hr_high_vs_low": 2.2016862662583083,
+      "cox_hr_ci_lower": 0.9042590498235672,
+      "cox_hr_ci_upper": 5.360656789640365,
+      "cox_p_value": 0.0821577748230665,
+      "cox_fit_note": null,
+      "km_plot_path": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/metabric_survival_validation/km_plots/km_gcn_top_set.png"
+    },
+    {
+      "model_ranking_source": "ensemble_top_set",
+      "ranking_score_column": "ensemble_score",
+      "top_drug_ids": [
+        1047,
+        1043,
+        1030,
+        1025,
+        1048,
+        1039,
+        1049,
+        1052,
+        1050,
+        1014
+      ],
+      "n_samples": 40,
+      "activation_definition": "mean ensemble_score over top-K drug pairs (sample-specific)",
+      "pathway_activation_median_high_group": 0.04284181445837021,
+      "pathway_activation_median_low_group": 0.0036811616737395525,
+      "median_model_score_high_group": 9.279935831427574,
+      "median_model_score_low_group": 7.126071005165576,
+      "logrank_p_value": 0.7437873732718976,
+      "cox_hr_high_vs_low": 1.152265357155606,
+      "cox_hr_ci_lower": 0.5074505269807889,
+      "cox_hr_ci_upper": 2.616443146094518,
+      "cox_p_value": 0.73481520392473,
+      "cox_fit_note": null,
+      "km_plot_path": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/metabric_survival_validation/km_plots/km_ensemble_top_set.png"
+    }
+  ],
+  "model_comparison_by_logrank_p": [
+    {
+      "model_ranking_source": "xgb_top_set",
+      "logrank_p_value": 0.036086290717120564
+    },
+    {
+      "model_ranking_source": "gcn_top_set",
+      "logrank_p_value": 0.08325155793415366
+    },
+    {
+      "model_ranking_source": "ensemble_top_set",
+      "logrank_p_value": 0.7437873732718976
+    },
+    {
+      "model_ranking_source": "residualmlp_top_set",
+      "logrank_p_value": 0.8313589209877142
+    }
+  ],
+  "interpretation_note": "High vs low groups use a median split on the sample-level mean model score over each model's top-K drugs. Cox HR is for high vs low of that split (exploratory; not causal treatment effect). Pathway medians in per_model_analyses describe the same samples under a mean HALLMARK pathway vector over the top-K pairs.",
+  "subtype_logrank_supplement": [
+    {
+      "model_ranking_source": "xgb_top_set",
+      "pam50_subtype": "LumB",
+      "n_samples": 20,
+      "logrank_p_value": 0.10445166189412347
+    },
+    {
+      "model_ranking_source": "residualmlp_top_set",
+      "pam50_subtype": "LumB",
+      "n_samples": 20,
+      "logrank_p_value": 0.814778464757599
+    },
+    {
+      "model_ranking_source": "gcn_top_set",
+      "pam50_subtype": "LumB",
+      "n_samples": 20,
+      "logrank_p_value": 0.26029283822422467
+    },
+    {
+      "model_ranking_source": "ensemble_top_set",
+      "pam50_subtype": "LumB",
+      "n_samples": 20,
+      "logrank_p_value": 0.9474630699456138
+    }
+  ],
+  "best_logrank_model": "xgb_top_set",
+  "best_logrank_p": 0.036086290717120564
+}

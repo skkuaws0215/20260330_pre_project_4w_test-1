@@ -1,0 +1,33 @@
+{
+  "external_inference_policy": {
+    "decision_date": "2026-04-02",
+    "canonical_ensemble_ranking_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_ensemble_ranking_no_lincs.csv",
+    "canonical_pair_features_parquet": "results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_pair_features_no_lincs.parquet",
+    "legacy_with_lincs_ensemble_ranking_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_ensemble_ranking.csv",
+    "legacy_with_lincs_pair_features_parquet": "results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_pair_features.parquet",
+    "legacy_role": "with-LINCS native artifacts: comparison and audit only; not for official external inference reporting.",
+    "why_with_vs_no_lincs_comparison_showed_zero_diff": "XGBoost training bundle feature_columns omit LINCS, so XGB does not consume LINCS at inference. ResidualMLP and GCN checkpoints include LINCS slots in feat_cols; build_final_ensemble_ranking.py zero-pads missing LINCS columns to match tensor width. In this run, with-LINCS FE produced LINCS values that were effectively identical to that zero-padded path, so rankings matched explicit no-LINCS FE.",
+    "operational_next_steps": "Use no-LINCS ranking for Top30/Top10 operational shortlists; proceed to direct molecular ADMET.",
+    "future_experiment_track_memo": "Deferred optional track: with-LINCS full retraining (XGBoost + ResidualMLP + GCN) with LINCS in the training feature schema and aligned scalers/graph dimensions — separate from current no-LINCS external inference policy."
+  },
+  "inference": {
+    "ensemble_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_ensemble_ranking.csv",
+    "n_prediction_rows": 2000,
+    "models": [
+      "xgboost",
+      "residual_mlp",
+      "gcn",
+      "ensemble_v2"
+    ],
+    "artifact_defaults": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260331/sagemaker_final_three"
+  },
+  "native_features": {
+    "parquet": "results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_pair_features.parquet",
+    "feature_column_order_matches_train": true,
+    "pathway_n_score_columns": 50,
+    "lincs_intersection_cols": 256,
+    "lincs_intersection_empty": false,
+    "n_native_pair_rows": 2000
+  },
+  "note": "Pairs subset: 40 MB samples x 50 drugs (see native_inputs metabric_gene_order_summary.json). Full 1980x597 cross-join is ~1.18M rows \u2014 use prepare_metabric_native_inputs.py with caps 0 for all."
+}

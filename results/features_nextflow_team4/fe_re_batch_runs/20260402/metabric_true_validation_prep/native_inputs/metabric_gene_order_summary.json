@@ -1,0 +1,85 @@
+{
+  "metabric_matrix_uri": "/tmp/metabric_inspect/54_filtered.parquet",
+  "n_matrix_rows": 19172,
+  "n_mb_sample_columns": 1980,
+  "hugo_symbol_na": 0,
+  "hugo_symbol_duplicated": 0,
+  "entrez_na": 0,
+  "remap_mygene": true,
+  "mygene_unique_entrez_queried": 19172,
+  "mygene_symbols_resolved": 19158,
+  "gene_csv_path": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_inputs/metabric_matrix_gene_order.csv",
+  "gene_symbol_na_after_build": 0,
+  "gene_symbol_duplicated_after_build": 0,
+  "row_count_matches_matrix": true,
+  "first_5_rows": [
+    {
+      "row_index": 0,
+      "gene_symbol": "A1BG",
+      "hugo_symbol_as_in_matrix": "ENTREZ_1",
+      "entrez_gene_id": 1.0
+    },
+    {
+      "row_index": 1,
+      "gene_symbol": "A2M",
+      "hugo_symbol_as_in_matrix": "ENTREZ_2",
+      "entrez_gene_id": 2.0
+    },
+    {
+      "row_index": 2,
+      "gene_symbol": "NAT1",
+      "hugo_symbol_as_in_matrix": "ENTREZ_9",
+      "entrez_gene_id": 9.0
+    },
+    {
+      "row_index": 3,
+      "gene_symbol": "NAT2",
+      "hugo_symbol_as_in_matrix": "ENTREZ_10",
+      "entrez_gene_id": 10.0
+    },
+    {
+      "row_index": 4,
+      "gene_symbol": "SERPINA3",
+      "hugo_symbol_as_in_matrix": "ENTREZ_12",
+      "entrez_gene_id": 12.0
+    }
+  ],
+  "last_5_rows": [
+    {
+      "row_index": 19167,
+      "gene_symbol": "CEP192P1",
+      "hugo_symbol_as_in_matrix": "ENTREZ_643201",
+      "entrez_gene_id": 643201.0
+    },
+    {
+      "row_index": 19168,
+      "gene_symbol": "TUBBP5",
+      "hugo_symbol_as_in_matrix": "ENTREZ_643224",
+      "entrez_gene_id": 643224.0
+    },
+    {
+      "row_index": 19169,
+      "gene_symbol": "GRXCR2",
+      "hugo_symbol_as_in_matrix": "ENTREZ_643226",
+      "entrez_gene_id": 643226.0
+    },
+    {
+      "row_index": 19170,
+      "gene_symbol": "TMEM72",
+      "hugo_symbol_as_in_matrix": "ENTREZ_643236",
+      "entrez_gene_id": 643236.0
+    },
+    {
+      "row_index": 19171,
+      "gene_symbol": "CCT6P1",
+      "hugo_symbol_as_in_matrix": "ENTREZ_643253",
+      "entrez_gene_id": 643253.0
+    }
+  ],
+  "pairs_parquet_path": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_inputs/metabric_pairs.parquet",
+  "pairs_n_rows": 2000,
+  "pairs_n_mb_samples": 40,
+  "pairs_n_drugs": 50,
+  "max_metabric_samples_cap": 40,
+  "max_drugs_cap": 50
+}

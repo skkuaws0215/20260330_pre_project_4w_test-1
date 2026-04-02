@@ -1,0 +1,816 @@
+{
+  "policy_final_external_inference_ranking": "Official external inference ranking: metabric_native_ensemble_ranking_no_lincs.csv (from metabric_native_pair_features_no_lincs.parquet, build_metabric_native_pair_features.py --omit-lincs-features). with-LINCS native ranking (metabric_native_ensemble_ranking.csv) is legacy: comparison and audit only.",
+  "why_with_lincs_vs_no_lincs_diff_was_zero_here": "XGBoost does not use LINCS columns (bundle feature_columns). ResidualMLP and GCN use checkpoint feat_cols that include LINCS slots; build_final_ensemble_ranking.py zero-fills missing LINCS columns. In this cohort/setup, with-LINCS FE yielded the same effective inputs as explicit no-LINCS (LINCS all zero / equivalent to padding), so TopK overlap and rank deltas were identical.",
+  "operational_next": "no-LINCS Top30/Top10 shortlists; then direct molecular ADMET.",
+  "future_experiment_memo_with_lincs_full_retrain": "Separate track (not started): full retraining of XGBoost, ResidualMLP, and GCN with LINCS in the training feature schema, including scaler and graph-head alignment.",
+  "inputs": {
+    "ranking_with_lincs_csv": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_ensemble_ranking.csv",
+    "ranking_no_lincs_csv": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_ensemble_ranking_no_lincs.csv"
+  },
+  "outputs": {
+    "comparison_csv": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_ranking_comparison_no_lincs.csv",
+    "comparison_summary_json": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_ranking_comparison_summary.json"
+  },
+  "counts": {
+    "n_pairs": 2000,
+    "n_samples": 40
+  },
+  "topk_overlap_per_sample": {
+    "top10_overlap_count_mean": 10.0,
+    "top10_overlap_count_std": 0.0,
+    "top10_overlap_count_min": 10,
+    "top10_overlap_count_max": 10,
+    "top30_overlap_count_mean": 30.0,
+    "top30_overlap_count_std": 0.0,
+    "top30_overlap_count_min": 30,
+    "top30_overlap_count_max": 30,
+    "top10_jaccard_mean": 1.0,
+    "top30_jaccard_mean": 1.0
+  },
+  "rank_shift": {
+    "mean_abs_rank_delta": 0.0,
+    "median_abs_rank_delta": 0.0,
+    "max_abs_rank_delta": 0,
+    "share_exact_same_rank": 1.0
+  },
+  "ensemble_score_change": {
+    "mean_delta": 0.0,
+    "mean_abs_delta": 0.0,
+    "max_abs_delta": 0.0,
+    "share_exact_same_score": 1.0
+  },
+  "per_drug_rank_shift": [
+    {
+      "canonical_drug_id": 1001,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1043,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1030,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1031,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1032,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1033,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1034,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1036,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1037,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1038,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1039,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1042,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1046,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1003,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1047,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1048,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1049,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1050,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1051,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1052,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1053,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1054,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1057,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1058,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1029,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1028,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1026,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1025,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1004,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1005,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1006,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1007,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1008,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1009,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1010,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1011,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1012,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1013,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1014,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1015,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1016,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1017,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1018,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1019,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1020,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1021,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1022,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1023,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1024,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    },
+    {
+      "canonical_drug_id": 1059,
+      "n_samples": 40,
+      "mean_rank_delta": 0.0,
+      "mean_abs_rank_delta": 0.0,
+      "max_abs_rank_delta": 0,
+      "mean_ensemble_score_delta": 0.0,
+      "mean_abs_ensemble_score_delta": 0.0
+    }
+  ],
+  "per_sample": [
+    {
+      "sample_id": "MB-0000",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0002",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0005",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0006",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0008",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0010",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0014",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0020",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0022",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0028",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0035",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0036",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0039",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0045",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0046",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0048",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0050",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0053",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0054",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0056",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0059",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0060",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0062",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0064",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0066",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0068",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0071",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0079",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0081",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0083",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0093",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0095",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0097",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0099",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0100",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0101",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0102",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0106",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0107",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    },
+    {
+      "sample_id": "MB-0108",
+      "top10_overlap_count": 10,
+      "top30_overlap_count": 30,
+      "top10_jaccard": 1.0,
+      "top30_jaccard": 1.0,
+      "n_drugs_ranked": 50
+    }
+  ]
+}

@@ -137,7 +137,20 @@ def main() -> None:
             {
                 "step": 1,
                 "name": "build_external_pair_table",
-                "description": "Build METABRIC pair rows: keys (sample_id after bridge, canonical_drug_id), label_regression, and feature columns aligned to train schema (transform-only from train FE).",
+                "description": (
+                    "Run ml/pilot_sagemaker/build_metabric_external_eval_tables.py: keys "
+                    "(sample_id after bridge, canonical_drug_id), labels from labels_B_graph, "
+                    "and feature columns copied from pair_features_newfe_v2 (train schema, no refit)."
+                ),
+            },
+            {
+                "step": 1.5,
+                "name": "build_metabric_native_pair_features_optional",
+                "description": (
+                    "For cohort-native FE, run ml/pilot_sagemaker/build_metabric_native_pair_features.py "
+                    "with METABRIC matrix, gene-order CSV, TCGA reference sample_expression (column names), "
+                    "pairs parquet (MB-* sample_id), and train schema parquet; see script --help."
+                ),
             },
             {
                 "step": 2,
@@ -153,6 +166,8 @@ def main() -> None:
         manifest["recommended_commands"] = [
             "python3 ml/pilot_sagemaker/prepare_metabric_true_validation_inputs.py",
             "python3 ml/pilot_sagemaker/validate_metabric_sample_bridge.py --format finalized --bridge-csv results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/bridge_finalized/finalized_metabric_sample_bridge.csv",
+            "python3 ml/pilot_sagemaker/build_metabric_external_eval_tables.py --finalized-bridge-csv results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/bridge_finalized/finalized_metabric_sample_bridge.csv",
+            "python3 ml/pilot_sagemaker/prepare_metabric_native_inputs.py  # gene_order CSV + metabric_pairs.parquet (see --max-metabric-samples / --max-drugs)",
         ]
 
     man_path = out_dir / "metabric_true_validation_pipeline_manifest.json"

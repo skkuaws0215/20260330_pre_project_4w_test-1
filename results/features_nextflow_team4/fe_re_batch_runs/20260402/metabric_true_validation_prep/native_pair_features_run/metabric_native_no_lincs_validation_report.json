@@ -1,0 +1,31 @@
+{
+  "parquet_vs_train_no_lincs_schema": {
+    "columns_identical_same_order": true,
+    "n_columns_metabric": 2120,
+    "n_columns_train_no_lincs": 2120
+  },
+  "lincs_audit": {
+    "lincs_feature_columns_in_metabric_parquet": [],
+    "n_lincs_columns_in_metabric_parquet": 0,
+    "train_full_schema_lincs_dropped": [
+      "lincs_cosine",
+      "lincs_pearson",
+      "lincs_spearman",
+      "lincs_reverse_score_top50",
+      "lincs_reverse_score_top100"
+    ]
+  },
+  "validation_json_summary": {
+    "metabric_vs_train_aligned_columns_match": true,
+    "lincs_columns_present_count": 0
+  },
+  "outputs": {
+    "features": "results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_pair_features_no_lincs.parquet",
+    "ensemble_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_ensemble_ranking_no_lincs.csv",
+    "manifest": "results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_feature_manifest_no_lincs.json",
+    "validation_detail": "results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_feature_validation_no_lincs.json"
+  },
+  "inference": {
+    "note": "GCN/MLP receive zero-filled LINCS slots via build_final_ensemble_ranking._feature_frame_for_model_cols when columns are absent."
+  }
+}

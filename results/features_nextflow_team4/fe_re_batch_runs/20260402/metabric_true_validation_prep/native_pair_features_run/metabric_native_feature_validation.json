@@ -1,0 +1,77 @@
+{
+  "gene_mapping": {
+    "n_reference_gene_columns": 17916,
+    "n_reference_columns_with_matrix_gene_match": 17252,
+    "n_metabric_matrix_rows": 19172,
+    "n_distinct_gene_symbols_in_order": 19172
+  },
+  "feature_column_order_matches_train": true,
+  "missing_columns_vs_raw_fe": [],
+  "extra_columns_vs_train_before_align": [],
+  "alignment": {
+    "missing_columns_filled_zero": [],
+    "extra_columns_dropped_from_output": [],
+    "n_missing_filled": 0,
+    "n_extra_dropped": 0
+  },
+  "pathway_coverage": {
+    "n_pathway_score_columns": 50,
+    "pathway_column_head": [
+      "pathway__HALLMARK_TNFA_SIGNALING_VIA_NFKB",
+      "pathway__HALLMARK_HYPOXIA",
+      "pathway__HALLMARK_CHOLESTEROL_HOMEOSTASIS",
+      "pathway__HALLMARK_MITOTIC_SPINDLE",
+      "pathway__HALLMARK_WNT_BETA_CATENIN_SIGNALING",
+      "pathway__HALLMARK_TGF_BETA_SIGNALING",
+      "pathway__HALLMARK_IL6_JAK_STAT3_SIGNALING",
+      "pathway__HALLMARK_DNA_REPAIR",
+      "pathway__HALLMARK_G2M_CHECKPOINT",
+      "pathway__HALLMARK_APOPTOSIS",
+      "pathway__HALLMARK_NOTCH_SIGNALING",
+      "pathway__HALLMARK_ADIPOGENESIS",
+      "pathway__HALLMARK_ESTROGEN_RESPONSE_EARLY",
+      "pathway__HALLMARK_ESTROGEN_RESPONSE_LATE",
+      "pathway__HALLMARK_ANDROGEN_RESPONSE"
+    ]
+  },
+  "pathway_columns_in_train_schema": 50,
+  "lincs_overlap": {
+    "n_sample_numeric_cols": 17916,
+    "n_lincs_drug_numeric_cols": 256,
+    "n_lincs_intersection_cols": 256,
+    "lincs_intersection_empty": false,
+    "lincs_intersection_head": [
+      "crispr__A1BG",
+      "crispr__A1CF",
+      "crispr__A2M",
+      "crispr__A2ML1",
+      "crispr__A3GALT2",
+      "crispr__A4GALT",
+      "crispr__A4GNT",
+      "crispr__AAAS",
+      "crispr__AACS",
+      "crispr__AADAC",
+      "crispr__AADACL2",
+      "crispr__AADACL3",
+      "crispr__AADACL4",
+      "crispr__AADAT",
+      "crispr__AAGAB",
+      "crispr__AAK1",
+      "crispr__AAMDC",
+      "crispr__AAMP",
+      "crispr__AANAT",
+      "crispr__AAR2",
+      "crispr__AARD",
+      "crispr__AARS1",
+      "crispr__AARS2",
+      "crispr__AARSD1",
+      "crispr__AASDH",
+      "crispr__AASDHPPT",
+      "crispr__AASS",
+      "crispr__AATF",
+      "crispr__AATK",
+      "crispr__ABAT"
+    ]
+  },
+  "transform_only_compliance": "Model scaler/encoding: not applied in this script; use checkpoint.joblib / checkpoint.pt when running inference. Cohort z-score here is FE-only (optional)."
+}
