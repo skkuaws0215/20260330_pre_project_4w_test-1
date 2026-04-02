@@ -316,6 +316,34 @@ PPTX의 LightGBM/XGB **SageMaker built-in** 등은 위 “학습·튜닝” 행�
   - `results/features_nextflow_team4/fe_re_batch_runs/20260331/sagemaker_final_three/final_model_summary.json`
 - GCN `evaluation_note`는 유지: SageMaker 지표는 row holdout, 대표 선정은 drug-group CV 기준.
 
+#### SageMaker 20260402 Dual Validation (holdout + CV)
+
+- 산출 경로: `results/features_nextflow_team4/fe_re_batch_runs/20260402/sagemaker_dual_validation/`
+- 생성 파일:
+  - `final_model_comparison.csv`
+  - `final_model_summary.json`
+  - `holdout/artifacts/{xgb,residualmlp,gcn}/metrics.json`
+  - `cv/artifacts/{xgb,residualmlp,gcn}/*_fold_metrics.csv`, `*_metrics.json`
+
+**Holdout (single split)**
+
+| family | model | job | RMSE | MAE | Spearman | NDCG@20 | Hit@20 |
+|------|------|------|------|-----|----------|---------|--------|
+| ML | XGBoost | `team4-final-xgb-20260331-1775114416` | 2.1036 | 1.5768 | 0.4701 | - | - |
+| DL | ResidualMLP | `team4-final-resmlp-1775114623` | 2.1069 | 1.5806 | 0.4621 | 0.8234 | 1.0000 |
+| Graph | GCN | `team4-final-gcn-1775114858` | 1.4987 | 1.0942 | 0.8422 | 0.9543 | 1.0000 |
+
+**CV (5-fold)**
+
+| family | model | validation_type | job | RMSE(mean) | MAE(mean) | Spearman(mean) | NDCG@20(mean) | Hit@20(mean) |
+|------|------|------------------|------|------------|-----------|----------------|---------------|--------------|
+| ML | XGBoost | row KFold | `team4-cv-xgb-20260402-1775115653` | 2.0703 | 1.5414 | 0.4731 | 0.8401 | 1.0000 |
+| DL | ResidualMLP | row KFold | `team4-cv-residualmlp-20260402-1775115890` | 2.0728 | 1.5371 | 0.4688 | 0.8401 | 1.0000 |
+| Graph | GCN | GroupKFold(by `canonical_drug_id`) | `team4-cv-gcn-group-20260402-1775116156` | 2.5793 | 2.0959 | 0.2301 | 0.7452 | 0.9931 |
+
+- validation_type은 비교표에서 `holdout` vs `cv`로 명시해 구분.
+- GCN은 holdout과 CV의 검증 정의가 다르므로(CV=drug-group), 행 간 직접 비교 시 주의.
+
 #### 다음 단계 (로컬 분석): 3모델 ensemble + ranking
 
 SageMaker 추가 실행 없이, 저장된 대표 모델 아티팩트의 예측값을 같은 pair 키(`sample_id`, `canonical_drug_id`)로 결합해 후속 랭킹을 만든다.

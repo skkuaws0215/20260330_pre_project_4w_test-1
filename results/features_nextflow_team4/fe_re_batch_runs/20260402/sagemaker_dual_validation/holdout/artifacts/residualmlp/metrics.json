@@ -1,0 +1,29 @@
+{
+  "model": "residual_mlp",
+  "validation_type": "Single row-level holdout (test_size=0.1)",
+  "evaluation_note": "Single random row split (test_size), same preprocessing as run_residual_mlp_cv_local per fold; not identical to 5-fold CV mean in residual_mlp_cv_summary.",
+  "rows_total": 14497,
+  "rows_train": 13047,
+  "rows_valid": 1450,
+  "n_features": 2118,
+  "inputs": {
+    "features": "s3://sagemaker-ap-northeast-2-666803869796/team4-final-residualmlp-train/data/final_residualmlp/1775114623/features.parquet",
+    "labels": "s3://sagemaker-ap-northeast-2-666803869796/team4-final-residualmlp-train/data/final_residualmlp/1775114623/labels.parquet"
+  },
+  "sagemaker_training_job": "team4-final-resmlp-1775114623",
+  "sagemaker_status": "Completed",
+  "final_eval": {
+    "rmse": 2.1068789958953857,
+    "mae": 1.5806329250335693,
+    "spearman": 0.46209992490297497,
+    "ndcg20": 0.8233611788692351,
+    "hit20": 1.0
+  },
+  "validation_fold_metrics_row": {
+    "RMSE": 2.1068789958953857,
+    "MAE": 1.5806329250335693,
+    "Spearman": 0.46209992490297497,
+    "NDCG@20": 0.8233611788692351,
+    "Hit@20": 1.0
+  }
+}

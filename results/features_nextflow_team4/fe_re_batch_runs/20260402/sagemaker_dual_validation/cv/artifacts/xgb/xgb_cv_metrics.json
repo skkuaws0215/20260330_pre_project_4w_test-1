@@ -1,0 +1,18 @@
+{
+  "model": "xgb",
+  "validation_type": "5-fold row KFold",
+  "rows_total": 14497,
+  "fold_metrics_file": "xgb_cv_fold_metrics.csv",
+  "summary": {
+    "RMSE_mean": 2.070253,
+    "RMSE_std": 0.042550738512979885,
+    "MAE_mean": 1.5414278000000001,
+    "MAE_std": 0.02050788415609962,
+    "Spearman_mean": 0.4730656,
+    "Spearman_std": 0.007909913668302583,
+    "NDCG@20_mean": 0.8400836,
+    "NDCG@20_std": 0.003572374985916214,
+    "Hit@20_mean": 1.0,
+    "Hit@20_std": 0.0
+  }
+}

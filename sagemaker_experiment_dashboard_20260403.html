@@ -33,7 +33,7 @@
     <h1>SageMaker 통합 실험 대시보드</h1>
     <p><strong>ML · DL · Graph</strong> 군별 대표(<strong>XGBoost · ResidualMLP · GCN</strong>)를 SageMaker에서 실행하고, 산출 지표·아티팩트·로그를 한곳에 모읍니다. <strong>최종 실행 단계</strong>이며 추가 탐색은 하지 않습니다. 로컬 CV는 선정 근거로만 유지합니다. 통합 산출 번들: <code>sagemaker_final_three/</code> (<strong>§2.5</strong>).</p>
     <p class="muted" style="margin-top:10px;font-size:0.88rem;">로컬 목차: <code>python3 serve_dashboards.py</code> 또는 <code>http://127.0.0.1:8000/sagemaker_experiment_dashboard_20260403.html</code></p>
-    <div class="badge">Snapshot · 20260403_v4 · final 3 jobs completed + local ensemble step</div>
+    <div class="badge">Snapshot · 20260403_v5 · final 3 jobs completed + local next steps</div>
     <a class="nav-btn" href="index.html">Index</a>
     <a class="nav-btn" href="dl_experiment_dashboard_20260331.html">DL 대시보드 (로컬 §0)</a>
     <a class="nav-btn" href="graph_experiment_dashboard_20260402.html">Graph 대시보드</a>
@@ -125,11 +125,40 @@ python3 ml/pilot_sagemaker/aggregate_final_representative_outputs.py --collect</
     </section>
 
     <section>
+      <h2>3.5) 20260402 Dual Validation (holdout / CV 분리)</h2>
+      <p class="muted" style="margin:0 0 10px;">산출 루트: <code>results/features_nextflow_team4/fe_re_batch_runs/20260402/sagemaker_dual_validation/</code>. 요청 기준에 맞춰 holdout과 CV를 분리 저장·비교합니다.</p>
+      <h3 style="font-size:1rem;margin:8px 0 8px;">Holdout (single split)</h3>
+      <table>
+        <tr><th>family</th><th>model</th><th>job</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th></tr>
+        <tr><td>ML</td><td>XGBoost</td><td><code>team4-final-xgb-20260331-1775114416</code></td><td>2.104</td><td>1.577</td><td>0.470</td><td class="tbd">—</td><td class="tbd">—</td></tr>
+        <tr><td>DL</td><td>ResidualMLP</td><td><code>team4-final-resmlp-1775114623</code></td><td>2.107</td><td>1.581</td><td>0.462</td><td>0.823</td><td>1.000</td></tr>
+        <tr><td>Graph</td><td>GCN</td><td><code>team4-final-gcn-1775114858</code></td><td>1.499</td><td>1.094</td><td>0.842</td><td>0.954</td><td>1.000</td></tr>
+      </table>
+      <h3 style="font-size:1rem;margin:14px 0 8px;">CV (5-fold)</h3>
+      <table>
+        <tr><th>family</th><th>model</th><th>validation_type</th><th>job</th><th>RMSE(mean)</th><th>MAE(mean)</th><th>Spearman(mean)</th><th>NDCG@20(mean)</th><th>Hit@20(mean)</th></tr>
+        <tr><td>ML</td><td>XGBoost</td><td>row KFold</td><td><code>team4-cv-xgb-20260402-1775115653</code></td><td>2.070</td><td>1.541</td><td>0.473</td><td>0.840</td><td>1.000</td></tr>
+        <tr><td>DL</td><td>ResidualMLP</td><td>row KFold</td><td><code>team4-cv-residualmlp-20260402-1775115890</code></td><td>2.073</td><td>1.537</td><td>0.469</td><td>0.840</td><td>1.000</td></tr>
+        <tr><td>Graph</td><td>GCN</td><td>GroupKFold(by drug)</td><td><code>team4-cv-gcn-group-20260402-1775116156</code></td><td>2.579</td><td>2.096</td><td>0.230</td><td>0.745</td><td>0.993</td></tr>
+      </table>
+      <p class="muted" style="margin:10px 0 0;">원본 파일: <code>final_model_comparison.csv</code>, <code>final_model_summary.json</code> 및 각 모델별 <code>metrics.json / fold_metrics.csv</code>.</p>
+    </section>
+
+    <section>
       <h2>4) 업데이트 방법 (팀 합의 후 고정)</h2>
       <ul class="muted">
         <li><strong>수동:</strong> Job 종료 후 CloudWatch/SageMaker 콘솔에서 지표를 확인하고, 이 HTML의 §3 표 셀을 직접 수정 후 커밋</li>
         <li><strong>반자동:</strong> <code>sagemaker_final_three/artifacts/*/metrics.json</code>을 채운 뒤 <code>aggregate_final_representative_outputs.py --collect</code>로 <code>final_model_comparison.csv</code> 갱신 후, 필요 시 이 HTML §3와 맞춤</li>
         <li><strong>공통:</strong> 인스턴스 타입·입력 채널·하이퍼파라미터는 팀 노션/README의 SageMaker 절과 맞출 것 (DL 대시보드 §0 체크리스트 참고)</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>4.5) 향후 단계 (로컬, SageMaker 미사용)</h2>
+      <ul class="muted">
+        <li><strong>Step 1 — Ensemble/Ranking 고정:</strong> <code>final_ensemble_ranking.csv</code> 기준으로 Top100 후보군 확정 (가중치: XGB 0.5 / ResidualMLP 0.3 / GCN 0.2)</li>
+        <li><strong>Step 2 — 후보 검증:</strong> Top100의 target/pathway 근거·중복 약물 편향 점검, 필요 시 규칙 기반 재정렬 (재학습 없음)</li>
+        <li><strong>Step 3 — 리포트 패키징:</strong> 최종 비교표(<code>final_model_comparison.csv</code>) + 앙상블 랭킹(<code>final_ensemble_ranking.csv</code>) + 해석 노트로 의사결정본 생성</li>
       </ul>
     </section>
 

@@ -1,0 +1,18 @@
+{
+  "model": "xgboost",
+  "training_mode": "train_valid_split",
+  "fixed_parameters": {
+    "xgb_max_depth": 4,
+    "xgb_learning_rate": 0.05,
+    "xgb_n_estimators": 400,
+    "xgb_subsample": 0.8,
+    "xgb_colsample_bytree": 0.8,
+    "seed": 42,
+    "exclude_lincs": "on"
+  },
+  "artifacts": {
+    "metrics": "metrics.json",
+    "feature_importance": "feature_importance.csv",
+    "model": "artifact.joblib"
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "run_date": "2026-04-02",
+  "scope": "SageMaker dual validation (holdout + CV) for XGBoost/ResidualMLP/GCN",
+  "validation_types": [
+    "holdout",
+    "cv"
+  ],
+  "notes": [
+    "Holdout uses single split metrics from each final training entry.",
+    "CV rows are separate SageMaker jobs per model.",
+    "GCN CV uses GroupKFold by canonical_drug_id."
+  ],
+  "comparison_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260402/sagemaker_dual_validation/final_model_comparison.csv",
+  "rows": [
+    {
+      "model_family": "ML",
+      "representative_model": "XGBoost",
+      "validation_type": "holdout",
+      "validation_detail": "Single row-level holdout (test_size=0.1; valid metrics)",
+      "sagemaker_training_job": "team4-final-xgb-20260331-1775114416",
+      "sagemaker_status": "Completed",
+      "RMSE": 2.1036432069881923,
+      "MAE": 1.576788738709502,
+      "Spearman": 0.4700722090554678,
+      "NDCG20": null,
+      "Hit20": null,
+      "evaluation_note": "Single holdout split (test_size); not the 5-fold CV mean in residual_mlp_cv_summary / xgb_tuned_cv_summary.",
+      "metrics_json": "results/features_nextflow_team4/fe_re_batch_runs/20260402/sagemaker_dual_validation/holdout/artifacts/xgb/metrics.json",
+      "fold_metrics_csv": ""
+    },
+    {
+      "model_family": "DL",
+      "representative_model": "ResidualMLP",
+      "validation_type": "holdout",
+      "validation_detail": "Single row-level holdout (test_size=0.1)",
+      "sagemaker_training_job": "team4-final-resmlp-1775114623",
+      "sagemaker_status": "Completed",
+      "RMSE": 2.1068789958953857,
+      "MAE": 1.5806329250335693,
+      "Spearman": 0.46209992490297497,
+      "NDCG20": 0.8233611788692351,
+      "Hit20": 1.0,
+      "evaluation_note": "Single random row split (test_size), same preprocessing as run_residual_mlp_cv_local per fold; not identical to 5-fold CV mean in residual_mlp_cv_summary.",
+      "metrics_json": "results/features_nextflow_team4/fe_re_batch_runs/20260402/sagemaker_dual_validation/holdout/artifacts/residualmlp/metrics.json",
+      "fold_metrics_csv": ""
+    },
+    {
+      "model_family": "Graph",
+      "representative_model": "GCN",
+      "validation_type": "holdout",
+      "validation_detail": "Single row-level holdout (test_size=0.1; not drug-group CV)",
+      "sagemaker_training_job": "team4-final-gcn-1775114858",
+      "sagemaker_status": "Completed",
+      "RMSE": 1.4986531734466553,
+      "MAE": 1.0941951274871826,
+      "Spearman": 0.8422256711820097,
+      "NDCG20": 0.9542641560709687,
+      "Hit20": 1.0,
+      "evaluation_note": "Metrics are on a single random row split (test_size) for early stopping and reporting; they are not drug-group CV means. Model selection and local comparison use graph_family_groupcv.",
+      "metrics_json": "results/features_nextflow_team4/fe_re_batch_runs/20260402/sagemaker_dual_validation/holdout/artifacts/gcn/metrics.json",
+      "fold_metrics_csv": ""
+    },
+    {
+      "model_family": "ML",
+      "representative_model": "XGBoost",
+      "validation_type": "cv",
+      "validation_detail": "5-fold row KFold",
+      "sagemaker_training_job": "team4-cv-xgb-20260402-1775115653",
+      "sagemaker_status": "Completed",
+      "RMSE": 2.070253,
+      "MAE": 1.5414278000000001,
+      "Spearman": 0.4730656,
+      "NDCG20": 0.8400836,
+      "Hit20": 1.0,
+      "evaluation_note": "5-fold row CV.",
+      "metrics_json": "results/features_nextflow_team4/fe_re_batch_runs/20260402/sagemaker_dual_validation/cv/artifacts/xgb/xgb_cv_metrics.json",
+      "fold_metrics_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260402/sagemaker_dual_validation/cv/artifacts/xgb/xgb_cv_fold_metrics.csv"
+    },
+    {
+      "model_family": "DL",
+      "representative_model": "ResidualMLP",
+      "validation_type": "cv",
+      "validation_detail": "5-fold row KFold",
+      "sagemaker_training_job": "team4-cv-residualmlp-20260402-1775115890",
+      "sagemaker_status": "Completed",
+      "RMSE": 2.0727645999999997,
+      "MAE": 1.5371458,
+      "Spearman": 0.4688052,
+      "NDCG20": 0.8401224,
+      "Hit20": 1.0,
+      "evaluation_note": "5-fold row CV.",
+      "metrics_json": "results/features_nextflow_team4/fe_re_batch_runs/20260402/sagemaker_dual_validation/cv/artifacts/residualmlp/residualmlp_cv_metrics.json",
+      "fold_metrics_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260402/sagemaker_dual_validation/cv/artifacts/residualmlp/residualmlp_cv_fold_metrics.csv"
+    },
+    {
+      "model_family": "Graph",
+      "representative_model": "GCN",
+      "validation_type": "cv",
+      "validation_detail": "5-fold GroupKFold(by canonical_drug_id)",
+      "sagemaker_training_job": "team4-cv-gcn-group-20260402-1775116156",
+      "sagemaker_status": "Completed",
+      "RMSE": 2.5793052000000003,
+      "MAE": 2.0958676,
+      "Spearman": 0.23011299999999996,
+      "NDCG20": 0.7452362000000001,
+      "Hit20": 0.9931034000000001,
+      "evaluation_note": "GCN CV is drug-group based.",
+      "metrics_json": "results/features_nextflow_team4/fe_re_batch_runs/20260402/sagemaker_dual_validation/cv/artifacts/gcn/gcn_groupcv_summary.json",
+      "fold_metrics_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260402/sagemaker_dual_validation/cv/artifacts/gcn/gcn_groupcv_fold_metrics.csv"
+    }
+  ]
+}

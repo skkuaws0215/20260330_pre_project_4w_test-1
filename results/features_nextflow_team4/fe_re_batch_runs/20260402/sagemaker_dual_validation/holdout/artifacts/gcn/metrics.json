@@ -1,0 +1,25 @@
+{
+  "model": "gcn",
+  "baseline_tag": "A (hidden 64, lr 1e-3, weight_decay 1e-5)",
+  "validation_type": "Single row-level holdout (test_size=0.1; not drug-group CV)",
+  "evaluation_note": "Metrics are on a single random row split (test_size) for early stopping and reporting; they are not drug-group CV means. Model selection and local comparison use graph_family_groupcv.",
+  "rows_total": 14497,
+  "rows_train": 13047,
+  "rows_valid": 1450,
+  "sagemaker_training_job": "team4-final-gcn-1775114858",
+  "sagemaker_status": "Completed",
+  "final_eval": {
+    "rmse": 1.4986531734466553,
+    "mae": 1.0941951274871826,
+    "spearman": 0.8422256711820097,
+    "ndcg20": 0.9542641560709687,
+    "hit20": 1.0
+  },
+  "validation_metrics": {
+    "RMSE": 1.4986531734466553,
+    "MAE": 1.0941951274871826,
+    "Spearman": 0.8422256711820097,
+    "NDCG@20": 0.9542641560709687,
+    "Hit@20": 1.0
+  }
+}
