@@ -498,11 +498,21 @@ Delta 요약:
 - **요약 JSON:** `recommended_graph_representative`(Spearman mean 최대), `temporary_graph_representative_candidate`, `representative_finalization_policy`, `gnn_transductive_caveat` 등.
 - **대시보드:** `graph_experiment_dashboard_20260401.html` (섹션 9), DL 대시보드 `dl_experiment_dashboard_20260331.html`에서 Graph 쪽 교차 링크.
 
-**다른 팀에 URL만 공유할 때 (저장소 `main` 기준, 푸시 후):**
+**대시보드 HTML을 다른 팀에 보여줄 때 (GitHub 링크만으로는 보통 “페이지”로 안 열립니다):**
 
-- Graph: `https://github.com/skkuaws0215/20260330_pre_project_4w_test-1/blob/main/graph_experiment_dashboard_20260401.html`
-- DL: `https://github.com/skkuaws0215/20260330_pre_project_4w_test-1/blob/main/dl_experiment_dashboard_20260331.html`
-- 브라우저에서 바로 렌더링(서브페이지 링크 포함)이 필요하면 HTMLPreview: `https://htmlpreview.github.io/?https://raw.githubusercontent.com/skkuaws0215/20260330_pre_project_4w_test-1/main/graph_experiment_dashboard_20260401.html` (동일 방식으로 `dl_experiment_dashboard_20260331.html`도 가능). 비공개 저장소면 팀원은 clone 후 로컬에서 HTML을 열거나 Pages 등으로 호스팅해야 합니다.
+- **`/blob/main/...html` 링크:** GitHub는 HTML을 **렌더링하지 않고** 소스(태그)로만 보여 줍니다. “안 열린다”처럼 느껴지는 경우가 많습니다.
+- **`htmlpreview.github.io`:** 회사망·브라우저·서비스 장애로 **자주 실패**합니다. 메인 안내 수단으로 쓰지 않는 것을 권장합니다.
+
+**실제로 화면으로 보게 하는 방법 (권장):**
+
+1. 저장소 clone 후 **저장소 루트**에서 로컬 웹 서버 실행:
+   - `python3 -m http.server 8765`
+   - 브라우저에서 `http://127.0.0.1:8765/graph_experiment_dashboard_20260401.html` 또는 `http://127.0.0.1:8765/dl_experiment_dashboard_20260331.html`
+2. 같은 Wi‑Fi의 동료에게는 본인 PC의 LAN IP로 공유: `http://<내_IP>:8765/...` (방화벽에서 포트 허용 필요).
+3. **macOS**에서만 빠르게: 루트에서 `open graph_experiment_dashboard_20260401.html` — 다만 `file://`로 열리므로 일부 브라우저에서 상대 링크 동작이 서버 방식보다 까다로울 수 있어, 가능하면 위 1번이 안전합니다.
+4. 조직에서 허용하면 **GitHub Pages**로 `main` 브랜치 `/` 또는 `/docs`에 HTML을 올리면 `https://<user>.github.io/<repo>/...` 형태로 공유할 수 있습니다.
+
+**참고용(소스·diff 확인):** `https://github.com/skkuaws0215/20260330_pre_project_4w_test-1/blob/main/graph_experiment_dashboard_20260401.html` · 동일 경로에 `dl_experiment_dashboard_20260331.html`.
 
 #### Pathway (Hallmark GMT) — `pathway__*` 보강 및 BlockWise 정식 블록 CV
 
