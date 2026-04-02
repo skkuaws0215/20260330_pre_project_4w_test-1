@@ -503,7 +503,7 @@ Delta 요약:
   - `ml_dl_graph_family_mean_groupcv.csv`, `graph_schema_groupcv.json`
 - **Proximity 보정:** drug-group 분할에서 train-only `y ~ a·z+b`가 불안정할 수 있어, 기울기 상한·비정상 RMSE 시 train 평균 예측 폴백 (`run_network_proximity_baseline.py`).
 - **요약 JSON:** `recommended_graph_representative`(Spearman mean 최대), `temporary_graph_representative_candidate`, `representative_finalization_policy`, `gnn_transductive_caveat` 등.
-- **대시보드:** `graph_experiment_dashboard_20260401.html` (섹션 8 drug-group CV, 표 하단 HTML 주석에 지표 정의), DL 대시보드 `dl_experiment_dashboard_20260331.html`에서 Graph 쪽 교차 링크.
+- **대시보드:** `graph_experiment_dashboard_20260401.html` (섹션 8 drug-group CV, 결과 표 아래 <strong>펼치기(details)</strong>에 지표 정의 표·요약), DL 대시보드 `dl_experiment_dashboard_20260331.html`에서 Graph 쪽 교차 링크.
 
 **대시보드 HTML이 “안 열릴” 때:** GitHub **`blob` URL**은 HTML을 **렌더하지 않습니다**. 다른 폴더에서 `python3 -m http.server`만 실행하면 **루트 HTML이 없어** 빈 화면·404가 납니다.
 
