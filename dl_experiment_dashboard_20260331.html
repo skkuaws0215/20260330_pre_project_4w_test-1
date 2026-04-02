@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DL Experiment Dashboard · 20260402_v2</title>
+  <title>DL Experiment Dashboard · 20260402_v3</title>
   <style>
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b1020; color: #e6edf7; }
     .hero { padding: 42px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); background: linear-gradient(120deg, #10223a, #1a3558); }
@@ -29,7 +29,7 @@
     <h1>DL Experiment Dashboard</h1>
     <p>ML / DL / Graph 각 군에서 대표 모델을 고르기 위한 단계별 기록. <strong>로컬 검증·문서화 단계는 완료</strong>로 보고, 다음은 <strong>SageMaker에서 군별 대표 3종 최종 실행</strong>입니다.</p>
     <p class="muted" style="margin-top:10px;font-size:0.88rem;">로컬: 저장소 루트에서 <code>python3 serve_dashboards.py</code> → 브라우저가 <code>index.html</code>을 엽니다. (반드시 루트에서 실행; 다른 폴더에서 <code>http.server</code>를 켜면 이 파일이 안 뜹니다.) GitHub Pages 사용 시 저장소 Settings → Pages → GitHub Actions 활성화 후 <code>https://&lt;user&gt;.github.io/&lt;repo&gt;/</code> 목차로 접속.</p>
-    <div class="badge">Snapshot · 20260402_v2 · 대표 3종 확정 → SageMaker</div>
+    <div class="badge">Snapshot · 20260402_v3 · GCN 미니튜닝 결론 반영</div>
     <a class="nav-btn" href="newfe_quality_dashboard_20260331.html">Back to New FE Quality Dashboard</a>
     <a class="nav-btn" href="graph_experiment_dashboard_20260402.html">Go to Graph Experiment Dashboard</a>
     <a class="nav-btn" href="sagemaker_experiment_dashboard_20260403.html">SageMaker 통합 대시보드 (20260403)</a>
@@ -39,7 +39,7 @@
     <section>
       <h2>0) 군별 대표 확정 · 최종 3모델 (SageMaker 이전)</h2>
       <p class="muted"><strong>확정 대표:</strong> ML <strong>XGBoost</strong> (tuned) · DL <strong>ResidualMLP</strong> · Graph <strong>GCN</strong>.</p>
-      <p class="muted" style="margin-top:10px;"><strong>Graph 정책 요약:</strong> Spearman mean 기준으로 <strong>drug-group CV</strong>에서는 <strong>GCN</strong>이 GraphSAGE보다 앞섭니다. Round1 <strong>행 단위 5-fold</strong>에서는 GraphSAGE가 Spearman 기준 잠정 1위였으나, 동일 약물이 train·valid에 동시에 올 수 있어 <strong>optimistic bias</strong> 가능성이 있어 <strong>temporary representative candidate</strong>로만 문서에 남기고, <strong>최종 Graph 군 대표는 group CV 결과를 반영해 GCN으로 확정</strong>합니다.</p>
+      <p class="muted" style="margin-top:10px;"><strong>Graph 정책 요약:</strong> Spearman mean 기준으로 <strong>drug-group CV</strong>에서는 <strong>GCN</strong>이 GraphSAGE보다 앞섭니다. Round1 <strong>행 단위 5-fold</strong>에서는 GraphSAGE가 Spearman 기준 잠정 1위였으나, 동일 약물이 train·valid에 동시에 올 수 있어 <strong>optimistic bias</strong> 가능성이 있어 <strong>temporary representative candidate</strong>로만 문서에 남기고, <strong>최종 Graph 군 대표는 group CV 결과를 반영해 GCN으로 확정</strong>합니다. <strong>GCN 경량 튜닝</strong>(동일 drug-group CV, hidden/lr/weight_decay 네 구성 A–D)을 돌린 결과, 1차 지표 Spearman mean은 구성 D가 소폭 우위였으나 베이스라인 A 대비 <strong>+0.01 미만</strong>이라 <strong>의미 있는 개선으로 보지 않음</strong> → <strong>SageMaker·문서상 GCN 하이퍼파라미터는 baseline A(64 / 1e-3 / 1e-5) 유지</strong>. 상세·표는 Graph 대시보드 §8.</p>
       <h3 style="font-size:1rem;margin:16px 0 8px;">최종 3모델 비교용 표 (지표는 각 군에서 채택한 검증 방식의 fold mean)</h3>
       <p class="muted" style="margin:0 0 8px;">ML/DL은 동일 <strong>행 단위 5-fold</strong> (<code>KFold(shuffle=True, random_state=42)</code>). Graph만 <strong><code>canonical_drug_id</code> GroupKFold 5-fold</strong>. 숫자를 행 간 직접 비교할 때는 검증 정의가 다름을 전제로 해석합니다.</p>
       <table>
@@ -67,7 +67,7 @@
         <tr>
           <td><strong>GCN</strong></td>
           <td><code>labels_B_graph.parquet</code> + 동일 pathway addon 피처 병합 · <code>drug_target_map_20260331.parquet</code> · disease genes · (선택) PPI</td>
-          <td><code>run_graph_gnn_cv.py --model gcn</code> 아키텍처·그래프 빌드 · <strong>최종 학습 시 CV 방식</strong>(group vs row)과 에폭·배치·lr 합의 · transductive GNN caveat 유지</td>
+          <td><code>run_graph_gnn_cv.py --model gcn</code> 아키텍처·그래프 빌드 · <strong>하이퍼파라미터는 미니튜닝 후에도 baseline A 유지</strong>(hidden 64, lr 1e-3, weight_decay 1e-5) · CV는 drug-group 5-fold · transductive GNN caveat 유지</td>
           <td>모델 가중치 · <code>graph_schema*.json</code>에 준하는 메타 · 검증 지표 로그</td>
         </tr>
       </table>
@@ -379,7 +379,7 @@
           <p><strong>ML·Graph와의 관계</strong></p>
           <ul>
             <li><strong>ML 군:</strong> 정렬·해석·운운 측면에서 <strong>XGBoost</strong>가 대표 후보로 자연스러움. DL 결과가 우세하다 해도 트리 기반은 벤치마크·SHAP 등으로 병행 가치가 큼.</li>
-            <li><strong>Graph 군:</strong> 로컬에서 Proximity / GraphSAGE / GCN 완료. <strong>대표는 drug-group CV 기준 GCN</strong>(§0, Graph 대시보드 §8). GraphSAGE는 Round1 row-CV temporary candidate만.</li>
+            <li><strong>Graph 군:</strong> 로컬에서 Proximity / GraphSAGE / GCN 완료. <strong>대표는 drug-group CV 기준 GCN</strong>(§0, Graph 대시보드 §8). GCN 미니튜닝(A–D) 후 <strong>baseline 하이퍼파라미터(A) 유지</strong>. GraphSAGE는 Round1 row-CV temporary candidate만.</li>
             <li><strong>의사결정 순서 (현재):</strong> 군별 대표 확정(§0) → SageMaker에서 3종 최종 학습·지표 정리 → 필요 시 동일 holdout/정책으로 챔피언 비교.</li>
           </ul>
         </div>

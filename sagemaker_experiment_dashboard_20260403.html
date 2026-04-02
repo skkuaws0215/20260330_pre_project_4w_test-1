@@ -59,6 +59,7 @@
         <tr><td>Graph</td><td>GCN</td><td>drug GroupKFold 5</td><td>2.551</td><td>2.070</td><td>0.254</td><td>0.758</td></tr>
       </table>
       <p class="muted" style="margin:10px 0 0;">Graph만 검증 정의가 다르므로 행 간 숫자는 DL 대시보드 <strong>§0</strong>에 적어 둔 대로 해석합니다. 로컬 상세: <code>dl_experiment_dashboard_20260331.html</code> 맨 위 §0.</p>
+      <p class="muted" style="margin:10px 0 0;"><strong>Graph GCN 하이퍼파라미터:</strong> 로컬에서 동일 drug-group CV로 미니튜닝(A–D)을 수행했으나 Spearman mean 기준 <strong>baseline A 대비 ≥0.01 개선이 없어</strong> SageMaker job에도 <strong>hidden 64, lr 1e-3, weight_decay 1e-5</strong>(구성 A)를 사용합니다. 근거 파일: <code>graph_baseline_round1/gcn_tuning_summary.json</code> — Graph 대시보드 §8.</p>
     </section>
 
     <section>
