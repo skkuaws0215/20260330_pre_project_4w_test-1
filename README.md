@@ -470,6 +470,20 @@ Delta 요약:
 - 대시보드: `dl_experiment_dashboard_20260331.html` → **7)**
 - 대시보드: `dl_experiment_dashboard_20260331.html` → **8)** 의사결정 참고 Agent 요약 의견 (DL 채택·제외·ML/Graph 관계 주석)
 
+#### Graph 군 Round1 — Network Proximity · GraphSAGE · GCN (동일 스키마·동일 `cv_fold_indices.json`)
+
+- 대시보드: `graph_experiment_dashboard_20260401.html`
+- **로컬 기본 경로(저장소 루트 기준):**
+  - 라벨: `results/features_nextflow_team4/fe_re_batch_runs/20260331/input_derived/labels_B_graph.parquet` (B `labels`와 동일 스키마, `final_pathway_addon` 피처와 inner join 시 **n=14497** = `cv_fold_indices.json`과 정합)
+  - 피처: `.../final_pathway_addon/pair_features_newfe_v2.parquet`
+  - drug–target: `.../input_refs/drug_target_map_20260331.parquet`
+- 공통 병합: `graph_baseline_data.load_merged_pair_frame`, 회귀 라벨 `label_regression`, CV는 `model_selection_stage1/cv_fold_indices.json`.
+- **Network Proximity:** `run_network_proximity_baseline.py` — **rule-based, non-sample-specific** drug-level z-score. 검증 폴드에서 **RMSE/MAE**는 train에서 적합한 `y ~ a·z+b`로 스케일 맞춘 예측으로 계산하고, **Spearman/NDCG/Hit**는 원시 z로 계산(`graph_schema.json`의 `proximity_calibration` 참고).
+- **GraphSAGE / GCN:** `run_graph_gnn_cv.py --model sage|gcn` → `graph_gnn_*_partial.csv`.
+- **병합:** `merge_graph_family_outputs.py` → `graph_family_comparison.csv`, `graph_family_summary.json`, 그리고 ML/DL 대표와 한 줄 비교용 **`ml_dl_graph_family_mean.csv`** (소스: `analysis_target_only/residual_mlp_cv/residual_mlp_cv_summary.json`의 XGBoost·ResidualMLP + Graph 대표).
+- `s3://` URI는 `s3fs` 설치·자격 증명이 있으면 그대로 사용 가능.
+- Python: `ml/pilot_sagemaker/requirements.txt` (`torch`, `s3fs`).
+
 #### Pathway (Hallmark GMT) — `pathway__*` 보강 및 BlockWise 정식 블록 CV
 
 - **GMT 파일:** `nextflow/refs/h.all.v7.5.symbols.gmt` (MSigDB Hallmark v7.5 symbols). `build_pair_features_newfe_v2.py`에 `--pathway-gmt`를 주지 않으면 `sample_pathway_features.parquet`에 `pathway__*` 점수 열이 **0개**로 남는다. 표현 행렬 열이 `crispr__TP53`처럼 접두어가 있어도 **열 이름 끝 심볼**과 GMT를 맞추도록 빌드 스크립트가 처리한다.

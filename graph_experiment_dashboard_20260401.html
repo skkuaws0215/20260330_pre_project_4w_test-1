@@ -58,8 +58,9 @@
       <h2>3) 입력/공정성 규칙</h2>
       <table>
         <tr><th>항목</th><th>설정</th></tr>
-        <tr><td>Feature</td><td><code>results/features_nextflow_team4/fe_re_batch_runs/20260331/final_pathway_addon/pair_features_newfe_v2.parquet</code> (고정)</td></tr>
-        <tr><td>Label</td><td>실 <code>labels.parquet</code> (고정)</td></tr>
+        <tr><td>Feature</td><td><code>results/.../final_pathway_addon/pair_features_newfe_v2.parquet</code> (고정)</td></tr>
+        <tr><td>Label</td><td>로컬 기본: <code>.../input_derived/labels_B_graph.parquet</code> (pathway_addon와 join 시 n=14497, CV 정합)</td></tr>
+        <tr><td>Drug–target</td><td>로컬 기본: <code>.../input_refs/drug_target_map_20260331.parquet</code></td></tr>
         <tr><td>Graph / Network</td><td>GNN: 동일 feature를 graph 입력으로 변환 (node / edge). Network baseline: PPI 등 고정 그래프에서 drug-target ↔ disease gene 거리·근접도 산출</td></tr>
         <tr><td>Split</td><td>동일 5-fold CV (<code>KFold(shuffle=True, random_state=42)</code>)</td></tr>
         <tr><td>금지사항</td><td>feature 재생성/랜덤 라벨/부분 샘플링 금지</td></tr>
@@ -75,22 +76,22 @@
           <td>1</td>
           <td><strong>Network Proximity</strong></td>
           <td>rule-based baseline</td>
-          <td>drug-target vs disease gene 네트워크 <strong>거리/근접도</strong>, 무작위 대조 대비 <strong>z-score</strong>; 학습 없음</td>
-          <td class="plan">예정</td>
+          <td>drug-target vs disease gene 네트워크 <strong>거리/근접도</strong>, 무작위 대조 대비 <strong>z-score</strong>; 학습 없음. <em>샘플별이 아니라 약물 단위 스코어를 모든 pair 행에 브로드캐스트</em> (rule-based, non-sample-specific graph baseline).</td>
+          <td class="ok">Round1 실행됨</td>
         </tr>
         <tr>
           <td>2</td>
           <td><strong>GraphSAGE</strong></td>
           <td>GNN primary baseline</td>
           <td>sample-aggregate; drug-gene graph + sample-side feature 결합 구조</td>
-          <td class="plan">예정</td>
+          <td class="ok">Round1 실행됨</td>
         </tr>
         <tr>
           <td>3</td>
           <td><strong>GCN</strong></td>
           <td>GNN secondary baseline</td>
           <td>기본 message passing; GraphSAGE와 동일 그래프/스플릿으로 비교</td>
-          <td class="plan">예정</td>
+          <td class="ok">Round1 실행됨</td>
         </tr>
       </table>
       <p class="muted" style="margin:12px 0 0;"><strong>주의:</strong> 초기에는 <strong>GAT / R-GCN(Hetero)</strong> 제외. GraphSAGE·GCN 결과 확인 후 필요 시 확장.</p>
@@ -121,8 +122,9 @@
       <h2>6) 산출물</h2>
       <table>
         <tr><th>파일</th><th>설명</th></tr>
-        <tr><td><code>graph_family_comparison.csv</code></td><td>위 3종(Network Proximity, GraphSAGE, GCN)의 fold별·평균 지표 비교 (RMSE, MAE, Spearman, NDCG@20, Hit@20, std)</td></tr>
-        <tr><td><code>graph_family_summary.json</code></td><td>Graph 군 <strong>대표 1종</strong> 선정 근거, ML/DL 대비 해석, (선택) 확장 여부(GAT/R-GCN) 메모(JSON)</td></tr>
+        <tr><td><code>graph_family_comparison.csv</code></td><td>위 3종의 <strong>fold 1~5 행</strong> + 각 모델별 <code>fold=mean</code>(5-fold 산술평균) + <code>fold=spearman_std</code>(fold 간 Spearman 표준편차). 대표 선정 시 <strong>Spearman mean</strong>을 1차 기준으로 사용.</td></tr>
+        <tr><td><code>graph_family_summary.json</code></td><td>모델별 mean/std 요약, <code>merge_graph_family_outputs.py</code>가 쓰는 <code>recommended_graph_representative</code>(Spearman mean 최대) 등</td></tr>
+        <tr><td><code>graph_gnn_sage_partial.csv</code> / <code>graph_gnn_gcn_partial.csv</code></td><td>GNN 단계별 산출; 최종 표는 <code>merge_graph_family_outputs.py</code>로 3종 병합</td></tr>
       </table>
     </section>
 
@@ -138,18 +140,22 @@
     </section>
 
     <section>
-      <h2>8) Round1 실행 (Network Proximity)</h2>
-      <p class="muted">스키마: node = drug, gene / edge = drug–target (PPI는 <code>--ppi-edges-uri</code>로 선택) / disease gene = <code>data/graph_baseline/disease_genes_common_v1.txt</code> 고정 집합. CV는 <code>model_selection_stage1/cv_fold_indices.json</code> 재사용.</p>
-      <pre style="background:rgba(0,0,0,0.35);padding:12px;border-radius:8px;overflow:auto;font-size:0.85rem;"><code>python3 ml/pilot_sagemaker/run_network_proximity_baseline.py \
-  --labels-uri s3://.../labels.parquet \
-  --features-uri results/.../final_pathway_addon/pair_features_newfe_v2.parquet \
-  --drug-target-uri s3://.../drug_target_map.parquet \
-  --cv-fold-json results/.../model_selection_stage1/cv_fold_indices.json</code></pre>
+      <h2>8) Round1 실행 순서 (Proximity → GNN → 병합)</h2>
+      <p class="muted">스키마: node = drug, gene / edge = drug–target (PPI는 <code>--ppi-edges-uri</code>로 선택) / disease gene = <code>data/graph_baseline/disease_genes_common_v1.txt</code> 고정. CV는 <code>model_selection_stage1/cv_fold_indices.json</code> 재사용. 라벨·피처 병합은 GNN과 동일하게 <code>graph_baseline_data.load_merged_pair_frame</code> 기준(행 수·순서 일치).</p>
+      <p class="muted">저장소 기본값: <code>labels_B_graph.parquet</code>, <code>drug_target_map_20260331.parquet</code>, pathway addon 피처, <code>cv_fold_indices.json</code> — <strong>추가 인자 없이</strong> 아래만 실행하면 됩니다. S3·다른 경로는 각 스크립트의 <code>--*-uri</code>로 덮어쓰기.</p>
+      <h3 style="font-size:1rem;margin:14px 0 6px;">(1) Network Proximity</h3>
+      <pre style="background:rgba(0,0,0,0.35);padding:12px;border-radius:8px;overflow:auto;font-size:0.85rem;"><code>python3 ml/pilot_sagemaker/run_network_proximity_baseline.py</code></pre>
+      <h3 style="font-size:1rem;margin:14px 0 6px;">(2) GraphSAGE · (3) GCN</h3>
+      <pre style="background:rgba(0,0,0,0.35);padding:12px;border-radius:8px;overflow:auto;font-size:0.85rem;"><code>python3 ml/pilot_sagemaker/run_graph_gnn_cv.py --model sage
+python3 ml/pilot_sagemaker/run_graph_gnn_cv.py --model gcn</code></pre>
+      <h3 style="font-size:1rem;margin:14px 0 6px;">(4) 병합 + ML/DL 대표와 한 표 (<code>ml_dl_graph_family_mean.csv</code>)</h3>
+      <pre style="background:rgba(0,0,0,0.35);padding:12px;border-radius:8px;overflow:auto;font-size:0.85rem;"><code>python3 ml/pilot_sagemaker/merge_graph_family_outputs.py</code></pre>
       <table style="margin-top:10px;">
         <tr><th>산출물</th><th>경로</th></tr>
-        <tr><td>스키마 메타</td><td><code>results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/graph_schema.json</code></td></tr>
-        <tr><td>fold 지표 + mean + Spearman std</td><td><code>.../graph_family_comparison.csv</code></td></tr>
-        <tr><td>요약</td><td><code>.../graph_family_summary.json</code></td></tr>
+        <tr><td>스키마 메타</td><td><code>results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/graph_schema.json</code> (Proximity 단계에서 생성)</td></tr>
+        <tr><td>3종 비교 CSV (병합 후)</td><td><code>.../graph_family_comparison.csv</code></td></tr>
+        <tr><td>요약 JSON (병합 후)</td><td><code>.../graph_family_summary.json</code> — <code>recommended_graph_representative</code></td></tr>
+        <tr><td>ML / DL / Graph 대표 mean 한 줄</td><td><code>.../ml_dl_graph_family_mean.csv</code></td></tr>
       </table>
     </section>
   </div>

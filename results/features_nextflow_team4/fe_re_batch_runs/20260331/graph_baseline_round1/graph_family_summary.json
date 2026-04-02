@@ -1,0 +1,36 @@
+{
+  "graph_family_comparison_csv": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/graph_family_comparison.csv",
+  "metrics_mean_5fold_by_model": {
+    "Network_Proximity": {
+      "RMSE": 2.5813296044350547,
+      "MAE": 1.9896868247141597,
+      "Spearman": 0.1116689143040008,
+      "NDCG@20": 0.706868836059995,
+      "Hit@20": 0.993103448275862
+    },
+    "GraphSAGE": {
+      "RMSE": 1.4198103570557847,
+      "MAE": 1.0270020961761477,
+      "Spearman": 0.8454477222281997,
+      "NDCG@20": 0.9514070062396676,
+      "Hit@20": 1.0
+    },
+    "GCN": {
+      "RMSE": 1.444340285283504,
+      "MAE": 1.053189039230347,
+      "Spearman": 0.835099526503841,
+      "NDCG@20": 0.9551719757538204,
+      "Hit@20": 1.0
+    }
+  },
+  "spearman_std_across_folds_by_model": {
+    "Network_Proximity": 0.0090284809213446,
+    "GraphSAGE": 0.005949440057142,
+    "GCN": 0.0082136493396959
+  },
+  "recommended_graph_representative": "GraphSAGE",
+  "selection_rule": "Highest Spearman mean (fold mean row); tie-break manually if needed.",
+  "notes": "Network_Proximity is rule-based and non-sample-specific (drug-level z-score broadcast to pairs). GNN rows use drug node embedding + scaled pair features per row.",
+  "ml_dl_graph_family_mean_csv": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/ml_dl_graph_family_mean.csv",
+  "ml_dl_summary_source": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/residual_mlp_cv/residual_mlp_cv_summary.json"
+}

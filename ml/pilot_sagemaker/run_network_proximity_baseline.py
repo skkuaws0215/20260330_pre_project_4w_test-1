@@ -11,12 +11,19 @@ from __future__ import annotations
 import argparse
 import json
 import random
+import sys
 from collections import deque
 from pathlib import Path
 from typing import Any
 
+_PKG = Path(__file__).resolve().parent
+if str(_PKG) not in sys.path:
+    sys.path.insert(0, str(_PKG))
+
 import numpy as np
 import pandas as pd
+
+from graph_baseline_data import load_cv_meta, load_drug_targets_dict, load_merged_pair_frame
 from sklearn.metrics import mean_absolute_error, mean_squared_error, ndcg_score
 
 INF = 10**9
@@ -27,7 +34,11 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Network proximity baseline with fixed CV folds.")
     p.add_argument(
         "--labels-uri",
-        default="s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/abc_inputs/20260330_abc_v1/B/labels.parquet",
+        default=str(
+            repo
+            / "results/features_nextflow_team4/fe_re_batch_runs/20260331/input_derived/labels_B_graph.parquet"
+        ),
+        help="Local labels (n=14497 when merged with pathway_addon pair features); override with s3:// if needed.",
     )
     p.add_argument(
         "--features-uri",
@@ -38,8 +49,11 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--drug-target-uri",
-        default="s3://drug-discovery-joe-raw-data-team4/results/features_nextflow_team4/input/20260331/drug_target_map.parquet",
-        help="Parquet with canonical_drug_id, target_gene_symbol (use s3://... for object storage).",
+        default=str(
+            repo
+            / "results/features_nextflow_team4/fe_re_batch_runs/20260331/input_refs/drug_target_map_20260331.parquet"
+        ),
+        help="Parquet with canonical_drug_id, target_gene_symbol (repo-local default; use s3:// if needed).",
     )
     p.add_argument(
         "--disease-genes-path",
@@ -280,28 +294,19 @@ def main() -> None:
     disease_raw = load_disease_genes(Path(args.disease_genes_path))
     disease_set = set(disease_raw)
 
-    labels = pd.read_parquet(args.labels_uri)
-    feats = pd.read_parquet(args.features_uri)
+    df_merged, _feat_cols = load_merged_pair_frame(
+        args.labels_uri,
+        args.features_uri,
+        args.sample_id_col,
+        args.drug_id_col,
+        args.target_col,
+    )
     key = [args.sample_id_col, args.drug_id_col]
-    df = labels[key + [args.target_col]].merge(feats, on=key, how="inner")
-    df = df[key + [args.target_col]].copy().sort_values(key).reset_index(drop=True)
+    df = df_merged[key + [args.target_col]].copy()
 
-    cv_meta = json.loads(Path(args.cv_fold_json).read_text(encoding="utf-8"))
-    if int(cv_meta["n_rows"]) != len(df):
-        raise SystemExit(
-            f"cv_fold_indices n_rows={cv_meta['n_rows']} != merged df rows={len(df)}. Check labels/features alignment."
-        )
+    cv_meta = load_cv_meta(Path(args.cv_fold_json), len(df))
 
-    dt = pd.read_parquet(args.drug_target_uri)
-    if args.drug_id_col not in dt.columns or args.target_gene_col not in dt.columns:
-        raise SystemExit(f"drug-target parquet needs {args.drug_id_col} and {args.target_gene_col}")
-    dt = dt[[args.drug_id_col, args.target_gene_col]].dropna()
-    dt[args.drug_id_col] = dt[args.drug_id_col].astype(str).str.strip()
-    dt[args.target_gene_col] = dt[args.target_gene_col].astype(str).str.strip().str.upper()
-
-    drug_targets: dict[str, set[str]] = {}
-    for did, grp in dt.groupby(args.drug_id_col):
-        drug_targets[str(did)] = {str(x).upper() for x in grp[args.target_gene_col] if str(x).strip()}
+    drug_targets = load_drug_targets_dict(args.drug_target_uri, args.drug_id_col, args.target_gene_col)
 
     ppi_pairs = try_load_ppi(args.ppi_edges_uri.strip())
     adj, genes_in_graph, _ = build_adjacency(drug_targets, disease_set, ppi_pairs)
@@ -328,9 +333,17 @@ def main() -> None:
         va_idx = np.array(fold_info["valid_indices"], dtype=int)
         tr_idx = np.array(fold_info["train_indices"], dtype=int)
         df_va = df.iloc[va_idx].reset_index(drop=True)
-        y_va = y[va_idx]
-        p_va = pred[va_idx]
-        m = fold_metrics(df_va, args.sample_id_col, y_va, p_va)
+        y_tr, p_tr = y[tr_idx], pred[tr_idx]
+        y_va, p_va = y[va_idx], pred[va_idx]
+        # Affine map raw drug z-scores to label scale using train fold only (Spearman invariant if slope > 0).
+        A = np.vstack([p_tr, np.ones(len(p_tr))]).T
+        slope, intercept = np.linalg.lstsq(A, y_tr, rcond=None)[0]
+        p_va_cal = slope * p_va + intercept
+        rmse = float(np.sqrt(mean_squared_error(y_va, p_va_cal)))
+        mae_v = float(mean_absolute_error(y_va, p_va_cal))
+        ndcg, hit = rank_metrics(df_va, args.sample_id_col, y_va, p_va)
+        sp = safe_spearman(y_va, p_va)
+        m = {"RMSE": rmse, "MAE": mae_v, "Spearman": sp, "NDCG@20": ndcg, "Hit@20": hit}
         spearmans.append(m["Spearman"])
         fold_rows.append({"model": "Network_Proximity", "fold": fold_info["fold"], **m})
 
@@ -373,6 +386,7 @@ def main() -> None:
         "n_rows_merged": len(df),
         "null_draws": args.null_draws,
         "null_seed": args.null_seed,
+        "proximity_calibration": "Per fold: OLS on train for RMSE/MAE on valid (a*raw_z+b). Spearman/NDCG/Hit use raw drug z-scores (label-scale affine can flip slope and distort ranks).",
     }
     schema_path = out_dir / "graph_schema.json"
     schema_path.write_text(json.dumps(schema, indent=2), encoding="utf-8")
@@ -383,7 +397,7 @@ def main() -> None:
         "spearman_std_across_folds": std_row["Spearman"],
         "graph_schema_path": str(schema_path),
         "comparison_csv": str(comp_path),
-        "notes": "Prediction is drug-level proximity z-score (same value for all rows sharing a drug). Phase-2: GraphSAGE/GCN on same schema.",
+        "notes": "Rule-based, non-sample-specific graph baseline: prediction is drug-level proximity z-score (same value for all pair rows sharing a drug). After GraphSAGE/GCN, run merge_graph_family_outputs.py for a single comparison table and representative selection.",
     }
     (out_dir / "graph_family_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
 
