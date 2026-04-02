@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import subprocess
+import sys
 import tarfile
 import tempfile
 import time
@@ -38,6 +39,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--output-prefix",
         default=f"s3://{TEAM_BUCKET}/results/features_nextflow_team4/sagemaker/final_xgb_20260331",
+    )
+    p.add_argument("--wait", action="store_true", help="Block until the training job completes.")
+    p.add_argument(
+        "--sync-to-final-three",
+        action="store_true",
+        help="After a successful job (requires --wait), download model.tar.gz and sync into sagemaker_final_three/artifacts/xgb/.",
     )
     return p.parse_args()
 
@@ -84,6 +91,8 @@ def _stage_data(
 
 def main() -> None:
     args = parse_args()
+    if args.sync_to_final_three and not args.wait:
+        raise SystemExit("--sync-to-final-three requires --wait")
     ts = int(time.time())
     staging_root = "team4-final-xgb-train"
     code_bucket = args.code_bucket or f"sagemaker-{args.region}-{args.sagemaker_account_id}"
@@ -129,17 +138,35 @@ def main() -> None:
             "xgb_colsample_bytree": "0.8",
         },
     )
-    est.fit(wait=False, job_name=job_name)
+    est.fit(wait=args.wait, job_name=job_name)
     print("submitted_job_name:", est.latest_training_job.name)
     print("source_s3:", source_s3)
     print("staged_features_s3:", features_s3)
     print("staged_labels_s3:", labels_s3)
     print("output_prefix:", args.output_prefix)
-    print(
-        "After the job completes: download model.tar.gz from the job output, then run\n"
-        "  python3 ml/pilot_sagemaker/sync_sagemaker_model_tar_to_final_three.py "
-        "--family xgb --model-tar /path/to/model.tar.gz"
-    )
+    if args.wait and args.sync_to_final_three:
+        md = est.model_data
+        if not md or not str(md).startswith("s3://"):
+            raise RuntimeError(f"Unexpected model_data after training: {md!r}")
+        subprocess.run(
+            [
+                sys.executable,
+                str(pilot_dir / "sagemaker_final_sync.py"),
+                "--family",
+                "xgb",
+                "--model-tar-s3",
+                str(md),
+                "--region",
+                args.region,
+            ],
+            check=True,
+        )
+    elif not args.wait:
+        print(
+            "After the job completes: download model.tar.gz from the job output, then run\n"
+            "  python3 ml/pilot_sagemaker/sync_sagemaker_model_tar_to_final_three.py "
+            "--family xgb --model-tar /path/to/model.tar.gz"
+        )
 
 
 if __name__ == "__main__":

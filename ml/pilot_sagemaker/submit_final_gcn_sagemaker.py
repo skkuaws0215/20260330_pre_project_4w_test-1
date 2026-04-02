@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import subprocess
+import sys
 import tarfile
 import tempfile
 import time
@@ -34,6 +35,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--output-prefix",
         default=f"s3://{TEAM_BUCKET}/results/features_nextflow_team4/sagemaker/final_gcn_20260331",
+    )
+    p.add_argument("--wait", action="store_true", help="Block until the training job completes.")
+    p.add_argument(
+        "--sync-to-final-three",
+        action="store_true",
+        help="After a successful job (requires --wait), download model.tar.gz and sync into sagemaker_final_three/artifacts/gcn/.",
     )
     return p.parse_args()
 
@@ -88,11 +95,14 @@ def _stage_triple(
 
 def main() -> None:
     args = parse_args()
+    if args.sync_to_final_three and not args.wait:
+        raise SystemExit("--sync-to-final-three requires --wait")
     ts = int(time.time())
     staging_root = "team4-final-gcn-train"
     code_bucket = args.code_bucket or f"sagemaker-{args.region}-{args.sagemaker_account_id}"
     pilot_dir = Path(__file__).resolve().parent
-    repo_root = pilot_dir.parents[2]
+    # pilot_dir = <repo>/ml/pilot_sagemaker → repo root is parents[1], not parents[2]
+    repo_root = pilot_dir.parents[1]
 
     source_s3 = _upload_source_tarball(pilot_dir, repo_root, code_bucket, args.region, staging_root, ts)
     fs, ls, ds = _stage_triple(
@@ -117,7 +127,7 @@ def main() -> None:
             "features_s3": fs,
             "drug_target_s3": ds,
             "disease_genes_path": "data/graph_baseline/disease_genes_common_v1.txt",
-            "ppi_edges_s3": "",
+            # Omit ppi_edges_s3 when unused: empty str becomes `--ppi_edges_s3` with no value → argparse error.
             "seed": "42",
             "test_size": "0.1",
             "hidden_dim": "64",
@@ -127,17 +137,35 @@ def main() -> None:
             "patience": "12",
         },
     )
-    est.fit(wait=False, job_name=job_name)
+    est.fit(wait=args.wait, job_name=job_name)
     print("submitted_job_name:", est.latest_training_job.name)
     print("source_s3:", source_s3)
     print("staged_features_s3:", fs)
     print("staged_labels_s3:", ls)
     print("staged_drug_target_s3:", ds)
     print("output_prefix:", args.output_prefix)
-    print(
-        "After job: aws s3 cp <output>/model.tar.gz /tmp/m.tar.gz && "
-        "python3 ml/pilot_sagemaker/sync_sagemaker_model_tar_to_final_three.py --family gcn --model-tar /tmp/m.tar.gz"
-    )
+    if args.wait and args.sync_to_final_three:
+        md = est.model_data
+        if not md or not str(md).startswith("s3://"):
+            raise RuntimeError(f"Unexpected model_data after training: {md!r}")
+        subprocess.run(
+            [
+                sys.executable,
+                str(pilot_dir / "sagemaker_final_sync.py"),
+                "--family",
+                "gcn",
+                "--model-tar-s3",
+                str(md),
+                "--region",
+                args.region,
+            ],
+            check=True,
+        )
+    elif not args.wait:
+        print(
+            "After job: aws s3 cp <output>/model.tar.gz /tmp/m.tar.gz && "
+            "python3 ml/pilot_sagemaker/sync_sagemaker_model_tar_to_final_three.py --family gcn --model-tar /tmp/m.tar.gz"
+        )
 
 
 if __name__ == "__main__":

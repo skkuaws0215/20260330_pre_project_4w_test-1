@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SageMaker 통합 실험 대시보드 · 20260403_v3</title>
+  <title>SageMaker 통합 실험 대시보드 · 20260403_v4</title>
   <style>
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0a0f18; color: #e6edf7; }
     .hero { padding: 42px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); background: linear-gradient(120deg, #152238, #1e3d52 45%, #1a4d3a); }
@@ -33,7 +33,7 @@
     <h1>SageMaker 통합 실험 대시보드</h1>
     <p><strong>ML · DL · Graph</strong> 군별 대표(<strong>XGBoost · ResidualMLP · GCN</strong>)를 SageMaker에서 실행하고, 산출 지표·아티팩트·로그를 한곳에 모읍니다. <strong>최종 실행 단계</strong>이며 추가 탐색은 하지 않습니다. 로컬 CV는 선정 근거로만 유지합니다. 통합 산출 번들: <code>sagemaker_final_three/</code> (<strong>§2.5</strong>).</p>
     <p class="muted" style="margin-top:10px;font-size:0.88rem;">로컬 목차: <code>python3 serve_dashboards.py</code> 또는 <code>http://127.0.0.1:8000/sagemaker_experiment_dashboard_20260403.html</code></p>
-    <div class="badge">Snapshot · 20260403_v3 · comparison CSV validation columns</div>
+    <div class="badge">Snapshot · 20260403_v4 · final 3 jobs completed + local ensemble step</div>
     <a class="nav-btn" href="index.html">Index</a>
     <a class="nav-btn" href="dl_experiment_dashboard_20260331.html">DL 대시보드 (로컬 §0)</a>
     <a class="nav-btn" href="graph_experiment_dashboard_20260402.html">Graph 대시보드</a>
@@ -69,6 +69,7 @@
         <tr><th>파일 / 경로</th><th>역할</th></tr>
         <tr><td><code>results/…/sagemaker_final_three/final_model_comparison.csv</code></td><td>모델군별 1행: <code>local_validation_type</code>·로컬 CV mean + <code>sagemaker_validation_type</code>·<code>sagemaker_evaluation_note</code>·잡·지표·URI. GCN 행은 row holdout이 drug-group CV mean과 직접 비교 불가 — <code>evaluation_note</code> 참고.</td></tr>
         <tr><td><code>results/…/sagemaker_final_three/final_model_summary.json</code></td><td>실행 원칙, 로컬 근거 JSON 경로, <code>artifacts/*</code>·<code>logs/</code> 위치, sidecar <code>metrics.json</code> 스키마</td></tr>
+        <tr><td><code>results/…/sagemaker_final_three/final_ensemble_ranking.csv</code></td><td>로컬 후속 분석(추가 학습 없음): XGB/ResidualMLP/GCN 예측 merge → weighted ensemble(<code>0.5/0.3/0.2</code>) → 전체 rank + Top100 플래그</td></tr>
         <tr><td><code>artifacts/xgb/</code> · <code>artifacts/residualmlp/</code> · <code>artifacts/gcn/</code></td><td>모델 아티팩트 + (선택) <code>metrics.json</code> — Training Job 산출물 복사·동기화</td></tr>
         <tr><td><code>logs/</code></td><td>CloudWatch 로그 링크 또는 저장한 텍스트</td></tr>
         <tr><td><code>sagemaker_final_three/README.txt</code></td><td>운영 안내</td></tr>
@@ -82,44 +83,45 @@ python3 ml/pilot_sagemaker/aggregate_final_representative_outputs.py --collect</
     </section>
 
     <section>
-      <h2>3) SageMaker 실행·지표 (채우기)</h2>
-      <p class="muted" style="margin:0 0 10px;">Training Job이 생성되면 아래 행에 <strong>job 이름</strong>, <strong>상태</strong>, <strong>지표 JSON/로그 S3 키</strong>, 필요 시 <strong>검증 fold mean</strong>을 기입합니다. 초기에는 <span class="tbd">TBD</span>로 둡니다.</p>
+      <h2>3) SageMaker 실행·지표 (최종 반영)</h2>
+      <p class="muted" style="margin:0 0 10px;">대표 3종 Training Job 완료 기준으로 <code>sagemaker_final_three/final_model_comparison.csv</code>와 동일 수치를 반영했습니다.</p>
       <table>
         <tr><th>family</th><th>representative</th><th>Training job / experiment</th><th>상태</th><th>지표 산출물 (S3 또는 로컬 경로)</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th></tr>
         <tr>
           <td>ML</td>
           <td>XGBoost</td>
-          <td class="tbd">TBD</td>
-          <td class="plan">대기</td>
-          <td class="tbd">예: s3://…/xgb/metrics.json</td>
-          <td class="tbd">—</td>
-          <td class="tbd">—</td>
-          <td class="tbd">—</td>
+          <td><code>team4-final-xgb-20260331-1775110781</code></td>
+          <td class="ok">Completed</td>
+          <td><code>sagemaker_final_three/artifacts/xgb/metrics.json</code></td>
+          <td>2.104</td>
+          <td>1.577</td>
+          <td>0.470</td>
           <td class="tbd">—</td>
         </tr>
         <tr>
           <td>DL</td>
           <td>ResidualMLP</td>
-          <td class="tbd">TBD</td>
-          <td class="plan">대기</td>
-          <td class="tbd">예: s3://…/resmlp/metrics.json</td>
-          <td class="tbd">—</td>
-          <td class="tbd">—</td>
-          <td class="tbd">—</td>
-          <td class="tbd">—</td>
+          <td><code>team4-final-resmlp-1775110990</code></td>
+          <td class="ok">Completed</td>
+          <td><code>sagemaker_final_three/artifacts/residualmlp/metrics.json</code></td>
+          <td>2.107</td>
+          <td>1.581</td>
+          <td>0.462</td>
+          <td>0.823</td>
         </tr>
         <tr>
           <td>Graph</td>
           <td>GCN</td>
-          <td class="tbd">TBD</td>
-          <td class="plan">대기</td>
-          <td class="tbd">예: s3://…/gcn/metrics.json</td>
-          <td class="tbd">—</td>
-          <td class="tbd">—</td>
-          <td class="tbd">—</td>
-          <td class="tbd">—</td>
+          <td><code>team4-final-gcn-1775111671</code></td>
+          <td class="ok">Completed</td>
+          <td><code>sagemaker_final_three/artifacts/gcn/metrics.json</code></td>
+          <td>1.499</td>
+          <td>1.094</td>
+          <td>0.842</td>
+          <td>0.954</td>
         </tr>
       </table>
+      <p class="muted" style="margin:10px 0 0;"><strong>주의:</strong> GCN 행은 row holdout 지표이며, 로컬 대표 선정 기준인 drug-group CV mean과 검증 정의가 다릅니다(비교표의 <code>sagemaker_evaluation_note</code> 유지).</p>
     </section>
 
     <section>

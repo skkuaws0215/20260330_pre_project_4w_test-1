@@ -7,23 +7,23 @@
   "rows_valid": 1450,
   "n_features": 2118,
   "inputs": {
-    "features": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260331/final_pathway_addon/pair_features_newfe_v2.parquet",
-    "labels": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260331/input_derived/labels_B_graph.parquet"
+    "features": "s3://sagemaker-ap-northeast-2-666803869796/team4-final-residualmlp-train/data/final_residualmlp/1775110990/features.parquet",
+    "labels": "s3://sagemaker-ap-northeast-2-666803869796/team4-final-residualmlp-train/data/final_residualmlp/1775110990/labels.parquet"
   },
-  "sagemaker_training_job": "local-smoke-resmlp",
+  "sagemaker_training_job": "team4-final-resmlp-1775110990",
   "sagemaker_status": "Completed",
   "final_eval": {
-    "rmse": 2.104746395609586,
-    "mae": 1.5760934352874756,
-    "spearman": 0.46716389918442375,
-    "ndcg20": 0.8231232665609187,
+    "rmse": 2.1068789958953857,
+    "mae": 1.5806329250335693,
+    "spearman": 0.46209992490297497,
+    "ndcg20": 0.8233611788692351,
     "hit20": 1.0
   },
   "validation_fold_metrics_row": {
-    "RMSE": 2.104746395609586,
-    "MAE": 1.5760934352874756,
-    "Spearman": 0.46716389918442375,
-    "NDCG@20": 0.8231232665609187,
+    "RMSE": 2.1068789958953857,
+    "MAE": 1.5806329250335693,
+    "Spearman": 0.46209992490297497,
+    "NDCG@20": 0.8233611788692351,
     "Hit@20": 1.0
   }
 }

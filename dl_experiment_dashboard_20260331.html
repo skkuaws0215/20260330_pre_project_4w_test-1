@@ -27,9 +27,9 @@
 <body>
   <div class="hero">
     <h1>DL Experiment Dashboard</h1>
-    <p>ML / DL / Graph 각 군에서 대표 모델을 고르기 위한 단계별 기록. <strong>로컬 검증·문서화 단계는 완료</strong>로 보고, 다음은 <strong>SageMaker에서 군별 대표 3종 최종 실행</strong>입니다.</p>
+    <p>ML / DL / Graph 각 군에서 대표 모델을 고르기 위한 단계별 기록. <strong>로컬 검증·문서화 + SageMaker 최종 3종 실행은 완료</strong>, 다음 단계는 <strong>로컬 post-analysis(ensemble + ranking)</strong>입니다.</p>
     <p class="muted" style="margin-top:10px;font-size:0.88rem;">로컬: 저장소 루트에서 <code>python3 serve_dashboards.py</code> → 브라우저가 <code>index.html</code>을 엽니다. (반드시 루트에서 실행; 다른 폴더에서 <code>http.server</code>를 켜면 이 파일이 안 뜹니다.) GitHub Pages 사용 시 저장소 Settings → Pages → GitHub Actions 활성화 후 <code>https://&lt;user&gt;.github.io/&lt;repo&gt;/</code> 목차로 접속.</p>
-    <div class="badge">Snapshot · 20260402_v4 · Graph GCN 정책(E 보류) 반영</div>
+    <div class="badge">Snapshot · 20260402_v5 · SageMaker 완료 + 로컬 ensemble 단계 반영</div>
     <a class="nav-btn" href="newfe_quality_dashboard_20260331.html">Back to New FE Quality Dashboard</a>
     <a class="nav-btn" href="graph_experiment_dashboard_20260402.html">Go to Graph Experiment Dashboard</a>
     <a class="nav-btn" href="sagemaker_experiment_dashboard_20260403.html">SageMaker 통합 대시보드 (20260403)</a>
@@ -40,6 +40,7 @@
       <h2>0) 군별 대표 확정 · 최종 3모델 (SageMaker 이전)</h2>
       <p class="muted"><strong>확정 대표:</strong> ML <strong>XGBoost</strong> (tuned) · DL <strong>ResidualMLP</strong> · Graph <strong>GCN</strong>.</p>
       <p class="muted" style="margin-top:10px;"><strong>Graph 정책 요약:</strong> <strong>Graph representative: GCN 유지.</strong> Spearman mean 기준 <strong>drug-group CV</strong>에서 GCN이 GraphSAGE보다 앞섬. Round1 <strong>행 단위 5-fold</strong>에서는 GraphSAGE가 잠정 1위였으나 <strong>optimistic bias</strong> 가능 → <strong>temporary candidate</strong>만 기록. <strong>GCN 경량 튜닝 완료</strong>(동일 drug-group CV, A–D): 내부 best는 <strong>D</strong>이나 A 대비 Spearman 약 <strong>+0.0054</strong> → 팀 기준 <strong>≥ +0.01</strong>에 <strong>미달</strong> → <strong>no meaningful improvement over baseline threshold</strong> → <strong>baseline GCN(A) retained</strong> as final graph-family representative. <strong>구성 E는 이번 단계 보류.</strong> 상세: Graph 대시보드 §8, <code>gcn_tuning_summary.json</code>.</p>
+      <p class="muted" style="margin-top:10px;"><strong>현재 단계(로컬):</strong> 대표 3종의 예측값을 동일 pair key(<code>sample_id</code>, <code>canonical_drug_id</code>)로 결합해 weighted ensemble(<code>XGB 0.5 / MLP 0.3 / GCN 0.2</code>) 및 ranking을 생성. 산출: <code>sagemaker_final_three/final_ensemble_ranking.csv</code> (Top100 플래그 포함).</p>
       <h3 style="font-size:1rem;margin:16px 0 8px;">최종 3모델 비교용 표 (지표는 각 군에서 채택한 검증 방식의 fold mean)</h3>
       <p class="muted" style="margin:0 0 8px;">ML/DL은 동일 <strong>행 단위 5-fold</strong> (<code>KFold(shuffle=True, random_state=42)</code>). Graph만 <strong><code>canonical_drug_id</code> GroupKFold 5-fold</strong>. 숫자를 행 간 직접 비교할 때는 검증 정의가 다름을 전제로 해석합니다.</p>
       <table>

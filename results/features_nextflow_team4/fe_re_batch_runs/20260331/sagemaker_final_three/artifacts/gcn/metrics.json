@@ -6,20 +6,20 @@
   "rows_total": 14497,
   "rows_train": 13047,
   "rows_valid": 1450,
-  "sagemaker_training_job": "local-smoke-gcn",
+  "sagemaker_training_job": "team4-final-gcn-1775111671",
   "sagemaker_status": "Completed",
   "final_eval": {
-    "rmse": 1.445439266109901,
-    "mae": 1.0596996545791626,
-    "spearman": 0.8507270324197764,
-    "ndcg20": 0.9629064622749846,
+    "rmse": 1.4986531734466553,
+    "mae": 1.0941951274871826,
+    "spearman": 0.8422256711820097,
+    "ndcg20": 0.9542641560709687,
     "hit20": 1.0
   },
   "validation_metrics": {
-    "RMSE": 1.445439266109901,
-    "MAE": 1.0596996545791626,
-    "Spearman": 0.8507270324197764,
-    "NDCG@20": 0.9629064622749846,
+    "RMSE": 1.4986531734466553,
+    "MAE": 1.0941951274871826,
+    "Spearman": 0.8422256711820097,
+    "NDCG@20": 0.9542641560709687,
     "Hit@20": 1.0
   }
 }
