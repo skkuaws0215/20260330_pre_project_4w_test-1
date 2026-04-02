@@ -33,7 +33,7 @@
     <h1>Graph Experiment Dashboard</h1>
     <p><strong>Graph 군</strong>은 GNN(학습 기반)만이 아니라, PPI/유전자 네트워크 상의 <strong>거리·근접도(규칙 기반)</strong> 접근도 포함합니다. <strong>Graph 대표 모델: GCN 유지.</strong> Round1 행 단위 CV에서는 GraphSAGE가 Spearman 상위였으나 <strong>temporary candidate</strong>로만 기록 — 최종 확정은 group CV까지 본 뒤 <strong>GCN</strong>. <strong>GCN 경량 튜닝</strong>(A–D, 동일 drug-group CV) <strong>완료</strong>: 그리드 내 Spearman mean 최고는 <strong>구성 D</strong>이나, baseline A 대비 개선은 약 <strong>+0.0054</strong>로 팀 기준(<strong>≥ +0.01</strong>)에 <strong>미달</strong> → <strong>의미 있는 개선으로 보지 않음</strong> → <strong>baseline GCN(A)을 최종 Graph 군 대표 설정으로 유지</strong>. <strong>구성 E</strong>(96 / 5e-4 / 5e-5)는 <strong>이번 단계에서 보류</strong>. 다음: <strong>SageMaker</strong>에서 GCN 최종 실행(DL 대시보드 §0과 함께 3종). 요약 JSON: <code>gcn_tuning_summary.json</code>.</p>
     <p class="muted" style="margin-top:10px;font-size:0.88rem;">로컬: 저장소 루트에서 <code>python3 serve_dashboards.py</code> 후 목차 또는 이 파일 URL로 접속. GitHub Pages는 Actions 배포 + Settings에서 Pages 소스 지정 후 팀에 URL 공유.</p>
-    <div class="badge">Snapshot · 20260402_v8 · §8 GCN 미니튜닝 결론(E 보류) + 지표 표(펼치기)</div>
+    <div class="badge">Snapshot · 20260402_v8 · §8 GCN 튜닝 표 열 주석(details) + 지표 정의(펼치기)</div>
     <a class="nav-btn" href="dl_experiment_dashboard_20260331.html">Go to DL Experiment Dashboard</a>
     <a class="nav-btn" href="newfe_quality_dashboard_20260331.html">Back to New FE Quality Dashboard</a>
     <a class="nav-btn" href="sagemaker_experiment_dashboard_20260403.html">SageMaker 통합 대시보드 (20260403)</a>
@@ -183,6 +183,20 @@ python3 ml/pilot_sagemaker/run_graph_gnn_cv.py --model gcn</code></pre>
       <p class="muted" style="margin:10px 0 0;font-size:0.88rem;">상단 GCN 행은 <strong>3종 병합 group CV</strong> 산출이며, 기본 하이퍼파라미터는 튜닝 그리드의 <strong>구성 A</strong>(hidden 64, lr 1e-3, weight_decay 1e-5)와 같은 운영 baseline입니다.</p>
       <h3 style="font-size:1rem;margin:18px 0 8px;">GCN 경량 하이퍼파라미터 튜닝 (동일 drug-group CV)</h3>
       <p class="muted" style="margin:0 0 10px;">동일 <code>cv_fold_indices_drug_group.json</code>·동일 <code>run_graph_gnn_cv.py --model gcn</code>로 hidden_dim·learning rate·weight_decay만 바꾼 소규모 그리드. 1차 지표: <strong>Spearman mean</strong>. 팀 규칙: baseline <strong>A</strong> 대비 Spearman mean <strong>≥ +0.01</strong>일 때만 “의미 있는 개선”으로 채택.</p>
+      <details class="metric-fold" style="margin:0 0 12px;">
+        <summary>주석: GCN 튜닝 표 각 열의 의미 — 클릭하여 펼치기</summary>
+        <p class="muted" style="margin:10px 0 8px;font-size:0.88rem;">아래는 이 표의 <strong>헤더 한 줄</strong>에 대응하는 정의입니다. 나머지 학습 설정(에폭 상한·조기 종료·배치·옵티마이저 종류 등)은 구성 간 <strong>동일</strong>하게 두고, 표에 적힌 세 가지만 바꿉니다.</p>
+        <table>
+          <tr><th>열</th><th>의미</th></tr>
+          <tr><td><code>config</code></td><td>튜닝 그리드 식별자. <strong>A</strong>는 문서·운영상의 베이스라인(기존 group CV GCN과 동일 스케일의 하이퍼파라미터); B·C·D는 비교용 변형.</td></tr>
+          <tr><td><code>hidden</code></td><td>GCN의 <strong>은닉 차원</strong> (<code>hidden_dim</code>). 메시지 패싱·임베딩 폭이 넓을수록 표현력은 커질 수 있으나 데이터·폴드에 따라 과적합·불안정이 생길 수 있음.</td></tr>
+          <tr><td><code>lr</code></td><td><strong>학습률</strong> (learning rate). 한 스텝에서 가중치를 얼마나 크게 갱신할지 결정; 너무 크면 발산·불안정, 너무 작으면 수렴이 더뎌질 수 있음.</td></tr>
+          <tr><td><code>weight_decay</code></td><td><strong>L2 가중 감쇠</strong> (weight decay). 클수록 가중치 크기를 더 강하게 줄여 <strong>정규화</strong> 효과; 과적합 완화와의 트레이드오프가 있음.</td></tr>
+          <tr><td><code>Spearman mean</code></td><td>drug-group CV <strong>5개 검증 폴드</strong> 각각에서 계산한 <strong>Spearman 순위 상관</strong>의 <strong>산술평균</strong>. 본 튜닝에서 <strong>1차 비교 지표</strong>(클수록 좋음). 조기 종료는 폴드별 검증 MSE 기준이므로, 이 값과 최적화 목표는 완전히 같지 않음.</td></tr>
+          <tr><td><code>Spearman std (folds)</code></td><td>위 5개 폴드 Spearman 값의 <strong>표준편차</strong>. 폴드 간 들쭉날쭉함을 나타내며, <strong>작을수록 안정적</strong>인 경향으로 해석(단, 평균과 함께 봐야 함).</td></tr>
+          <tr><td><code>비고</code></td><td>수치 열이 아니라 <strong>해당 행 해석용 메모</strong>(운영 채택 여부, 그리드 내 상대 순위, 팀 임계 규칙과의 관계 등).</td></tr>
+        </table>
+      </details>
       <table>
         <tr><th>config</th><th>hidden</th><th>lr</th><th>weight_decay</th><th>Spearman mean</th><th>Spearman std (folds)</th><th>비고</th></tr>
         <tr><td>A (baseline)</td><td>64</td><td>1e-3</td><td>1e-5</td><td>0.254</td><td>0.103</td><td>기존 운영·SageMaker 기준</td></tr>
@@ -191,7 +205,7 @@ python3 ml/pilot_sagemaker/run_graph_gnn_cv.py --model gcn</code></pre>
         <tr><td>D</td><td>64</td><td>1e-3</td><td>1e-4</td><td>0.259</td><td>0.103</td><td><strong>그리드 내 Spearman mean 최고</strong> · A 대비 약 <strong>+0.0054</strong> (&lt; 0.01)</td></tr>
       </table>
       <p class="muted" style="margin:10px 0 0;"><strong>결론:</strong> <strong>Graph representative는 GCN 유지.</strong> 내부 best는 D이나 baseline A 대비 Spearman 개선이 <strong>+0.0054</strong>로 팀 기준(<strong>≥ +0.01</strong>)에 미달 → <strong>의미 있는 개선 아님</strong> → <strong>baseline GCN(A)을 최종 Graph 군 대표 설정으로 유지.</strong> <strong>구성 E</strong>(hidden 96, lr 5e-4, weight_decay 5e-5)는 <strong>이번 단계에서 실행하지 않고 보류.</strong> 원시 수치·정책 필드: <code>results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/gcn_tuning_comparison.csv</code>, <code>gcn_tuning_summary.json</code>.</p>
-      <p class="muted" style="margin:10px 0 0;font-size:0.9rem;">위 <strong>3종 표·튜닝 표</strong>의 열 의미는 <strong>아래 제목을 클릭</strong>하면 펼쳐지는 <strong>평가 지표 정의</strong>로 공유·논의할 수 있습니다.</p>
+      <p class="muted" style="margin:10px 0 0;font-size:0.9rem;">튜닝 표 전용 열 정의는 위 <strong>「주석: GCN 튜닝 표 각 열의 의미」</strong>를 펼치면 됩니다. 3종 group CV 표와 공통 지표(Spearman 등)는 <strong>아래 제목을 클릭</strong>한 <strong>평가 지표 정의</strong>에서 함께 다룹니다.</p>
       <details class="metric-fold">
         <summary>평가 지표 정의 (위 표 열 해석) — 클릭하여 펼치기 · 다시 클릭하여 접기</summary>
         <p class="muted" style="margin:0 0 10px;font-size:0.88rem;">원래 별도 절이던 지표 정의를 §8 결과 바로 아래에 두었습니다. 회의·리뷰 시 이 블록만 열어 화면 공유하면 됩니다.</p>
