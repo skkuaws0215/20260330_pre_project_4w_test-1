@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Graph Experiment Dashboard · 20260402_v1</title>
+  <title>Graph Experiment Dashboard · 20260402_v2</title>
   <style>
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b1020; color: #e6edf7; }
     .hero { padding: 42px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); background: linear-gradient(120deg, #1f223f, #2d3f7a); }
@@ -21,13 +21,14 @@
     .ok { color: #42d59f; font-weight: 600; }
     .plan { color: #f7c266; font-weight: 600; }
     code { background: rgba(255,255,255,0.08); border-radius: 6px; padding: 2px 6px; }
+    .best { color: #ff6b6b; font-weight: 700; }
   </style>
 </head>
 <body>
   <div class="hero">
     <h1>Graph Experiment Dashboard</h1>
     <p><strong>Graph 군</strong>은 GNN(학습 기반)만이 아니라, PPI/유전자 네트워크 상의 <strong>거리·근접도(규칙 기반)</strong> 접근도 포함합니다. 학습형과 비학습형을 동일 지표로 비교해 대표 후보를 고릅니다.</p>
-    <div class="badge">Snapshot · 20260402_v1</div>
+    <div class="badge">Snapshot · 20260402_v2 · drug-group CV 반영</div>
     <a class="nav-btn" href="dl_experiment_dashboard_20260331.html">Go to DL Experiment Dashboard</a>
     <a class="nav-btn" href="newfe_quality_dashboard_20260331.html">Back to New FE Quality Dashboard</a>
   </div>
@@ -62,7 +63,8 @@
         <tr><td>Label</td><td>로컬 기본: <code>.../input_derived/labels_B_graph.parquet</code> (pathway_addon와 join 시 n=14497, CV 정합)</td></tr>
         <tr><td>Drug–target</td><td>로컬 기본: <code>.../input_refs/drug_target_map_20260331.parquet</code></td></tr>
         <tr><td>Graph / Network</td><td>GNN: 동일 feature를 graph 입력으로 변환 (node / edge). Network baseline: PPI 등 고정 그래프에서 drug-target ↔ disease gene 거리·근접도 산출</td></tr>
-        <tr><td>Split</td><td>동일 5-fold CV (<code>KFold(shuffle=True, random_state=42)</code>)</td></tr>
+        <tr><td>Split (Round1)</td><td>행 단위 5-fold <code>KFold(shuffle=True, random_state=42)</code> — <code>model_selection_stage1/cv_fold_indices.json</code>. 동일 <code>canonical_drug_id</code>가 train·valid에 동시에 등장할 수 있음.</td></tr>
+        <tr><td>Split (stricter)</td><td><strong>Drug-group 5-fold</strong> <code>GroupKFold(n_splits=5, shuffle=True, random_state=42)</code> by <code>canonical_drug_id</code> — 한 폴드에서 약물이 train·valid에 동시에 나오지 않음. 산출: <code>cv_fold_indices_drug_group.json</code>, <code>graph_family_groupcv_*</code>.</td></tr>
         <tr><td>금지사항</td><td>feature 재생성/랜덤 라벨/부분 샘플링 금지</td></tr>
       </table>
     </section>
@@ -84,7 +86,7 @@
           <td><strong>GraphSAGE</strong></td>
           <td>GNN primary baseline</td>
           <td>sample-aggregate; drug-gene graph + sample-side feature 결합 구조</td>
-          <td class="ok">Round1 실행됨</td>
+          <td class="ok">Round1 실행됨 · Round1에서 Spearman 기준 <strong>temporary graph representative candidate</strong> (행 단위 CV·공유 drug node로 optimistic bias 가능 → group CV로 확정 보류)</td>
         </tr>
         <tr>
           <td>3</td>
@@ -125,15 +127,21 @@
         <tr><td><code>graph_family_comparison.csv</code></td><td>위 3종의 <strong>fold 1~5 행</strong> + 각 모델별 <code>fold=mean</code>(5-fold 산술평균) + <code>fold=spearman_std</code>(fold 간 Spearman 표준편차). 대표 선정 시 <strong>Spearman mean</strong>을 1차 기준으로 사용.</td></tr>
         <tr><td><code>graph_family_summary.json</code></td><td>모델별 mean/std 요약, <code>merge_graph_family_outputs.py</code>가 쓰는 <code>recommended_graph_representative</code>(Spearman mean 최대) 등</td></tr>
         <tr><td><code>graph_gnn_sage_partial.csv</code> / <code>graph_gnn_gcn_partial.csv</code></td><td>GNN 단계별 산출; 최종 표는 <code>merge_graph_family_outputs.py</code>로 3종 병합</td></tr>
+        <tr><td><code>cv_fold_indices_drug_group.json</code></td><td>Drug-group 5-fold 인덱스 (<code>build_cv_fold_indices_drug_group.py</code>)</td></tr>
+        <tr><td><code>graph_family_groupcv_comparison.csv</code></td><td>동일 스키마·동일 지표로 Proximity / GraphSAGE / GCN 재평가 (group CV)</td></tr>
+        <tr><td><code>graph_family_groupcv_summary.json</code></td><td>group CV 요약, <code>recommended_graph_representative</code>, temporary candidate·정책·caveat 필드</td></tr>
+        <tr><td><code>graph_gnn_*_groupcv_partial.csv</code></td><td>group CV용 GNN partial</td></tr>
+        <tr><td><code>ml_dl_graph_family_mean_groupcv.csv</code></td><td>ML/DL CV mean + group CV에서 고른 Graph 대표 한 줄 비교</td></tr>
+        <tr><td><code>graph_schema_groupcv.json</code></td><td>group CV 실행 시 Proximity 단계에서 기록한 스키마 메타</td></tr>
       </table>
     </section>
 
     <section>
       <h2>7) 다음 액션</h2>
       <ul class="muted">
-        <li>(1) Network Proximity 로컬 계산 → 동일 5-fold CV로 지표 산출</li>
-        <li>(2) GraphSAGE → (3) GCN 순으로 동일 조건 실행</li>
-        <li><code>graph_family_comparison.csv</code>, <code>graph_family_summary.json</code> 작성 후 Graph 군 대표 1종 확정</li>
+        <li>Round1: <code>graph_family_comparison.csv</code> / <code>graph_family_summary.json</code> 완료</li>
+        <li>Stricter: drug-group CV로 과대평가 여부 점검 — <code>graph_family_groupcv_*</code> 완료</li>
+        <li><strong>대표 확정 정책:</strong> Round1의 GraphSAGE는 <strong>temporary candidate</strong>만 유지. Graph 군 대표는 group CV에서도 경쟁력이 있을 때 확정(<code>graph_family_groupcv_summary.json</code>의 <code>representative_finalization_policy</code> 참고).</li>
         <li>ML/DL 스코어와 대조해 graph 접근의 추가 가치 판단</li>
         <li>이후 ML(XGBoost) / DL(ResidualMLP) / Graph 대표를 동일 조건으로 SageMaker 최종 비교</li>
       </ul>
@@ -157,6 +165,22 @@ python3 ml/pilot_sagemaker/run_graph_gnn_cv.py --model gcn</code></pre>
         <tr><td>요약 JSON (병합 후)</td><td><code>.../graph_family_summary.json</code> — <code>recommended_graph_representative</code></td></tr>
         <tr><td>ML / DL / Graph 대표 mean 한 줄</td><td><code>.../ml_dl_graph_family_mean.csv</code></td></tr>
       </table>
+    </section>
+
+    <section>
+      <h2>9) Drug-group CV (stricter validation)</h2>
+      <p class="muted" style="margin:0 0 10px;">목적: 행 단위 KFold + GNN의 공유 drug node 표현 때문에 생길 수 있는 <strong>optimistic bias</strong>를 줄이기 위해, <code>canonical_drug_id</code> 기준으로 train·valid를 분리한 뒤 동일 3종을 재평가합니다. Network Proximity는 폴드별 train에서 <code>y ~ a·z+b</code> 보정 후 RMSE/MAE를 계산하며, 비정상 보정 시 train 평균 예측으로 폴백합니다.</p>
+      <h3 style="font-size:1rem;margin:14px 0 6px;">일괄 파이프라인</h3>
+      <pre style="background:rgba(0,0,0,0.35);padding:12px;border-radius:8px;overflow:auto;font-size:0.85rem;"><code>python3 ml/pilot_sagemaker/run_graph_groupcv_pipeline.py</code></pre>
+      <p class="muted" style="margin:8px 0 10px;"><code>--skip-build-cv</code>로 기존 <code>cv_fold_indices_drug_group.json</code>만 재사용 가능. Proximity만 다시 돌린 뒤 병합만 하려면 <code>run_network_proximity_baseline.py</code>에 동일 <code>--cv-fold-json</code>·<code>--comparison-csv graph_family_groupcv_comparison.csv</code>·<code>--schema-json graph_schema_groupcv.json</code>·<code>--omit-summary-json</code> 후 <code>merge_graph_family_outputs.py --preset groupcv</code>.</p>
+      <h3 style="font-size:1rem;margin:14px 0 6px;">현재 스냅샷 — 5-fold mean (group CV)</h3>
+      <table>
+        <tr><th>model</th><th>RMSE</th><th>MAE</th><th>Spearman</th><th>NDCG@20</th><th>Hit@20</th><th>Spearman std (folds)</th></tr>
+        <tr><td>Network_Proximity</td><td>2.583</td><td>1.993</td><td>0.111</td><td>0.707</td><td>0.966</td><td>0.068</td></tr>
+        <tr><td>GraphSAGE</td><td>2.680</td><td>2.197</td><td>0.243</td><td>0.750</td><td>1.000</td><td>0.062</td></tr>
+        <tr><td>GCN</td><td>2.551</td><td>2.070</td><td><span class="best">0.254</span></td><td><span class="best">0.758</span></td><td>0.993</td><td>0.103</td></tr>
+      </table>
+      <p class="muted" style="margin:10px 0 0;"><strong>권장 대표(동일 규칙: Spearman mean 최대):</strong> 이 스냅샷에서는 <strong>GCN</strong>. JSON의 <code>temporary_graph_representative_candidate</code>는 여전히 Round1 기준 <strong>GraphSAGE</strong>를 가리키며, 최종 운영 대표는 정책에 따라 group CV 결과를 우선합니다.</p>
     </section>
   </div>
 </body>

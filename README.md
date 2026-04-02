@@ -481,8 +481,28 @@ Delta 요약:
 - **Network Proximity:** `run_network_proximity_baseline.py` — **rule-based, non-sample-specific** drug-level z-score. 검증 폴드에서 **RMSE/MAE**는 train에서 적합한 `y ~ a·z+b`로 스케일 맞춘 예측으로 계산하고, **Spearman/NDCG/Hit**는 원시 z로 계산(`graph_schema.json`의 `proximity_calibration` 참고).
 - **GraphSAGE / GCN:** `run_graph_gnn_cv.py --model sage|gcn` → `graph_gnn_*_partial.csv`.
 - **병합:** `merge_graph_family_outputs.py` → `graph_family_comparison.csv`, `graph_family_summary.json`, 그리고 ML/DL 대표와 한 줄 비교용 **`ml_dl_graph_family_mean.csv`** (소스: `analysis_target_only/residual_mlp_cv/residual_mlp_cv_summary.json`의 XGBoost·ResidualMLP + Graph 대표).
+- **Round1 정책:** `graph_family_summary.json`에 `temporary_graph_representative_candidate: "GraphSAGE"` 및 행 단위 CV·공유 drug node로 인한 optimistic bias 가능성을 명시. Graph 군 **최종 대표는 drug-group CV 결과를 함께 본 뒤** 확정.
 - `s3://` URI는 `s3fs` 설치·자격 증명이 있으면 그대로 사용 가능.
 - Python: `ml/pilot_sagemaker/requirements.txt` (`torch`, `s3fs`).
+
+#### Graph 군 drug-group CV (stricter, `canonical_drug_id`)
+
+- **목적:** 행 단위 `KFold`에서는 동일 약물이 train·valid에 동시에 올 수 있어 GNN drug node 표현이 낙관적으로 보일 수 있음 → **`GroupKFold(n_splits=5, shuffle=True, random_state=42)`** 로 재분할 후 동일 3종(Proximity, GraphSAGE, GCN)·동일 지표로 재평가.
+- **폴드 정의:** `ml/pilot_sagemaker/build_cv_fold_indices_drug_group.py` → `graph_baseline_round1/cv_fold_indices_drug_group.json`.
+- **일괄 실행:** `ml/pilot_sagemaker/run_graph_groupcv_pipeline.py` (Proximity → sage/gcn → `merge_graph_family_outputs.py --preset groupcv`).
+- **산출물 (기본 디렉터리 `.../graph_baseline_round1/`):**
+  - `graph_family_groupcv_comparison.csv`, `graph_family_groupcv_summary.json`
+  - `graph_gnn_sage_groupcv_partial.csv`, `graph_gnn_gcn_groupcv_partial.csv`
+  - `ml_dl_graph_family_mean_groupcv.csv`, `graph_schema_groupcv.json`
+- **Proximity 보정:** drug-group 분할에서 train-only `y ~ a·z+b`가 불안정할 수 있어, 기울기 상한·비정상 RMSE 시 train 평균 예측 폴백 (`run_network_proximity_baseline.py`).
+- **요약 JSON:** `recommended_graph_representative`(Spearman mean 최대), `temporary_graph_representative_candidate`, `representative_finalization_policy`, `gnn_transductive_caveat` 등.
+- **대시보드:** `graph_experiment_dashboard_20260401.html` (섹션 9), DL 대시보드 `dl_experiment_dashboard_20260331.html`에서 Graph 쪽 교차 링크.
+
+**다른 팀에 URL만 공유할 때 (저장소 `main` 기준, 푸시 후):**
+
+- Graph: `https://github.com/skkuaws0215/20260330_pre_project_4w_test-1/blob/main/graph_experiment_dashboard_20260401.html`
+- DL: `https://github.com/skkuaws0215/20260330_pre_project_4w_test-1/blob/main/dl_experiment_dashboard_20260331.html`
+- 브라우저에서 바로 렌더링(서브페이지 링크 포함)이 필요하면 HTMLPreview: `https://htmlpreview.github.io/?https://raw.githubusercontent.com/skkuaws0215/20260330_pre_project_4w_test-1/main/graph_experiment_dashboard_20260401.html` (동일 방식으로 `dl_experiment_dashboard_20260331.html`도 가능). 비공개 저장소면 팀원은 clone 후 로컬에서 HTML을 열거나 Pages 등으로 호스팅해야 합니다.
 
 #### Pathway (Hallmark GMT) — `pathway__*` 보강 및 BlockWise 정식 블록 CV
 

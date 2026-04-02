@@ -29,6 +29,13 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, ndcg_score
 INF = 10**9
 
 
+def _resolve_out_path(out_dir: Path, name: str | None, default_name: str) -> Path:
+    if not name:
+        return out_dir / default_name
+    p = Path(name)
+    return p if p.is_absolute() else out_dir / p
+
+
 def parse_args() -> argparse.Namespace:
     repo = Path(__file__).resolve().parents[2]
     p = argparse.ArgumentParser(description="Network proximity baseline with fixed CV folds.")
@@ -82,6 +89,18 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--target-gene-col", default="target_gene_symbol")
     p.add_argument("--null-draws", type=int, default=80, help="Monte Carlo draws for z-score null.")
     p.add_argument("--null-seed", type=int, default=42)
+    p.add_argument(
+        "--comparison-csv",
+        default=None,
+        help="Output CSV for Network_Proximity rows only (default: graph_family_comparison.csv in out-dir).",
+    )
+    p.add_argument("--schema-json", default=None, help="Schema JSON path (default: graph_schema.json).")
+    p.add_argument("--summary-json", default=None, help="Summary JSON path (default: graph_family_summary.json).")
+    p.add_argument(
+        "--omit-summary-json",
+        action="store_true",
+        help="Do not write graph_family_summary.json (e.g. group CV; merge script writes final summary).",
+    )
     return p.parse_args()
 
 
@@ -338,9 +357,18 @@ def main() -> None:
         # Affine map raw drug z-scores to label scale using train fold only (Spearman invariant if slope > 0).
         A = np.vstack([p_tr, np.ones(len(p_tr))]).T
         slope, intercept = np.linalg.lstsq(A, y_tr, rcond=None)[0]
+        if not np.isfinite(slope) or abs(slope) > 80.0 or float(np.std(p_tr)) < 1e-12:
+            slope, intercept = 0.0, float(np.mean(y_tr))
         p_va_cal = slope * p_va + intercept
+        if not np.all(np.isfinite(p_va_cal)):
+            p_va_cal = np.full_like(p_va, float(np.mean(y_tr)), dtype=np.float64)
         rmse = float(np.sqrt(mean_squared_error(y_va, p_va_cal)))
-        mae_v = float(mean_absolute_error(y_va, p_va_cal))
+        if rmse > 25.0 * max(float(np.std(y_va)), 1e-6):
+            p_va_cal = np.full_like(p_va, float(np.mean(y_tr)), dtype=np.float64)
+            rmse = float(np.sqrt(mean_squared_error(y_va, p_va_cal)))
+            mae_v = float(mean_absolute_error(y_va, p_va_cal))
+        else:
+            mae_v = float(mean_absolute_error(y_va, p_va_cal))
         ndcg, hit = rank_metrics(df_va, args.sample_id_col, y_va, p_va)
         sp = safe_spearman(y_va, p_va)
         m = {"RMSE": rmse, "MAE": mae_v, "Spearman": sp, "NDCG@20": ndcg, "Hit@20": hit}
@@ -367,7 +395,7 @@ def main() -> None:
     }
 
     comp = pd.DataFrame(fold_rows + [mean_row, std_row])
-    comp_path = out_dir / "graph_family_comparison.csv"
+    comp_path = _resolve_out_path(out_dir, args.comparison_csv, "graph_family_comparison.csv")
     comp.to_csv(comp_path, index=False)
 
     schema = {
@@ -388,18 +416,20 @@ def main() -> None:
         "null_seed": args.null_seed,
         "proximity_calibration": "Per fold: OLS on train for RMSE/MAE on valid (a*raw_z+b). Spearman/NDCG/Hit use raw drug z-scores (label-scale affine can flip slope and distort ranks).",
     }
-    schema_path = out_dir / "graph_schema.json"
+    schema_path = _resolve_out_path(out_dir, args.schema_json, "graph_schema.json")
     schema_path.write_text(json.dumps(schema, indent=2), encoding="utf-8")
 
-    summary = {
-        "baseline": "Network_Proximity",
-        "metrics_mean_5fold": {k: mean_row[k] for k in ["RMSE", "MAE", "Spearman", "NDCG@20", "Hit@20"]},
-        "spearman_std_across_folds": std_row["Spearman"],
-        "graph_schema_path": str(schema_path),
-        "comparison_csv": str(comp_path),
-        "notes": "Rule-based, non-sample-specific graph baseline: prediction is drug-level proximity z-score (same value for all pair rows sharing a drug). After GraphSAGE/GCN, run merge_graph_family_outputs.py for a single comparison table and representative selection.",
-    }
-    (out_dir / "graph_family_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    if not args.omit_summary_json:
+        summary_path = _resolve_out_path(out_dir, args.summary_json, "graph_family_summary.json")
+        summary = {
+            "baseline": "Network_Proximity",
+            "metrics_mean_5fold": {k: mean_row[k] for k in ["RMSE", "MAE", "Spearman", "NDCG@20", "Hit@20"]},
+            "spearman_std_across_folds": std_row["Spearman"],
+            "graph_schema_path": str(schema_path),
+            "comparison_csv": str(comp_path),
+            "notes": "Rule-based, non-sample-specific graph baseline: prediction is drug-level proximity z-score (same value for all pair rows sharing a drug). After GraphSAGE/GCN, run merge_graph_family_outputs.py for a single comparison table and representative selection.",
+        }
+        summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
 
     print(json.dumps({"wrote": str(out_dir), "comparison": str(comp_path)}, indent=2))
 

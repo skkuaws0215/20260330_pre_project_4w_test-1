@@ -27,6 +27,13 @@ from graph_baseline_data import load_cv_meta, load_drug_targets_dict, load_merge
 from run_network_proximity_baseline import build_adjacency, load_disease_genes, try_load_ppi
 
 
+def _resolve_out_path(out_dir: Path, name: str | None, default_name: str) -> Path:
+    if not name:
+        return out_dir / default_name
+    p = Path(name)
+    return p if p.is_absolute() else out_dir / p
+
+
 def parse_args() -> argparse.Namespace:
     repo = Path(__file__).resolve().parents[2]
     p = argparse.ArgumentParser(description="GraphSAGE or GCN 5-fold CV on drug-gene graph + pair features.")
@@ -78,6 +85,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--lr", type=float, default=1e-3)
     p.add_argument("--weight-decay", type=float, default=1e-5)
     p.add_argument("--seed", type=int, default=42)
+    p.add_argument(
+        "--partial-csv",
+        default=None,
+        help="GNN partial metrics CSV (default: graph_gnn_{sage|gcn}_partial.csv in out-dir).",
+    )
     return p.parse_args()
 
 
@@ -362,7 +374,8 @@ def main() -> None:
         "Hit@20": float("nan"),
     }
     part = pd.DataFrame(fold_rows + [mean_row, std_row])
-    part_path = out_dir / f"graph_gnn_{args.model}_partial.csv"
+    default_partial = f"graph_gnn_{args.model}_partial.csv"
+    part_path = _resolve_out_path(out_dir, args.partial_csv, default_partial)
     part.to_csv(part_path, index=False)
 
     print(json.dumps({"model": model_label, "wrote_partial": str(part_path), "spearman_mean": mean_row["Spearman"]}, indent=2))

@@ -1,0 +1,42 @@
+{
+  "preset": "groupcv",
+  "graph_family_comparison_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/graph_family_groupcv_comparison.csv",
+  "metrics_mean_5fold_by_model": {
+    "Network_Proximity": {
+      "RMSE": 2.582866504762509,
+      "MAE": 1.9928276895040653,
+      "Spearman": 0.110907775762491,
+      "NDCG@20": 0.7067024255405608,
+      "Hit@20": 0.9655172413793104
+    },
+    "GraphSAGE": {
+      "RMSE": 2.679938235316897,
+      "MAE": 2.1974664688110352,
+      "Spearman": 0.242645478711919,
+      "NDCG@20": 0.7500822134762594,
+      "Hit@20": 1.0
+    },
+    "GCN": {
+      "RMSE": 2.5512886207234837,
+      "MAE": 2.070464825630188,
+      "Spearman": 0.2535836298737356,
+      "NDCG@20": 0.7577479162869373,
+      "Hit@20": 0.993103448275862
+    }
+  },
+  "spearman_std_across_folds_by_model": {
+    "Network_Proximity": 0.0678222932207024,
+    "GraphSAGE": 0.0623494422370952,
+    "GCN": 0.1026809390987216
+  },
+  "recommended_graph_representative": "GCN",
+  "selection_rule": "Highest Spearman mean (fold mean row); tie-break manually if needed.",
+  "notes": "Network_Proximity is rule-based and non-sample-specific (drug-level z-score broadcast to pairs). GNN rows use drug node embedding + scaled pair features per row.",
+  "cv_type": "GroupKFold by canonical_drug_id (no drug in both train and valid)",
+  "temporary_graph_representative_candidate": "GraphSAGE",
+  "temporary_candidate_basis": "Round1 row-based KFold (shared drug-node embeddings across train/val rows); subject to optimistic bias.",
+  "representative_finalization_policy": "Confirm Graph family representative only if group-CV results remain strong; compare to Round1 row-CV.",
+  "gnn_transductive_caveat": "Drug-group splits remove same-drug label leakage across folds; full-graph message passing can still backpropagate into all node embeddings during training (residual transductive coupling).",
+  "ml_dl_graph_family_mean_csv": "results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/ml_dl_graph_family_mean_groupcv.csv",
+  "ml_dl_summary_source": "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/residual_mlp_cv/residual_mlp_cv_summary.json"
+}

@@ -1,10 +1,11 @@
-"""Merge Network_Proximity + GraphSAGE + GCN partial CSVs into graph_family_comparison.csv and summary."""
+"""Merge Network_Proximity + GraphSAGE + GCN partial CSVs into one comparison table and summary."""
 
 from __future__ import annotations
 
 import argparse
 import json
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
@@ -17,12 +18,18 @@ def parse_args() -> argparse.Namespace:
         default=str(repo / "results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1"),
     )
     p.add_argument(
+        "--preset",
+        choices=["round1", "groupcv"],
+        default="round1",
+        help="round1: row-KFold artifacts; groupcv: drug-group CV filenames.",
+    )
+    p.add_argument(
         "--ml-dl-summary-json",
         default=str(
             repo
             / "results/features_nextflow_team4/fe_re_batch_runs/20260331/analysis_target_only/residual_mlp_cv/residual_mlp_cv_summary.json"
         ),
-        help="If present, write ml_dl_graph_family_mean.csv (XGBoost + ResidualMLP + graph representative).",
+        help="If present, write ml_dl_graph_family_mean*.csv (XGBoost + ResidualMLP + graph top model).",
     )
     return p.parse_args()
 
@@ -78,14 +85,33 @@ def _row_ml_dl(
     }
 
 
+def _repo_relative(repo_root: Path, path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(repo_root.resolve()))
+    except ValueError:
+        return str(path)
+
+
 def main() -> None:
     args = parse_args()
+    repo_root = Path(__file__).resolve().parents[2]
     out_dir = Path(args.out_dir)
-    parts: list[pd.DataFrame] = []
-    net_path = out_dir / "graph_family_comparison.csv"
-    sage_path = out_dir / "graph_gnn_sage_partial.csv"
-    gcn_path = out_dir / "graph_gnn_gcn_partial.csv"
+    if args.preset == "groupcv":
+        comparison_out = out_dir / "graph_family_groupcv_comparison.csv"
+        summary_out = out_dir / "graph_family_groupcv_summary.json"
+        net_path = comparison_out
+        sage_path = out_dir / "graph_gnn_sage_groupcv_partial.csv"
+        gcn_path = out_dir / "graph_gnn_gcn_groupcv_partial.csv"
+        ml_dl_csv_name = "ml_dl_graph_family_mean_groupcv.csv"
+    else:
+        comparison_out = out_dir / "graph_family_comparison.csv"
+        summary_out = out_dir / "graph_family_summary.json"
+        net_path = comparison_out
+        sage_path = out_dir / "graph_gnn_sage_partial.csv"
+        gcn_path = out_dir / "graph_gnn_gcn_partial.csv"
+        ml_dl_csv_name = "ml_dl_graph_family_mean.csv"
 
+    parts: list[pd.DataFrame] = []
     if net_path.is_file():
         net = pd.read_csv(net_path)
         net = net[net["model"] == "Network_Proximity"]
@@ -96,11 +122,10 @@ def main() -> None:
     if gcn_path.is_file():
         parts.append(pd.read_csv(gcn_path))
     if not parts:
-        raise SystemExit(f"No inputs found under {out_dir}")
+        raise SystemExit(f"No inputs found under {out_dir} (preset={args.preset})")
 
     full = pd.concat(parts, ignore_index=True)
-    out_csv = out_dir / "graph_family_comparison.csv"
-    full.to_csv(out_csv, index=False)
+    full.to_csv(comparison_out, index=False)
 
     models = ["Network_Proximity", "GraphSAGE", "GCN"]
     metrics_by_model: dict[str, dict] = {}
@@ -123,14 +148,36 @@ def main() -> None:
     if winner is None and metrics_by_model:
         winner = max(metrics_by_model.keys(), key=lambda k: metrics_by_model[k].get("Spearman", float("-inf")))
 
-    summary: dict = {
-        "graph_family_comparison_csv": str(out_csv),
+    summary: dict[str, Any] = {
+        "preset": args.preset,
+        "graph_family_comparison_csv": _repo_relative(repo_root, comparison_out),
         "metrics_mean_5fold_by_model": metrics_by_model,
         "spearman_std_across_folds_by_model": std_by_model,
         "recommended_graph_representative": winner,
         "selection_rule": "Highest Spearman mean (fold mean row); tie-break manually if needed.",
         "notes": "Network_Proximity is rule-based and non-sample-specific (drug-level z-score broadcast to pairs). GNN rows use drug node embedding + scaled pair features per row.",
     }
+
+    if args.preset == "round1":
+        summary["temporary_graph_representative_candidate"] = "GraphSAGE"
+        summary["temporary_candidate_caveat"] = (
+            "Row-based KFold can reuse the same canonical_drug_id in train and valid; GNN drug-node embeddings may "
+            "see optimistic bias. Confirm with drug-group CV (graph_family_groupcv_*)."
+        )
+
+    if args.preset == "groupcv":
+        summary["cv_type"] = "GroupKFold by canonical_drug_id (no drug in both train and valid)"
+        summary["temporary_graph_representative_candidate"] = "GraphSAGE"
+        summary["temporary_candidate_basis"] = (
+            "Round1 row-based KFold (shared drug-node embeddings across train/val rows); subject to optimistic bias."
+        )
+        summary["representative_finalization_policy"] = (
+            "Confirm Graph family representative only if group-CV results remain strong; compare to Round1 row-CV."
+        )
+        summary["gnn_transductive_caveat"] = (
+            "Drug-group splits remove same-drug label leakage across folds; full-graph message passing can still "
+            "backpropagate into all node embeddings during training (residual transductive coupling)."
+        )
 
     ml_dl_path = Path(args.ml_dl_summary_json)
     cmp_rows: list[dict] = []
@@ -190,13 +237,15 @@ def main() -> None:
             )
         )
     if cmp_rows:
-        cmp_csv = out_dir / "ml_dl_graph_family_mean.csv"
+        cmp_csv = out_dir / ml_dl_csv_name
         pd.DataFrame(cmp_rows).to_csv(cmp_csv, index=False)
-        summary["ml_dl_graph_family_mean_csv"] = str(cmp_csv)
-        summary["ml_dl_summary_source"] = str(ml_dl_path) if ml_dl_path.is_file() else None
+        summary["ml_dl_graph_family_mean_csv"] = _repo_relative(repo_root, cmp_csv)
+        summary["ml_dl_summary_source"] = (
+            _repo_relative(repo_root, ml_dl_path) if ml_dl_path.is_file() else None
+        )
 
-    (out_dir / "graph_family_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
-    print(json.dumps({"wrote": str(out_csv), "representative": winner}, indent=2))
+    summary_out.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    print(json.dumps({"wrote": str(comparison_out), "summary": str(summary_out), "representative": winner}, indent=2))
 
 
 if __name__ == "__main__":

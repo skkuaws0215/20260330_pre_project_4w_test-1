@@ -1,0 +1,26 @@
+{
+  "version": "graph_baseline_round1",
+  "nodes": [
+    "drug",
+    "gene"
+  ],
+  "node_id_convention": {
+    "drug": "D:{canonical_drug_id}",
+    "gene": "G:{GENE_SYMBOL_UPPER}"
+  },
+  "edges": [
+    "drug\u2013target (undirected)"
+  ],
+  "ppi_loaded": false,
+  "disease_genes_file": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/data/graph_baseline/disease_genes_common_v1.txt",
+  "disease_genes_list_size": 31,
+  "disease_genes_in_graph": 31,
+  "n_drugs_with_targets": 192,
+  "n_gene_nodes_in_adj": 330,
+  "n_edges_undirected_pairs": 647,
+  "cv_fold_json": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260331/graph_baseline_round1/cv_fold_indices_drug_group.json",
+  "n_rows_merged": 14497,
+  "null_draws": 80,
+  "null_seed": 42,
+  "proximity_calibration": "Per fold: OLS on train for RMSE/MAE on valid (a*raw_z+b). Spearman/NDCG/Hit use raw drug z-scores (label-scale affine can flip slope and distort ranks)."
+}

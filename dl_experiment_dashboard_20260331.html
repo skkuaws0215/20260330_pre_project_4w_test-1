@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DL Experiment Dashboard · 20260401_v1</title>
+  <title>DL Experiment Dashboard · 20260402_v1</title>
   <style>
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b1020; color: #e6edf7; }
     .hero { padding: 42px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); background: linear-gradient(120deg, #10223a, #1a3558); }
@@ -28,7 +28,7 @@
   <div class="hero">
     <h1>DL Experiment Dashboard</h1>
     <p>ML / DL / Graph 각 군에서 대표 모델을 고르기 위한 단계별 기록. 현재는 DL 군 실험·정리에 집중합니다.</p>
-    <div class="badge">Snapshot · 20260401_v1</div>
+    <div class="badge">Snapshot · 20260402_v1</div>
     <a class="nav-btn" href="newfe_quality_dashboard_20260331.html">Back to New FE Quality Dashboard</a>
     <a class="nav-btn" href="graph_experiment_dashboard_20260402.html">Go to Graph Experiment Dashboard</a>
   </div>
@@ -41,6 +41,7 @@
         <li>DL 군: 동일 데이터·동일 holdout으로 FlatMLP / VAE / TabNet / BlockWise / Residual 비교 후 대표 후보 확정</li>
         <li>이후 Graph 군 실험 후, ML 대표 vs DL 대표 vs Graph 대표로 최종 챔피언 비교</li>
       </ul>
+      <p class="muted" style="margin:14px 0 0;">Graph 군은 별도 대시보드에서 다룹니다. Round1(행 단위 5-fold)에서 GraphSAGE가 잠정 후보더라도, <strong><code>canonical_drug_id</code> 기준 drug-group CV</strong>로 분할 누설·낙관 편향을 점검한 뒤 대표를 확정합니다. 산출: <code>graph_family_groupcv_comparison.csv</code>, <code>graph_family_groupcv_summary.json</code> — 상세는 <a href="graph_experiment_dashboard_20260402.html" style="color:#9bc2ff;">Graph Experiment Dashboard</a> (섹션 9).</p>
     </section>
 
     <section>
