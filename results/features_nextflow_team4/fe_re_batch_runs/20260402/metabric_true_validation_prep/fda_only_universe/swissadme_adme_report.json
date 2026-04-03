@@ -1,0 +1,141 @@
+{
+  "pipeline": {
+    "stage1": "SwissADME physicochemical / drug-likeness (this script)",
+    "stage2": "ADMETlab toxicity & metabolism — use admetlab_stage2_queue.csv; final list = pass both + model score"
+  },
+  "input_csv": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe/swissadme_web_merged_n15.csv",
+  "n_input": 15,
+  "n_hard_pass": 8,
+  "n_hard_fail": 7,
+  "hard_fail_by_cid": [
+    {
+      "cid": 1990,
+      "drug_name": "Acetohydroxamic Acid",
+      "hard_fail_reasons": "Brenk_alerts>=2"
+    },
+    {
+      "cid": 24144,
+      "drug_name": "Acrisorcin",
+      "hard_fail_reasons": "PAINS_alerts>0"
+    },
+    {
+      "cid": 702,
+      "drug_name": "Ethanol",
+      "hard_fail_reasons": "GI_absorption_Low"
+    },
+    {
+      "cid": 1986,
+      "drug_name": "Acetazolamide",
+      "hard_fail_reasons": "GI_absorption_Low"
+    },
+    {
+      "cid": 6060,
+      "drug_name": "Acetylcholine Chloride",
+      "hard_fail_reasons": "GI_absorption_Low"
+    },
+    {
+      "cid": 60871,
+      "drug_name": "Adefovir Dipivoxil",
+      "hard_fail_reasons": "GI_absorption_Low; Brenk_alerts>=2"
+    },
+    {
+      "cid": 39859,
+      "drug_name": "Albuterol Sulfate",
+      "hard_fail_reasons": "Lipinski_violations>=3; GI_absorption_Low"
+    }
+  ],
+  "soft_top10": [
+    {
+      "cid": 1989,
+      "drug_name": "Acetohexamide",
+      "adme_final_score": 1.6995290105731917,
+      "ensemble_score": 1.5995290105731916,
+      "penalty_total": 0.0,
+      "bioavailability_bonus": 1
+    },
+    {
+      "cid": 2082,
+      "drug_name": "Albendazole",
+      "adme_final_score": 1.6995290105731917,
+      "ensemble_score": 1.5995290105731916,
+      "penalty_total": 0.0,
+      "bioavailability_bonus": 1
+    },
+    {
+      "cid": 176,
+      "drug_name": "Acetic Acid",
+      "adme_final_score": 1.4995290105731918,
+      "ensemble_score": 1.5995290105731916,
+      "penalty_total": 1.0,
+      "bioavailability_bonus": 1
+    },
+    {
+      "cid": 2083,
+      "drug_name": "Salbutamol",
+      "adme_final_score": 1.4995290105731918,
+      "ensemble_score": 1.5995290105731916,
+      "penalty_total": 1.0,
+      "bioavailability_bonus": 1
+    },
+    {
+      "cid": 12035,
+      "drug_name": "N-Acetyl-L-Cysteine",
+      "adme_final_score": 1.4995290105731918,
+      "ensemble_score": 1.5995290105731916,
+      "penalty_total": 1.0,
+      "bioavailability_bonus": 1
+    },
+    {
+      "cid": 1983,
+      "drug_name": "Acetaminophen",
+      "adme_final_score": 1.4995290105731918,
+      "ensemble_score": 1.5995290105731916,
+      "penalty_total": 1.0,
+      "bioavailability_bonus": 1
+    },
+    {
+      "cid": 15664,
+      "drug_name": "5,5'-Dimethyl-2,2'-bipyridyl",
+      "adme_final_score": 1.4995290105731918,
+      "ensemble_score": 1.5995290105731916,
+      "penalty_total": 1.0,
+      "bioavailability_bonus": 1
+    },
+    {
+      "cid": 60164,
+      "drug_name": "Adapalene",
+      "adme_final_score": 1.2995290105731918,
+      "ensemble_score": 1.5995290105731916,
+      "penalty_total": 2.0,
+      "bioavailability_bonus": 1
+    }
+  ],
+  "top10_adme_pattern": {
+    "n": 8,
+    "WLOGP": {
+      "mean": 2.1712499999999997,
+      "min": -0.49,
+      "max": 6.68
+    },
+    "TPSA": {
+      "mean": 66.23625,
+      "min": 25.78,
+      "max": 105.2
+    },
+    "Bioavailability Score": {
+      "mean": 0.62625,
+      "min": 0.55,
+      "max": 0.85
+    },
+    "Pgp_substrate_Yes_count": 0,
+    "BBB_permeant_Yes_count": 2,
+    "GI_absorption_all": {
+      "High": 8
+    },
+    "common_good_traits": "Survivors skew toward Lipinski violations < 2, GI High, PAINS=0, Brenk<2; soft-ranked favor moderate WLOGP (1–4), TPSA 20–140 when possible, oral bioavailability score ≥0.55, fewer P-gp/BBB penalties for non-CNS."
+  },
+  "parameters": {
+    "cns_target_mode": false,
+    "final_score_formula": "ensemble_score - 0.2 * penalty_total + 0.1 * bioavailability_bonus"
+  }
+}

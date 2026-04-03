@@ -29,8 +29,9 @@
     <h1>DL Experiment Dashboard</h1>
     <p>ML / DL / Graph 각 군에서 대표 모델을 고르기 위한 단계별 기록. <strong>로컬 검증·문서화 + SageMaker 최종 3종 실행은 완료</strong>이며, <strong>METABRIC cohort-native external inference</strong>의 <strong>공식 랭킹은 no-LINCS 산출물</strong>(<code>metabric_native_ensemble_ranking_no_lincs.csv</code>)로 확정했습니다. with-LINCS native 랭킹·train-row 재사용 기반 지표는 비교·감사·이전 단계 참고용입니다. <strong>차이 ≈ 0인 이유·레거시 역할·Top30/Top10·direct ADMET·향후 LINCS full retrain 메모</strong>는 아래 <strong>§0b</strong>에 정리했습니다. <strong>FDA(NDC) 필터·native shortlist·TCGA 사전 shortlist(§2)</strong>는 <a href="metabric_admet_survival_dashboard_20260402_v2.html" style="color:#9bc2ff;">METABRIC·ADMET·Survival 대시보드 (20260402 v2)</a> (<strong>§2·§2.1</strong>)에서 다룹니다.</p>
     <p class="muted" style="margin-top:10px;font-size:0.88rem;">로컬: 저장소 루트에서 <code>python3 serve_dashboards.py</code> → 브라우저가 <code>index.html</code>을 엽니다. (반드시 루트에서 실행; 다른 폴더에서 <code>http.server</code>를 켜면 이 파일이 안 뜹니다.) GitHub Pages 사용 시 저장소 Settings → Pages → GitHub Actions 활성화 후 <code>https://&lt;user&gt;.github.io/&lt;repo&gt;/</code> 목차로 접속.</p>
-    <div class="badge">Snapshot · 20260402_v8 · METABRIC-native external inference 정책(no-LINCS) 반영</div>
+    <div class="badge">Snapshot · 20260402_v8 · METABRIC-native external inference 정책(no-LINCS) 반영 · SwissADME 1차 ADME (FDA Top15) 반영</div>
     <a class="nav-btn" href="#metabric-native-external-policy" style="border-color:#6ea8fe;color:#9bc2ff;">§0b METABRIC-native 정책으로 이동</a>
+    <a class="nav-btn" href="#swissadme-fda-adme-stage1" style="border-color:#f7c266;color:#f7c266;">§0c SwissADME 1차 ADME</a>
     <a class="nav-btn" href="metabric_admet_survival_dashboard_20260402_v2.html#section-2-1-fda-ndc-native" style="border-color:#42d59f;color:#42d59f;">METABRIC 대시보드 §2.1 FDA shortlist</a>
     <a class="nav-btn" href="newfe_quality_dashboard_20260331.html">Back to New FE Quality Dashboard</a>
     <a class="nav-btn" href="graph_experiment_dashboard_20260402.html">Go to Graph Experiment Dashboard</a>
@@ -97,6 +98,24 @@
         <li><strong>후속 실험 트랙(메모):</strong> LINCS를 모델 입력에 포함하도록 XGB/MLP/GCN <strong>full retraining</strong> — 운영 정책과 분리.</li>
         <li><strong>요약 JSON:</strong> 동일 폴더의 <code>metabric_native_inference_summary.json</code> (<code>external_inference_policy</code>), 비교 실행 시 <code>metabric_native_ranking_comparison_summary.json</code>.</li>
       </ul>
+    </section>
+
+    <section id="swissadme-fda-adme-stage1">
+      <h2>0c) FDA native shortlist · SwissADME 1차 ADME → ADMETlab 2차 (독성/대사)</h2>
+      <p class="muted"><strong>흐름:</strong> (1) SwissADME 웹 배치로 물성·약물성 1차 컷. (2) 통과분은 <code>admetlab_stage2_queue.csv</code>로 ADMETlab 배치(2차: 독성·대사). (3) 최종 운영 후보는 <strong>두 단계 모두 통과</strong>한 약물을 모델 <code>ensemble_score</code>와 함께 종합 정렬.</p>
+      <p class="muted" style="margin-top:8px;"><strong>스크립트:</strong> <code>ml/pilot_sagemaker/rank_swissadme_adme_two_stage.py</code> · 입력 <code>swissadme_web_merged_n15.csv</code> · 산출 <code>swissadme_adme_*.csv</code>, <code>swissadme_adme_report.json</code>, <code>admetlab_stage2_queue.csv</code> (경로: <code>.../metabric_true_validation_prep/fda_only_universe/</code>).</p>
+      <p class="muted" style="margin-top:8px;"><strong>Hard filter (제거):</strong> Lipinski violations ≥ 2 · GI absorption = Low · PAINS alert &gt; 0 · Brenk alerts ≥ 2.</p>
+      <p class="muted" style="margin-top:8px;"><strong>Soft score:</strong> WLOGP·TPSA·P-gp·BBB(비-CNS 시 Yes 페널티)·F(oral) 보너스 후 <code>adme_final_score = ensemble − 0.2×penalty_total + 0.1×bioavailability_bonus</code>.</p>
+      <p class="muted" style="margin-top:8px;"><strong>스냅샷 (입력 15종):</strong> Hard 통과 <strong>8</strong>종 · Soft 순위 상위는 전원(8종)이며 상위 2 tie는 Acetohexamide·Albendazole (<code>adme_final_score</code> ≈ 1.70).</p>
+      <table style="margin-top:12px;">
+        <tr><th>soft_rank</th><th>CID</th><th>drug</th><th>adme_final_score</th><th>penalty_total</th><th>비고</th></tr>
+        <tr><td>1–2 (tie)</td><td>1989</td><td>Acetohexamide</td><td>1.700</td><td>0</td><td>Soft 페널티 없음</td></tr>
+        <tr><td>1–2 (tie)</td><td>2082</td><td>Albendazole</td><td>1.700</td><td>0</td><td>Soft 페널티 없음</td></tr>
+        <tr><td>3–7</td><td>176, 2083, 12035, 1983, 15664</td><td>(각 1.500)</td><td>1.500</td><td>1</td><td>WLOGP 또는 BBB(비-CNS) 페널티</td></tr>
+        <tr><td>8</td><td>60164</td><td>Adapalene</td><td>1.300</td><td>2</td><td>WLOGP &gt; 5 → +2</td></tr>
+      </table>
+      <p class="muted" style="margin-top:10px;"><strong>Hard 제거 7종 요약:</strong> Ethanol·Acetazolamide·Acetylcholine·Albuterol Sulfate·Adefovir Dipivoxil (GI Low 등) · Acetohydroxamic (Brenk≥2) · Acrisorcin (PAINS) — 상세는 <code>swissadme_adme_report.json</code>의 <code>hard_fail_by_cid</code>.</p>
+      <p class="muted" style="margin-top:8px;"><strong>통과 8종 ADME 패턴:</strong> GI 모두 High · 평균 WLOGP ≈ 2.17 · TPSA 평균 ≈ 66 · BBB Yes 2종(비-CNS 페널티 반영) · P-gp substrate Yes 0종. 전체 표는 <code>swissadme_adme_hard_pass.csv</code> / <code>swissadme_adme_soft_top10.csv</code>.</p>
     </section>
 
     <section>

@@ -1,0 +1,13 @@
+{
+  "input_meta": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe/swissadme_input_top30_with_meta.csv",
+  "swissadme_export": "/Users/skku_aws2_14/Downloads/swissadme.csv",
+  "rdkit_canonical_keys": true,
+  "n_meta_rows": 15,
+  "n_export_rows": 15,
+  "smiles_column_detected": "Canonical SMILES",
+  "n_matched_to_export": 15,
+  "unmatched_meta_rows": [],
+  "wrote_merged": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe/swissadme_web_merged_n15.csv",
+  "mean_ensemble_score_matched": 1.599529010573192,
+  "mean_swissadme_composite_risk_matched": 0.7333333333333333
+}

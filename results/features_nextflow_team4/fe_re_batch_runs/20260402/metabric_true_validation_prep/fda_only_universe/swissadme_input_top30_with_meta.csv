@@ -1,0 +1,16 @@
+cid,drug_name,smiles
+176,Acetic Acid,CC(=O)O
+702,Ethanol,CCO
+1983,Acetaminophen,CC(=O)NC1=CC=C(C=C1)O
+1989,Acetohexamide,CC(=O)C1=CC=C(C=C1)S(=O)(=O)NC(=O)NC2CCCCC2
+1990,Acetohydroxamic Acid,CC(=O)NO
+2082,Albendazole,CCCSC1=CC2=C(C=C1)N=C(N2)NC(=O)OC
+6060,Acetylcholine Chloride,CC(=O)OCC[N+](C)(C)C.[Cl-]
+15664,"5,5'-Dimethyl-2,2'-bipyridyl",CC1=CN=C(C=C1)C2=NC=C(C=C2)C
+24144,Acrisorcin,CCCCCCC1=C(C=C(C=C1)O)O.C1=CC=C2C(=C1)C(=C3C=CC=CC3=N2)N
+39859,Albuterol Sulfate,CC(C)(C)NCC(C1=CC(=C(C=C1)O)CO)O.CC(C)(C)NCC(C1=CC(=C(C=C1)O)CO)O.OS(=O)(=O)O
+60164,Adapalene,COC1=C(C=C(C=C1)C2=CC3=C(C=C2)C=C(C=C3)C(=O)O)C45CC6CC(C4)CC(C6)C5
+1986,Acetazolamide,CC(=O)NC1=NN=C(S1)S(=O)(=O)N
+2083,Salbutamol,CC(C)(C)NCC(C1=CC(=C(C=C1)O)CO)O
+12035,N-Acetyl-L-Cysteine,CC(=O)NC(CS)C(=O)O
+60871,Adefovir Dipivoxil,CC(C)OC(=O)OCCOP(=O)(OCCOC(=O)C(C)C)OC1=NC=NC2=C1N=CN2
