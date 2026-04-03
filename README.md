@@ -36,6 +36,53 @@ python -m streamlit run streamlit_app.py
 
 브라우저에서 사이드바로 **전체 요약·현황**, **핵심 용어**, **§2 플로우**, **Pre-Project 체크리스트**, **`pipeline_overview.html` 전체** 등을 전환해 확인합니다.
 
+## HTML 대시보드 — 주소·목록
+
+저장소 **루트**에 있는 정적 HTML입니다. **GitHub `blob` URL**은 태그만 보이고 페이지가 렌더되지 않으므로, 열람은 **GitHub Pages** 또는 **로컬 HTTP 서버**를 사용하세요.
+
+### GitHub Pages (고정 URL)
+
+저장소 **Settings → Pages** 에서 GitHub Actions 등으로 배포한 뒤(`.github/workflows/deploy-dashboards.yml`), 아래 형식으로 접속합니다.
+
+| 용도 | URL |
+|------|-----|
+| **목차(인덱스)** | [https://skkuaws0215.github.io/20260330_pre_project_4w_test-1/index.html](https://skkuaws0215.github.io/20260330_pre_project_4w_test-1/index.html) |
+| 저장소 루트(동일 인덱스로 리다이렉트되는 경우가 많음) | [https://skkuaws0215.github.io/20260330_pre_project_4w_test-1/](https://skkuaws0215.github.io/20260330_pre_project_4w_test-1/) |
+
+**파일 직링크 (Pages)** — 루트 파일명만 바꿔서 사용합니다.  
+`https://skkuaws0215.github.io/20260330_pre_project_4w_test-1/<파일명>.html`
+
+| 파일 | 한 줄 설명 |
+|------|------------|
+| `index.html` | SageMaker·METABRIC·DL·Graph 등으로 가는 **목차** |
+| `pipeline_overview.html` | 파이프라인 개요(Nextflow·METABRIC·ADMET·로드맵) |
+| `sagemaker_experiment_dashboard_20260403.html` | SageMaker 통합 실험 · FDA 정책·METABRIC proxy 등 |
+| `metabric_admet_survival_dashboard_20260402_v2.html` | METABRIC·ADMET·Survival · §2.1–2.5·SwissADME·ADMETlab 웹 2차 |
+| `dl_experiment_dashboard_20260331.html` | DL 군(ResidualMLP 등)·앙상블 · METABRIC §2.3b/§2.4 링크 |
+| `graph_experiment_dashboard_20260401.html` | Graph 군 Round1·**섹션 8** drug-group CV |
+| `graph_experiment_dashboard_20260402.html` | Graph 보조 스냅샷 |
+| `newfe_quality_dashboard_20260331.html` | New FE 품질 점검 |
+| `abc_smiles_experiment_dashboard.html` | ABC + SMILES 실험 |
+
+예시:  
+[METABRIC·ADMET·Survival v2](https://skkuaws0215.github.io/20260330_pre_project_4w_test-1/metabric_admet_survival_dashboard_20260402_v2.html) ·  
+[DL Experiment](https://skkuaws0215.github.io/20260330_pre_project_4w_test-1/dl_experiment_dashboard_20260331.html)
+
+### 로컬에서 열기
+
+저장소 **루트**에서 실행해야 `index.html`의 상대 링크·이미지(`results/...` KM 플롯 등)가 깨지지 않습니다.
+
+```bash
+cd /path/to/20260330_pre_project_4w_test-1
+python3 serve_dashboards.py
+```
+
+터미널에 출력되는 `http://127.0.0.1:8765/` 등으로 접속합니다. (`python3 -m http.server`만 다른 폴더에서 켜면 루트 HTML을 못 찾는 경우가 많습니다.)
+
+### GitHub에서 소스만 볼 때 (렌더 없음)
+
+`https://github.com/skkuaws0215/20260330_pre_project_4w_test-1/blob/main/<파일명>.html`
+
 ## Git / GitHub
 
 로컬에 커밋된 상태입니다. **원격 저장소를 만든 뒤** (GitHub에서 New repository, README 없이 생성 권장):
