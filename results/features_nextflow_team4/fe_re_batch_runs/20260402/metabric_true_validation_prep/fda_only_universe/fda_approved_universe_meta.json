@@ -1,0 +1,19 @@
+{
+  "output_dir": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe_smoke2",
+  "sources_requested": [
+    "drugsfda"
+  ],
+  "combine": "union",
+  "n_drugsfda_tokens": 2849,
+  "n_cids_from_drugsfda": 60,
+  "n_cids_from_drugbank": 0,
+  "n_cids_merged_pre_exclude": 60,
+  "n_cids_after_default_exclude": 60,
+  "n_cids_final_written": 15,
+  "max_universe_drugs_cap": 15,
+  "default_exclude_applied": true,
+  "outputs": {
+    "drug_table": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe_smoke2/fda_approved_drug_table.parquet",
+    "drug_targets": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe_smoke2/fda_approved_drug_targets.parquet"
+  }
+}

@@ -13,8 +13,8 @@
 | `.gitignore` | `.aws/credentials` 커밋 방지 |
 | `pipeline_overview.html` | 파이프라인 개요 보고서 — §2에 Nextflow·Batch·METABRIC·ADMET·Bedrock 플로우, §18~§19에 4주 산출물·Final 로드맵 반영 |
 | `index.html` | 루트 HTML **목차** — SageMaker·METABRIC/ADMET/Survival·DL·Graph 등 대시보드 링크 (`serve_dashboards.py` / GitHub Pages) |
-| `sagemaker_experiment_dashboard_20260403.html` | **SageMaker 통합 실험** 대시보드 — 스냅샷 `20260403_v7`, §4 후속·외부 검증을 **4.1–4.6** 순번, §4.4에 METABRIC-like **proxy** 경고 및 `metabric_admet_survival_dashboard_20260402_v2.html` 링크 |
-| `metabric_admet_survival_dashboard_20260402_v2.html` | **METABRIC · ADMET · Survival-linked** — **§2** 실제 OS 생존 표·KM, **§3–§5** 점선 **PROXY DATA** 박스(2648 pairs·native 랭킹 맥락·ADMET proxy), §2 **주의** 블록으로 라벨 맥락·모델 우위 해석 한계 명시 |
+| `sagemaker_experiment_dashboard_20260403.html` | **SageMaker 통합 실험** 대시보드 — 스냅샷 `20260403_v9`, **운영 정책: FDA 승인 의약품만** 최종 후보 허용(§4.3 청색 박스); 현재 `final_shortlist.csv`는 **승인 필터 적용 전** 스냅샷. §4.1–4.6, §4.4 METABRIC-like **proxy** 등 |
+| `metabric_admet_survival_dashboard_20260402_v2.html` | **METABRIC · ADMET · Survival-linked** — **운영 정책: FDA 승인 약만** (§2 청색 박스); §2 표는 **승인 필터 전** 스냅샷 + PubChem명. **§3** 생존, **§4–§6** proxy, **§7** 파이프라인 |
 | `streamlit_app.py` | 진행용 **Streamlit 대시보드** (용어·체크리스트·HTML 보고서·README 뷰어) |
 | `requirements.txt` | `streamlit` 등 Python 의존성 |
 | `nextflow/` | Nextflow 코드 예정 (`main.nf` 등) · 업로드 방법 `nextflow/README.md` |
@@ -398,7 +398,8 @@ python3 ml/pilot_sagemaker/build_final_ensemble_ranking.py
 
 - 조건: ADMET 통과 + ranking 유지
 - 출력: `final_shortlist.csv` (Top30)
-- 상태: **최종 Top 30 shortlist 생성 완료**
+- 상태: **Top 30 행 생성 완료** (파이프라인 스냅샷)
+- **운영 정책 (팀 합의):** 대외·최종 후보로 쓰는 약물은 **FDA 승인 의약품만** 허용. 본 CSV는 **승인 필터를 아직 적용하지 않음** — OpenFDA·Orange Book·RxNorm 등과 조인한 **승인약 전용 shortlist**로 교체하기 전까지는 “최종 후보”가 아님.
 - 파일 컬럼 개선: `final_shortlist.csv`에 `rank_v2`, `admet_pass`, `bucket` alias 컬럼 추가 (기존 원본 컬럼 유지)
 
 핵심 컬럼(요약): `canonical_drug_id`, `drug_rank_v2`(=`rank_v2`), `ensemble_score_v2`, `shortlist_bucket`(=`bucket`)
@@ -450,7 +451,9 @@ python3 ml/pilot_sagemaker/build_final_ensemble_ranking.py
   - **ResidualMLP / GCN:** 체크포인트 `feat_cols`에는 LINCS 슬롯이 있으나, `build_final_ensemble_ranking.py`는 피처 테이블에 없는 열을 **0으로 채워** 텐서 너비를 맞춤. with-LINCS native parquet에서도 학습 시와 동일하게 **LINCS 구간이 0**이면 no-LINCS parquet과 **동일 입력**이 되어 랭킹이 일치할 수 있음.  
   - 정리: **리포트·TopK 운영은 no-LINCS 산출물을 단일 기준**으로 쓰고, 위 이유는 “수치가 같아 보여도 정책적으로 no-LINCS를 채택한다”는 근거로 문서화함.
 - **비교 산출:** `compare_metabric_native_rankings_no_lincs.py` → `metabric_native_ranking_comparison_no_lincs.csv`, `metabric_native_ranking_comparison_summary.json` (`policy_final_external_inference_ranking` 키 포함).
-- **다음 단계 (no-LINCS 기준):** 샘플·약물 유니버스 확정 후 **Top30 / Top10 operational shortlist** 운영, 이어서 **direct molecular ADMET**(구조 기반) 게이트로 연결.
+- **FDA drug universe 랭킹 (재추론):** `ml/pilot_sagemaker/run_fda_only_metabric_ranking.py` — Drugs@FDA(+선택 DrugBank) CID 유니버스 × METABRIC 샘플 → 동일 native FE·동결 앙상블 → `fda_only_universe/fda_only_ranking.csv`, `fda_top30_shortlist.csv`. S3·행렬이 없을 때는 `backfill_fda_only_ranking_from_native.py`로 관측 쌍은 native 점수 유지·미관측 쌍은 pred 평균 impute(데모용).
+- **Direct ADMET (Top30 → hard/soft → Top10):** `ml/pilot_sagemaker/evaluate_fda_shortlist_direct_admet.py` — PubChem SMILES, RDKit `swissadme_proxy_*`, TCGA `final_shortlist.csv`의 `admet_pass` 조인(가능 시), hERG·간독성 **프록시** hard gate, `soft_composite_score`로 순위 → `fda_only_universe/direct_admet_results.csv`, `admet_combined_summary.csv`, `final_top10_fda_drugs.csv`. SwissADME·ADMETlab 웹/API 전체 배치는 포털로 보완(스크립트 내 메모 컬럼 참고).
+- **다음 단계 (no-LINCS 기준):** 유니버스 cap 해제 후 전체 FDA 후보 FE·SwissADME/ADMETlab 배치·컷오프 합의.
 - **별도 실험 트랙 (메모, 미착수):** LINCS를 **모델 입력에 포함**하도록 XGB / ResidualMLP / GCN **전부 재학습**(피처 스키마·스케일러·그래프 헤드 차원 정합 포함)하는 **with-LINCS full retraining** — 현재 운영 정책과 분리된 후속 연구 옵션으로만 기록.
 
 ### A/B/C 파일럿: ML 4종 병렬 Training Job
@@ -642,8 +645,8 @@ Delta 요약:
 - **Graph 정책:** Spearman mean 기준 **drug-group CV**에서 GCN이 앞섬. Round1 **행 단위 CV**에서는 GraphSAGE가 잠정 1위였으나 optimistic bias 가능 → **GraphSAGE는 temporary candidate로만** 기록하고, **최종 Graph 대표는 GCN**.
 - **GCN 경량 튜닝 (동일 drug-group CV, A–D):** 튜닝 **완료**. **Graph representative는 GCN 유지.** 그리드 내 Spearman mean 최고는 **구성 D**(weight_decay 1e-4)이나, baseline **A** 대비 개선폭은 약 **+0.0054**로 팀 기준(**≥ +0.01**)에 **미달** → **의미 있는 개선으로 보지 않음** → **최종 Graph 군 대표로 쓰는 GCN은 baseline 하이퍼파라미터(A: hidden 64, lr 1e-3, weight_decay 1e-5) 유지.** **구성 E**(96 / 5e-4 / 5e-5)는 **이번 단계에서 보류.** 근거: `graph_baseline_round1/gcn_tuning_summary.json`, `gcn_tuning_comparison.csv` · 스크립트 `ml/pilot_sagemaker/run_gcn_groupcv_tuning.py`.
 - **한 장 비교표·지표·검증 타입·SageMaker 입력/설정/산출물 체크리스트:** `dl_experiment_dashboard_20260331.html` **0)**.
-- **SageMaker 통합 실험 대시보드:** `sagemaker_experiment_dashboard_20260403.html` — 스냅샷 **20260403_v7**. 로컬 기준선 표 + `sagemaker_final_three` 번들(§2.5, CSV에 validation·evaluation_note) + 최종 Job 지표. **§4**는 「후속 운영·외부 검증」 하위 **4.1–4.6** 순번(업데이트 방법 → 향후 단계 → Post-Analysis 산출물 → METABRIC/ADMET 해석 → 진짜 METABRIC 체크리스트 → rank consistency). **§4.4**는 위 METABRIC 표가 **proxy·투영** 설정임을 노란 콜아웃으로 명시하고, 생존·ADMET 맥락 정리는 **`metabric_admet_survival_dashboard_20260402_v2.html`** 로 연결.
-- **METABRIC · ADMET · Survival-linked 대시보드:** `metabric_admet_survival_dashboard_20260402_v2.html` — **§2** 실제 METABRIC **OS** 기반 Survival-linked 수치·Kaplan–Meier. **§3–§5**는 노란 점선 **【PROXY DATA】** 로 구분(2648 pairs 정렬, no-LINCS native 랭킹 맥락, ADMET proxy 게이트). §2 **주의** 블록: 생존에 맞춘 입력이라 XGB 등 상대 우위가 보일 수 있음, 종점·라벨 정의가 바뀌면 모델 간 순위도 달라질 수 있음(문서에 별도 실험 로드맵은 적지 않음). **§6** 파이프라인 한 줄 요약으로 §2 vs §3–5 질문 차이 정리.
+- **SageMaker 통합 실험 대시보드:** `sagemaker_experiment_dashboard_20260403.html` — 스냅샷 **20260403_v9**. **운영 정책:** 최종 후보는 **FDA 승인 의약품만**(§4.3). 현재 `final_shortlist.csv` Top30은 **승인 필터 미적용** 스냅샷(감사용). 로컬 기준선·`sagemaker_final_three`·§4.1–4.6. **§4.4** METABRIC proxy 콜아웃, METABRIC HTML 링크.
+- **METABRIC · ADMET · Survival-linked 대시보드:** `metabric_admet_survival_dashboard_20260402_v2.html` — **§2**에 **FDA 승인약만** 운영 정책 명시; 동 절 표는 **승인 필터 전** Top30 + PubChem명. **§3** 생존·KM. **§4–§6** proxy. **§7** 파이프라인. 승인 조인·재산출 전에는 §2·§4.3 목록을 최종 후보로 쓰지 않음.
 - **수치 원본:** `analysis_target_only/residual_mlp_cv/residual_mlp_cv_summary.json` (ML/DL 행 5-fold mean); `graph_baseline_round1/graph_family_groupcv_summary.json` (GCN group 5-fold mean, 3종 대표 선정). GCN 하이퍼 그리드 결론은 **`graph_baseline_round1/gcn_tuning_summary.json`** (영문 policy 필드·`notes` 포함). 행 간 숫자는 검증 정의가 다르므로 직접 승패 비교 시 주의.
 
 #### Graph 군 Round1 — Network Proximity · GraphSAGE · GCN (동일 스키마·동일 `cv_fold_indices.json`)

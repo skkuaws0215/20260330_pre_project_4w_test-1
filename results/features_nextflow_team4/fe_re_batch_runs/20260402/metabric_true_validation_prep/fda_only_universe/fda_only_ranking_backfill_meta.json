@@ -1,0 +1,13 @@
+{
+  "native_ranking_csv": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_ensemble_ranking_no_lincs.csv",
+  "universe_drug_parquet": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe/fda_approved_drug_table.parquet",
+  "n_samples": 40,
+  "n_universe_drugs": 15,
+  "n_pairs": 600,
+  "shortlist_n": 15,
+  "note": "Missing pairs imputed with mean pred_* from native chemical-space ranking; for production use run_fda_only_metabric_ranking.py.",
+  "outputs": {
+    "fda_only_ranking": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe/fda_only_ranking.csv",
+    "fda_top30_shortlist": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe/fda_top30_shortlist.csv"
+  }
+}

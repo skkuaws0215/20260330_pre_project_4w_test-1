@@ -142,8 +142,12 @@ def _predict_gcn(
         .fillna(0.0)
         .to_numpy(dtype=np.float32)
     )
-    dids = feats["canonical_drug_id"].astype(str).str.strip()
-    drug_idx = np.array([id2i[f"D:{d}"] for d in dids], dtype=np.int64)
+    dids = feats["canonical_drug_id"].astype(str).str.strip().tolist()
+    drug_node_indices = torch.tensor(
+        [id2i[n] for n in nodes if str(n).startswith("D:")],
+        dtype=torch.long,
+        device=torch.device("cpu"),
+    )
 
     h0 = ckpt["h0"].to(torch.float32)
     hidden_dim = int(ckpt["hidden_dim"])
@@ -157,8 +161,25 @@ def _predict_gcn(
     with torch.no_grad():
         h = gnn(h0, a_hat)
         x = torch.tensor(X, dtype=torch.float32)
-        d = torch.tensor(drug_idx, dtype=torch.long)
-        pred = head(torch.cat([h[d], x], dim=-1)).squeeze(-1).numpy().astype(np.float64)
+        if drug_node_indices.numel() == 0:
+            h_unk = torch.zeros(hidden_dim, dtype=torch.float32)
+        else:
+            h_unk = h[drug_node_indices].mean(dim=0)
+        emb_chunks: list[torch.Tensor] = []
+        n_unk = 0
+        for d in dids:
+            k = f"D:{d}"
+            if k in id2i:
+                emb_chunks.append(h[id2i[k]])
+            else:
+                n_unk += 1
+                emb_chunks.append(h_unk)
+        if n_unk:
+            print(
+                f"GCN: {n_unk}/{len(dids)} pair rows use mean train-drug embedding (canonical_drug_id not in checkpoint graph)."
+            )
+        drug_h = torch.stack(emb_chunks, dim=0)
+        pred = head(torch.cat([drug_h, x], dim=-1)).squeeze(-1).numpy().astype(np.float64)
     return feats[KEY_COLS].assign(pred_gcn=pred)
 
 

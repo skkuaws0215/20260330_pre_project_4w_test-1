@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SageMaker 통합 실험 대시보드 · 20260403_v7</title>
+  <title>SageMaker 통합 실험 대시보드 · 20260403_v9</title>
   <style>
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0a0f18; color: #e6edf7; }
     .hero { padding: 42px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); background: linear-gradient(120deg, #152238, #1e3d52 45%, #1a4d3a); }
@@ -39,14 +39,26 @@
     }
     .callout-metabric-proxy strong { color: #fef08a; }
     .callout-metabric-proxy a { color: #fde047; font-weight: 600; }
+    .policy-fda {
+      margin: 0 0 14px;
+      padding: 14px 16px;
+      border: 2px solid rgba(56, 189, 248, 0.55);
+      border-left: 5px solid #38bdf8;
+      background: rgba(14, 165, 233, 0.12);
+      border-radius: 10px;
+      color: #e0f2fe;
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+    .policy-fda strong { color: #7dd3fc; }
   </style>
 </head>
 <body>
   <div class="hero">
     <h1>SageMaker 통합 실험 대시보드</h1>
-    <p><strong>ML · DL · Graph</strong> 군별 대표(<strong>XGBoost · ResidualMLP · GCN</strong>)를 SageMaker에서 실행하고, 산출 지표·아티팩트·로그를 한곳에 모읍니다. <strong>최종 실행 단계</strong>이며 추가 탐색은 하지 않습니다. 로컬 CV는 선정 근거로만 유지합니다. 통합 산출 번들: <code>sagemaker_final_three/</code> (<strong>§2.5</strong>).</p>
+    <p><strong>ML · DL · Graph</strong> 군별 대표(<strong>XGBoost · ResidualMLP · GCN</strong>)를 SageMaker에서 실행하고, 산출 지표·아티팩트·로그를 한곳에 모읍니다. <strong>최종 실행 단계</strong>이며 추가 탐색은 하지 않습니다. 로컬 CV는 선정 근거로만 유지합니다. 통합 산출 번들: <code>sagemaker_final_three/</code> (<strong>§2.5</strong>). <strong>운영 정책:</strong> 약물 후보는 <strong>FDA 승인 의약품만</strong> — §4.3 shortlist는 승인 필터 <strong>적용 전</strong> 스냅샷이다.</p>
     <p class="muted" style="margin-top:10px;font-size:0.88rem;">로컬 목차: <code>python3 serve_dashboards.py</code> 또는 <code>http://127.0.0.1:8000/sagemaker_experiment_dashboard_20260403.html</code></p>
-    <div class="badge">Snapshot · 20260403_v7 · §4 하위 4.1–4.6 재번호 + §4.4 proxy 경고</div>
+    <div class="badge">Snapshot · 20260403_v9 · 운영정책 FDA 승인약만 · §4.3 shortlist=필터 전 스냅샷</div>
     <a class="nav-btn" href="index.html">Index</a>
     <a class="nav-btn" href="dl_experiment_dashboard_20260331.html">DL 대시보드 (로컬 §0)</a>
     <a class="nav-btn" href="graph_experiment_dashboard_20260402.html">Graph 대시보드</a>
@@ -194,7 +206,7 @@ python3 ml/pilot_sagemaker/aggregate_final_representative_outputs.py --collect</
         <tr><td><code>final_ensemble_ranking_v2.csv</code></td><td>새 가중치 앙상블 점수·순위</td><td><code>ensemble_score</code> 유지 + <code>ensemble_score_v2</code>, <code>rank_v2</code>, <code>is_top100_v2</code> 추가</td></tr>
         <tr><td><code>metabric_validation_summary.csv</code></td><td>METABRIC external validation 완료</td><td>모델별 RMSE/MAE/Spearman, 평가 pair 수 2648</td></tr>
         <tr><td><code>admet_filter_log.json</code></td><td>ADMET 규칙·통과/탈락 로그</td><td>direct molecular lookup이 아닌 proxy rule-based screening</td></tr>
-        <tr><td><code>final_shortlist.csv</code></td><td>최종 후보군</td><td>Top 30 shortlist 생성 완료</td></tr>
+        <tr><td><code>final_shortlist.csv</code></td><td>후보 목록(스냅샷)</td><td>Top 30 행 생성 완료 · <strong>FDA 승인 필터 전</strong> — 운영 정책상 “최종 후보”로 쓰려면 승인약 조인·재산출 필요</td></tr>
       </table>
       <p class="muted" style="margin-top:10px;">
         <strong>요약 수치:</strong> METABRIC evaluation pairs = <strong>2648</strong> · ADMET passed = <strong>53 / 100</strong> · Final shortlist = <strong>30</strong>
@@ -210,6 +222,101 @@ python3 ml/pilot_sagemaker/aggregate_final_representative_outputs.py --collect</
         <tr><td>263</td><td>10</td><td>3.0255</td><td>-1.7865</td><td>8.4990</td><td>5.1917</td><td>True</td><td>Top10</td></tr>
         <tr><td>1852</td><td>11</td><td>2.8018</td><td>-1.8667</td><td>8.0618</td><td>5.1045</td><td>True</td><td>Top30</td></tr>
       </table>
+      <div class="policy-fda">
+        <strong>프로젝트 운영 정책 (필수):</strong> 최종 후보는 <strong>FDA 승인 의약품만</strong> 허용한다. 비승인·연구용 화합물만으로 구성된 shortlist는 <strong>운영 산출로 사용하지 않는다.</strong> 승인 여부는 OpenFDA / Orange Book / RxNorm 등과 <strong>공식 조인</strong>으로 증빙한다.
+      </div>
+      <p class="muted" style="margin-top:12px;">
+        <strong>아래 표의 현재 상태:</strong> 위 정책 <strong>미적용</strong> 파이프라인 스냅샷이다. <code>final_shortlist.csv</code>(20260402 dual validation) <strong>상위 30행</strong> — 모델·proxy ADMET만 반영, <strong>FDA 승인 필터 없음</strong>. 감사·비교용으로만 두고, <strong>처방·추천·대외 “후보 약” 제시 금지.</strong> PubChem명은 METABRIC 대시보드 §2 참고.
+      </p>
+      <h3 style="font-size:1rem;margin:14px 0 8px;">대표 10개 — shortlist tier(<code>bucket</code>)별</h3>
+      <p class="muted" style="margin:0 0 8px;">subtype = 운영 구간 <strong>Top10</strong> / <strong>Top30</strong> / <strong>&gt;Top30</strong>(파일에 포함된 30행 중 상위권 밖 예시 2개). 각 tier에서 순위·점수 스펙트럼을 보려고 고른 표본입니다.</p>
+      <table>
+        <tr><th>shortlist tier (<code>bucket</code>)</th><th><code>canonical_drug_id</code></th><th><code>rank_v2</code></th><th><code>ensemble_score_v2</code></th><th>메모</th></tr>
+        <tr><td>Top10</td><td>2498</td><td>1</td><td>2.7789</td><td>앙상블 v2 1위</td></tr>
+        <tr><td>Top10</td><td>196</td><td>3</td><td>3.0275</td><td>고득점 구간</td></tr>
+        <tr><td>Top10</td><td>1783</td><td>8</td><td>2.6365</td><td>Top10 내 중위</td></tr>
+        <tr><td>Top10</td><td>263</td><td>10</td><td>3.0255</td><td>Top10 경계</td></tr>
+        <tr><td>Top30</td><td>1852</td><td>11</td><td>2.8018</td><td>Top30 구간 시작</td></tr>
+        <tr><td>Top30</td><td>1047</td><td>15</td><td>2.9665</td><td>중간 순위</td></tr>
+        <tr><td>Top30</td><td>1635</td><td>19</td><td>2.7183</td><td></td></tr>
+        <tr><td>Top30</td><td>345</td><td>28</td><td>2.9916</td><td>Top30 후반</td></tr>
+        <tr><td>&gt;Top30</td><td>2360</td><td>31</td><td>2.7075</td><td>동일 CSV 30행 중 tier 라벨만 &gt;Top30</td></tr>
+        <tr><td>&gt;Top30</td><td>290</td><td>35</td><td>2.9824</td><td>예시</td></tr>
+      </table>
+
+      <!--
+        POLICY: FDA-approved drugs only for final ops; this block is PRE-FILTER pipeline snapshot, not an approved-drug list.
+        final_shortlist.csv Top30 (canonical_drug_id 목록, 소스: fe_re_batch_runs/20260402/sagemaker_dual_validation/)
+        전체 30행 | rank_v2 | canonical_drug_id | ensemble_score_v2 | bucket
+        1  2498  2.778895657018505  Top10
+        2  2438  2.764370005086742  Top10
+        3  196   3.0274880497306587 Top10
+        8  1783  2.63654743998888   Top10
+        10 263   3.025520180823172  Top10
+        11 1852  2.8018027628083595 Top30
+        12 1449  2.777973137081278  Top30
+        14 2002  2.7326457216839    Top30
+        15 1047  2.9665016537532214 Top30
+        16 1806  2.608674591478138  Top30
+        17 2361  2.728530855427186  Top30
+        19 1635  2.7182911769383487 Top30
+        20 1615  2.789135726751841  Top30
+        21 1780  2.6026625809037975 Top30
+        22 1716  2.6004556354844857 Top30
+        24 2003  2.7169250681499646 Top30
+        25 2359  2.715151138554017  Top30
+        26 1777  2.592226713594227  Top30
+        27 2107  2.940412882551551  Top30
+        28 345   2.991623591543997  Top30
+        30 1073  2.9429886704310775 Top30
+        31 2360  2.707538814793031  >Top30
+        33 1043  2.878307891111164  >Top30
+        34 2000  2.701540251026551  >Top30
+        35 290   2.982415913702811  >Top30
+        37 1030  2.8695533516214176 >Top30
+        39 231   2.975869130255545  >Top30
+        40 2157  2.617118351415477  >Top30
+        42 1253  2.6654524764511733 >Top30
+        43 2043  2.9195796286910776 >Top30
+      -->
+
+      <details class="sm-fold" style="margin-top:14px;">
+        <summary>전체 Top30 행 (표 · 소스 CSV와 동일 30 drugs)</summary>
+        <p class="muted" style="margin:0 0 10px;font-size:0.88rem;">동일 데이터가 위 HTML 주석 블록에도 텍스트로 들어 있습니다(검색·복사용).</p>
+        <table>
+          <tr><th><code>rank_v2</code></th><th><code>canonical_drug_id</code></th><th><code>ensemble_score_v2</code></th><th><code>bucket</code></th></tr>
+          <tr><td>1</td><td>2498</td><td>2.7789</td><td>Top10</td></tr>
+          <tr><td>2</td><td>2438</td><td>2.7644</td><td>Top10</td></tr>
+          <tr><td>3</td><td>196</td><td>3.0275</td><td>Top10</td></tr>
+          <tr><td>8</td><td>1783</td><td>2.6365</td><td>Top10</td></tr>
+          <tr><td>10</td><td>263</td><td>3.0255</td><td>Top10</td></tr>
+          <tr><td>11</td><td>1852</td><td>2.8018</td><td>Top30</td></tr>
+          <tr><td>12</td><td>1449</td><td>2.7780</td><td>Top30</td></tr>
+          <tr><td>14</td><td>2002</td><td>2.7326</td><td>Top30</td></tr>
+          <tr><td>15</td><td>1047</td><td>2.9665</td><td>Top30</td></tr>
+          <tr><td>16</td><td>1806</td><td>2.6087</td><td>Top30</td></tr>
+          <tr><td>17</td><td>2361</td><td>2.7285</td><td>Top30</td></tr>
+          <tr><td>19</td><td>1635</td><td>2.7183</td><td>Top30</td></tr>
+          <tr><td>20</td><td>1615</td><td>2.7891</td><td>Top30</td></tr>
+          <tr><td>21</td><td>1780</td><td>2.6027</td><td>Top30</td></tr>
+          <tr><td>22</td><td>1716</td><td>2.6005</td><td>Top30</td></tr>
+          <tr><td>24</td><td>2003</td><td>2.7169</td><td>Top30</td></tr>
+          <tr><td>25</td><td>2359</td><td>2.7152</td><td>Top30</td></tr>
+          <tr><td>26</td><td>1777</td><td>2.5922</td><td>Top30</td></tr>
+          <tr><td>27</td><td>2107</td><td>2.9404</td><td>Top30</td></tr>
+          <tr><td>28</td><td>345</td><td>2.9916</td><td>Top30</td></tr>
+          <tr><td>30</td><td>1073</td><td>2.9430</td><td>Top30</td></tr>
+          <tr><td>31</td><td>2360</td><td>2.7075</td><td>&gt;Top30</td></tr>
+          <tr><td>33</td><td>1043</td><td>2.8783</td><td>&gt;Top30</td></tr>
+          <tr><td>34</td><td>2000</td><td>2.7015</td><td>&gt;Top30</td></tr>
+          <tr><td>35</td><td>290</td><td>2.9824</td><td>&gt;Top30</td></tr>
+          <tr><td>37</td><td>1030</td><td>2.8696</td><td>&gt;Top30</td></tr>
+          <tr><td>39</td><td>231</td><td>2.9759</td><td>&gt;Top30</td></tr>
+          <tr><td>40</td><td>2157</td><td>2.6171</td><td>&gt;Top30</td></tr>
+          <tr><td>42</td><td>1253</td><td>2.6655</td><td>&gt;Top30</td></tr>
+          <tr><td>43</td><td>2043</td><td>2.9196</td><td>&gt;Top30</td></tr>
+        </table>
+      </details>
     </section>
 
     <section>
@@ -218,8 +325,8 @@ python3 ml/pilot_sagemaker/aggregate_final_representative_outputs.py --collect</
         <strong>중요 (프록시·비실제 METABRIC):</strong> 아래 표의 METABRIC Spearman·RMSE 등은 <strong>실제 METABRIC 임상·발현 코호트 전체를 그대로 쓴 값이 아닙니다.</strong>
         내부 외부 샘플 세트(<code>METABRIC-like</code>, <code>sample_expression_crispr_full</code> 등)에 약물 단위 점수를 <strong>투영(projection)</strong>한 <strong>가상에 가까운 proxy 설정</strong>에서 나온 수치입니다.
         <strong>앞으로는 실제 METABRIC 데이터</strong> 기반 파이프라인(코호트-native FE, 공식 랭킹, 생존 연계 등)으로 진행합니다.
-        <strong>갱신된 정리·수치·해석</strong>은 다음 대시보드에 반영했습니다:
-        <a href="metabric_admet_survival_dashboard_20260402_v2.html"><code>metabric_admet_survival_dashboard_20260402_v2.html</code> (20260402 v2)</a>
+        <strong>갱신된 정리·수치·해석·shortlist 화합물명(PubChem)</strong>은 다음 대시보드에 반영했습니다:
+        <a href="metabric_admet_survival_dashboard_20260402_v2.html"><code>metabric_admet_survival_dashboard_20260402_v2.html</code> (20260402 v2, §2 필터 전 shortlist · §2.1 FDA·native shortlist · §3 생존)</a>
       </div>
       <h3 style="font-size:1rem;margin:8px 0 8px;">방법</h3>
       <ul class="muted">

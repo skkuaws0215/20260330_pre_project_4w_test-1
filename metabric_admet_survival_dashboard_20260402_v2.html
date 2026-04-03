@@ -62,15 +62,36 @@
     .caution-label h3 { margin: 0 0 10px; font-size: 1rem; color: #fca5a5; }
     .caution-label ul { margin: 8px 0 0; padding-left: 1.2rem; color: #fecaca; }
     .caution-label li { margin: 6px 0; }
+    table.shortlist-table td { vertical-align: top; }
+    .chem-name { font-size: 0.82rem; line-height: 1.45; max-width: 32rem; }
+    table.shortlist-table code { font-size: 0.8rem; }
+    details.sm-fold { margin-top: 12px; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 12px 14px; background: rgba(255,255,255,0.04); }
+    details.sm-fold summary { cursor: pointer; color: #9bc2ff; font-weight: 600; font-size: 0.95rem; }
+    details.sm-fold[open] summary { margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .policy-fda {
+      margin: 0 0 14px;
+      padding: 14px 16px;
+      border: 2px solid rgba(56, 189, 248, 0.55);
+      border-left: 5px solid #38bdf8;
+      background: rgba(14, 165, 233, 0.12);
+      border-radius: 10px;
+      color: #e0f2fe;
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+    .policy-fda strong { color: #7dd3fc; }
   </style>
 </head>
 <body>
   <div class="hero">
     <h1>METABRIC · ADMET · Survival-linked clinical relevance</h1>
-    <p><strong>외부 코호트 관점 정리 대시보드 (20260402 v2).</strong> <strong>§2</strong>는 실제 METABRIC OS 등을 쓴 <strong>Survival-linked</strong> 축이고, <strong>§3–§5</strong>는 점선 박스로 표시한 <strong>proxy</strong> 기반 보조 분석(METABRIC-like 정렬·native 랭킹 맥락·ADMET proxy 게이트)입니다. 약물 반응 라벨의 “정답 맞추기” 외부 검증과는 목적이 다릅니다.</p>
+    <p><strong>외부 코호트 관점 정리 대시보드 (20260402 v2).</strong> <strong>운영 정책:</strong> 후보는 <strong>FDA 승인 의약품만</strong> 허용(§2 상단 박스). <strong>§2</strong>는 TCGA 학습 경로 <code>final_shortlist.csv</code> 기준 <strong>필터 적용 전</strong> 스냅샷·감사용. <strong>§2.1</strong>은 화학 공간 50약 풀에 대한 Drugs@FDA·치료제 제외 <strong>사후 필터</strong> shortlist. <strong>§2.2</strong>는 <strong>FDA drug universe</strong>를 먼저 정한 뒤 동일 FE·앙상블로 다시 랭킹한 경로(스냅샷은 <code>fda_only_universe/</code>). <strong>§2.3</strong>은 해당 Top30에 대한 <strong>direct ADMET</strong>(RDKit 프록시 + TCGA proxy 조인) 및 Top10 선정. <strong>§3</strong> 생존(OS), <strong>§4–§6</strong> proxy 보조 분석.</p>
     <p class="muted" style="margin-top:10px;font-size:0.88rem;">로컬: 저장소 루트에서 <code>python3 serve_dashboards.py</code> 후 <code>/metabric_admet_survival_dashboard_20260402_v2.html</code> 로 접속.</p>
-    <div class="badge">Snapshot · 20260402 v2 · §2 실제 생존축 / §3–5 proxy 박스</div>
+    <div class="badge">Snapshot · 20260402 v2 · §2.1=사후 FDA 필터 · §2.2=FDA universe 랭킹 · §2.3=direct ADMET Top10 · §3 생존 · §4–6 proxy</div>
     <a class="nav-btn" href="index.html">Index</a>
+    <a class="nav-btn" href="#section-2-1-fda-ndc-native" style="border-color:#42d59f;color:#6ee7b7;">§2.1 FDA·native shortlist</a>
+    <a class="nav-btn" href="#section-2-2-fda-universe-ranking" style="border-color:#5eead4;color:#5eead4;">§2.2 FDA universe 랭킹</a>
+    <a class="nav-btn" href="#section-2-3-direct-admet" style="border-color:#fcd34d;color:#fcd34d;">§2.3 direct ADMET</a>
     <a class="nav-btn" href="sagemaker_experiment_dashboard_20260403.html">SageMaker 통합 대시보드</a>
     <a class="nav-btn" href="dl_experiment_dashboard_20260331.html">DL 대시보드 (§0b native 정책)</a>
   </div>
@@ -81,14 +102,231 @@
       <ul class="muted tight">
         <li><strong>Drug-response 외부 검증의 한계:</strong> 학습 라벨은 주로 TCGA/LINCS 계열의 <strong>반응·민감도 proxy</strong>에 가깝습니다. METABRIC에서 동일 정의의 “약물 반응 정답”을 깨끗하게 맞추는 것은 라벨·실험 설계·치료 이력 정합이 어렵습니다.</li>
         <li><strong>임상 질문으로의 확장:</strong> 모델이 뽑은 약물·경로 신호가 <strong>환자 생존과 통계적으로 연결되는지</strong>는 “이 코호트에서 이 신호가 의미 있나?”라는 <strong>별도의 임상적 가설</strong>입니다. 이는 곧바로 인과(치료 효과)를 주장하지 않으며, <strong>탐색적 연관성(screening)</strong>입니다.</li>
-        <li><strong>이번 구현:</strong> 모델별 top drug set에 대해 샘플별 점수를 요약하고, cBioPortal형 <strong>Overall Survival</strong>과 조인한 뒤 high vs low에서 <strong>Kaplan–Meier · log-rank · Cox</strong>를 수행합니다. 산출: <code>metabric_survival_validation_summary.csv</code>, <code>metabric_survival_validation_report.json</code>, <code>km_plots/</code> — 수치·플롯은 <strong>§2</strong>에 정리합니다.</li>
+        <li><strong>이번 구현:</strong> 모델별 top drug set에 대해 샘플별 점수를 요약하고, cBioPortal형 <strong>Overall Survival</strong>과 조인한 뒤 high vs low에서 <strong>Kaplan–Meier · log-rank · Cox</strong>를 수행합니다. 산출: <code>metabric_survival_validation_summary.csv</code>, <code>metabric_survival_validation_report.json</code>, <code>km_plots/</code> — 수치·플롯은 <strong>§3</strong>에 정리합니다.</li>
         <li><strong>주의:</strong> 현재 생존 분석은 <strong>native 랭킹 서브셋(n=40 샘플 × 50약)</strong> 기준이며, 다중비교 미보정·소표본으로 <strong>해석은 가설 생성용</strong>입니다.</li>
       </ul>
     </section>
 
     <section>
-      <h2>2) Survival-linked clinical relevance — 모델별 수치 (n=40, top-K=10)</h2>
-      <p class="muted" style="margin:0 0 10px;"><strong>실제 METABRIC OS 축.</strong> 출처: <code>…/metabric_survival_validation/metabric_survival_validation_summary.csv</code>. 각 모델 점수로 뽑은 top-10 약물 집합에 대해, 샘플별 <strong>해당 모델 예측의 평균</strong>으로 high/low(중앙값 분할)를 정의하고 OS와 비교. <strong>약물 반응 라벨 검증이 아님</strong>.</p>
+      <h2>2) Shortlist Top30 스냅샷 — <code>canonical_drug_id</code> = PubChem CID + 화합물명</h2>
+      <div class="policy-fda">
+        <strong>프로젝트 운영 정책 (필수):</strong> 최종 후보·해석·대외 정리에 쓰는 약물은 <strong>미국 FDA가 승인한 의약품</strong>(처방/비처방 포함, 팀이 정한 최신 승인 데이터셋 기준)으로만 한정한다. <strong>연구용 스크리닝 화합물·비승인 물질만으로 구성된 후보군은 운영 범위에 넣지 않는다.</strong> 승인 여부는 OpenFDA·Orange Book·RxNorm 등 <strong>공식 소스와의 조인</strong>으로 증빙한다.
+      </div>
+      <p class="muted" style="margin:0 0 10px;"><strong>본 절 표의 현재 상태:</strong> 위 정책을 <strong>아직 반영하지 않은</strong> <code>final_shortlist.csv</code>(20260402 dual validation) 상위 30행이다. 모델 앙상블 순위·proxy ADMET만 거친 목록이라 <strong>FDA 승인 약으로 볼 수 없고</strong>, 다수는 일반 화합물·시약에 가깝다. <strong>처방·추천 금지.</strong> METABRIC 코호트-native 공식 랭킹에 <strong>Drugs@FDA 활성 성분 + PubChem 동의어 + 치료제 제외 CID</strong>를 적용한 후보 목록은 <strong><a href="#section-2-1-fda-ndc-native" style="color:#6ee7b7;">§2.1</a></strong>에 따로 정리했다(재랭킹 없음, 운영 정책에 더 가깝다).<br /><br />
+      프로젝트 키 <code>canonical_drug_id</code>를 <strong>PubChem Compound CID</strong>로 두고, 2026-04-02 시점 <a href="https://pubchem.ncbi.nlm.nih.gov/" style="color:#9bc2ff;">PubChem</a> <code>property/Title</code>(없으면 IUPACName)으로 표시명을 붙였습니다. Title은 <strong>IUPAC·시스템명</strong>이 많아 <strong>성분/상품명(허가 단위)</strong>과 다를 수 있다.</p>
+
+      <h3 style="font-size:1rem;margin:14px 0 8px;">tier(<code>bucket</code>)별 대표 10개</h3>
+      <table class="shortlist-table">
+        <tr><th>tier</th><th>CID</th><th>PubChem 표시명</th><th><code>rank_v2</code></th><th><code>ensemble_score_v2</code></th></tr>
+        <tr><td>Top10</td><td><code>2498</code></td><td class="chem-name">N-(1,3-Dihydroxyoctadec-4-en-2-yl)hexadecanamide</td><td>1</td><td>2.7789</td></tr>
+        <tr><td>Top10</td><td><code>196</code></td><td class="chem-name">Adipic Acid</td><td>3</td><td>3.0275</td></tr>
+        <tr><td>Top10</td><td><code>1783</code></td><td class="chem-name">Capravirine</td><td>8</td><td>2.6365</td></tr>
+        <tr><td>Top10</td><td><code>263</code></td><td class="chem-name">1-Butanol</td><td>10</td><td>3.0255</td></tr>
+        <tr><td>Top30</td><td><code>1852</code></td><td class="chem-name">3-[7,8-Dimethyl-2,4-dioxo-10-(2,3,4-trihydroxy-5-phosphonooxypentyl)benzo[g]pteridin-6-yl]tetradecanoic acid</td><td>11</td><td>2.8018</td></tr>
+        <tr><td>Top30</td><td><code>1047</code></td><td class="chem-name">2-Pyrazinecarboxylic acid</td><td>15</td><td>2.9665</td></tr>
+        <tr><td>Top30</td><td><code>1635</code></td><td class="chem-name">3-[4-(2-Pyrrolidin-1-yl-ethoxy)-benzyl]-2-4-(2-pyrrolidin-1-yl-ethoxy)-phenyl]-benzo[b]thiophene</td><td>19</td><td>2.7183</td></tr>
+        <tr><td>Top30</td><td><code>345</code></td><td class="chem-name">But-2-ene-1,2,3-tricarboxylic acid</td><td>28</td><td>2.9916</td></tr>
+        <tr><td>&gt;Top30</td><td><code>2360</code></td><td class="chem-name">Oxalyldiaminopropionic acid</td><td>31</td><td>2.7075</td></tr>
+        <tr><td>&gt;Top30</td><td><code>2157</code></td><td class="chem-name">Amiodarone</td><td>40</td><td>2.6171</td></tr>
+      </table>
+
+      <details class="sm-fold" style="margin-top:14px;">
+        <summary>전체 30개 — 순위·CID·화합물명·tier·앙상블 v2 점수</summary>
+        <table class="shortlist-table" style="margin-top:10px;">
+          <tr><th><code>rank_v2</code></th><th>CID</th><th>화합물명 (PubChem)</th><th>tier</th><th><code>ensemble_score_v2</code></th></tr>
+          <tr><td>1</td><td><code>2498</code></td><td class="chem-name">N-(1,3-Dihydroxyoctadec-4-en-2-yl)hexadecanamide</td><td>Top10</td><td>2.7789</td></tr>
+          <tr><td>2</td><td><code>2438</code></td><td class="chem-name">3-(1-Methyl-4-piperidinyl)-1H-indol-5-ol</td><td>Top10</td><td>2.7644</td></tr>
+          <tr><td>3</td><td><code>196</code></td><td class="chem-name">Adipic Acid</td><td>Top10</td><td>3.0275</td></tr>
+          <tr><td>8</td><td><code>1783</code></td><td class="chem-name">Capravirine</td><td>Top10</td><td>2.6365</td></tr>
+          <tr><td>10</td><td><code>263</code></td><td class="chem-name">1-Butanol</td><td>Top10</td><td>3.0255</td></tr>
+          <tr><td>11</td><td><code>1852</code></td><td class="chem-name">3-[7,8-Dimethyl-2,4-dioxo-10-(2,3,4-trihydroxy-5-phosphonooxypentyl)benzo[g]pteridin-6-yl]tetradecanoic acid</td><td>Top30</td><td>2.8018</td></tr>
+          <tr><td>12</td><td><code>1449</code></td><td class="chem-name">17-Octadecynoic acid</td><td>Top30</td><td>2.7780</td></tr>
+          <tr><td>14</td><td><code>2002</code></td><td class="chem-name">N-Acetyltryptophan</td><td>Top30</td><td>2.7326</td></tr>
+          <tr><td>15</td><td><code>1047</code></td><td class="chem-name">2-Pyrazinecarboxylic acid</td><td>Top30</td><td>2.9665</td></tr>
+          <tr><td>16</td><td><code>1806</code></td><td class="chem-name">[5-(5-bromo-2,4-dioxo-3,4-dihydropyrimidin-1(2H)-yl)-3-hydroxytetrahydrofuran-2-yl]methyl dihydrogen phosphate</td><td>Top30</td><td>2.6087</td></tr>
+          <tr><td>17</td><td><code>2361</code></td><td class="chem-name">Beta-Naphthoflavone</td><td>Top30</td><td>2.7285</td></tr>
+          <tr><td>19</td><td><code>1635</code></td><td class="chem-name">3-[4-(2-Pyrrolidin-1-yl-ethoxy)-benzyl]-2-4-(2-pyrrolidin-1-yl-ethoxy)-phenyl]-benzo[b]thiophene</td><td>Top30</td><td>2.7183</td></tr>
+          <tr><td>20</td><td><code>1615</code></td><td class="chem-name">3,4-Methylenedioxymethamphetamine</td><td>Top30</td><td>2.7891</td></tr>
+          <tr><td>21</td><td><code>1780</code></td><td class="chem-name">5,8,11,14-Eicosatetraynoic Acid</td><td>Top30</td><td>2.6027</td></tr>
+          <tr><td>22</td><td><code>1716</code></td><td class="chem-name">2-[[4-(2-Carboxypyrrolidin-1-yl)sulfonylbenzoyl]amino]pentanedioic acid</td><td>Top30</td><td>2.6005</td></tr>
+          <tr><td>24</td><td><code>2003</code></td><td class="chem-name">2-acetamido-3-(1H-indol-3-yl)propanamide</td><td>Top30</td><td>2.7169</td></tr>
+          <tr><td>25</td><td><code>2359</code></td><td class="chem-name">Benzo(B)Thiophene-2-Boronic Acid</td><td>Top30</td><td>2.7152</td></tr>
+          <tr><td>26</td><td><code>1777</code></td><td class="chem-name">Icosa-8,11,14-trien-5-ynoic acid</td><td>Top30</td><td>2.5922</td></tr>
+          <tr><td>27</td><td><code>2107</code></td><td class="chem-name">Alpha-Methylserotonin</td><td>Top30</td><td>2.9404</td></tr>
+          <tr><td>28</td><td><code>345</code></td><td class="chem-name">But-2-ene-1,2,3-tricarboxylic acid</td><td>Top30</td><td>2.9916</td></tr>
+          <tr><td>30</td><td><code>1073</code></td><td class="chem-name">1,5-Bisphosphate sodium salt hydrate</td><td>Top30</td><td>2.9430</td></tr>
+          <tr><td>31</td><td><code>2360</code></td><td class="chem-name">Oxalyldiaminopropionic acid</td><td>&gt;Top30</td><td>2.7075</td></tr>
+          <tr><td>33</td><td><code>1043</code></td><td class="chem-name">Pteridine</td><td>&gt;Top30</td><td>2.8783</td></tr>
+          <tr><td>34</td><td><code>2000</code></td><td class="chem-name">Afalanine</td><td>&gt;Top30</td><td>2.7015</td></tr>
+          <tr><td>35</td><td><code>290</code></td><td class="chem-name">4-Amino-1-{5-o-[hydroxy(phosphonooxy)phosphoryl]pentofuranosyl}pyrimidin-2(1h)-one</td><td>&gt;Top30</td><td>2.9824</td></tr>
+          <tr><td>37</td><td><code>1030</code></td><td class="chem-name">Propylene Glycol</td><td>&gt;Top30</td><td>2.8696</td></tr>
+          <tr><td>39</td><td><code>231</code></td><td class="chem-name">5,8,11,14-Eicosatetraenoic acid, (5Z,8Z,11Z,14Z)-</td><td>&gt;Top30</td><td>2.9759</td></tr>
+          <tr><td>40</td><td><code>2157</code></td><td class="chem-name">Amiodarone</td><td>&gt;Top30</td><td>2.6171</td></tr>
+          <tr><td>42</td><td><code>1253</code></td><td class="chem-name">Acanthus ilicifolius Linn</td><td>&gt;Top30</td><td>2.6655</td></tr>
+          <tr><td>43</td><td><code>2043</code></td><td class="chem-name">2-cyano-3-(3,5-ditert-butyl-4-hydroxyphenyl)prop-2-enimidothioic acid (PubChem IUPACName, Title 비어 있음)</td><td>&gt;Top30</td><td>2.9196</td></tr>
+        </table>
+      </details>
+
+      <!--
+        POLICY: FDA-approved drugs only for final ops; this list is PRE-FILTER snapshot, not approved-drug shortlist.
+        shortlist Top30 | rank_v2 | CID=canonical_drug_id | PubChem Title/IUPAC | bucket | ensemble_score_v2
+        (소스 CSV + 2026-04-02 PubChem PUG REST)
+        1 2498 N-(1,3-Dihydroxyoctadec-4-en-2-yl)hexadecanamide Top10 2.778895657018505
+        2 2438 3-(1-Methyl-4-piperidinyl)-1H-indol-5-ol Top10 2.764370005086742
+        3 196 Adipic Acid Top10 3.0274880497306587
+        8 1783 Capravirine Top10 2.63654743998888
+        10 263 1-Butanol Top10 3.025520180823172
+        11 1852 3-[7,8-Dimethyl-2,4-dioxo-10-(2,3,4-trihydroxy-5-phosphonooxypentyl)benzo[g]pteridin-6-yl]tetradecanoic acid Top30 2.8018027628083595
+        12 1449 17-Octadecynoic acid Top30 2.777973137081278
+        14 2002 N-Acetyltryptophan Top30 2.7326457216839
+        15 1047 2-Pyrazinecarboxylic acid Top30 2.9665016537532214
+        16 1806 [5-(5-bromo-2,4-dioxo-3,4-dihydropyrimidin-1(2H)-yl)-3-hydroxytetrahydrofuran-2-yl]methyl dihydrogen phosphate Top30 2.608674591478138
+        17 2361 Beta-Naphthoflavone Top30 2.728530855427186
+        19 1635 3-[4-(2-Pyrrolidin-1-yl-ethoxy)-benzyl]-2-4-(2-pyrrolidin-1-yl-ethoxy)-phenyl]-benzo[b]thiophene Top30 2.7182911769383487
+        20 1615 3,4-Methylenedioxymethamphetamine Top30 2.789135726751841
+        21 1780 5,8,11,14-Eicosatetraynoic Acid Top30 2.6026625809037975
+        22 1716 2-[[4-(2-Carboxypyrrolidin-1-yl)sulfonylbenzoyl]amino]pentanedioic acid Top30 2.6004556354844857
+        24 2003 2-acetamido-3-(1H-indol-3-yl)propanamide Top30 2.7169250681499646
+        25 2359 Benzo(B)Thiophene-2-Boronic Acid Top30 2.715151138554017
+        26 1777 Icosa-8,11,14-trien-5-ynoic acid Top30 2.592226713594227
+        27 2107 Alpha-Methylserotonin Top30 2.940412882551551
+        28 345 But-2-ene-1,2,3-tricarboxylic acid Top30 2.991623591543997
+        30 1073 1,5-Bisphosphate sodium salt hydrate Top30 2.9429886704310775
+        31 2360 Oxalyldiaminopropionic acid >Top30 2.707538814793031
+        33 1043 Pteridine >Top30 2.878307891111164
+        34 2000 Afalanine >Top30 2.701540251026551
+        35 290 4-Amino-1-{5-o-[hydroxy(phosphonooxy)phosphoryl]pentofuranosyl}pyrimidin-2(1h)-one >Top30 2.982415913702811
+        37 1030 Propylene Glycol >Top30 2.8695533516214176
+        39 231 5,8,11,14-Eicosatetraenoic acid, (5Z,8Z,11Z,14Z)- >Top30 2.975869130255545
+        40 2157 Amiodarone >Top30 2.617118351415477
+        42 1253 Acanthus ilicifolius Linn >Top30 2.6654524764511733
+        43 2043 2-cyano-3-(3,5-ditert-butyl-4-hydroxyphenyl)prop-2-enimidothioic acid >Top30 2.9195796286910776
+      -->
+    </section>
+
+    <section id="section-2-1-fda-ndc-native">
+      <h2>2.1) METABRIC native (no-LINCS) 랭킹 · Drugs@FDA 성분 + 치료제 필터 &amp; drug shortlist</h2>
+      <div class="policy-fda">
+        <strong>운영 정책과의 관계:</strong> 본 절은 <strong>공식 external inference 랭킹</strong>(§5·DL 대시보드 §0b와 동일 파일)을 <strong>재계산하지 않고</strong>, openFDA 벌크 <code>drug-drugsfda-*.json.zip</code>의 제품 <code>active_ingredients[].name</code>에서 뽑은 <strong>성분 토큰 집합</strong>과 PubChem CID <strong>동의어</strong>를 맞춘다(기본 <code>--drugsfda-match relaxed</code>: 길이≥8 부분문자열, NDC 전체 목록보다 좁음). 이어서 스크립트에 고정된 <strong>비치료제 CID 제외 목록</strong>(인산·글리콜·프로판올·피리딘·대사체 등)을 빼 <strong>NDC 시절보다 과대포함이 덜한</strong> 후보 집합을 만든다. <strong>DrugBank <code>approved</code></strong>와 교집합·합집합은 <code>--source drugbank+drugsfda</code>와 DrugBank XML(또는 승인 ID JSON)이 있을 때 사용한다.
+      </div>
+      <p class="muted" style="margin:0 0 10px;">
+        <strong>입력:</strong>
+        <code>results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_ensemble_ranking_no_lincs.csv</code><br />
+        <strong>스크립트:</strong> <code>ml/pilot_sagemaker/build_fda_metabric_shortlist.py</code> (기본 <code>--source drugsfda</code>) ·
+        <strong>산출:</strong> 동일 폴더 <code>fda_filtered_ranking.csv</code> · <code>fda_top30_shortlist.csv</code> (고유 약 최대 30; <strong>본 스냅샷은 조건을 만족하는 약이 4개뿐</strong>) · 메타 <code>fda_filter_run_meta.json</code> · 캐시 <code>fda_filter_cache/</code>
+      </p>
+      <p class="muted" style="margin:0 0 14px;"><strong>규모 (fda_filter_run_meta.json 기준):</strong> 입력 2000행 / 50고유 CID → 필터 후 <strong>160행 / 4고유 CID</strong>. PubChem PUG 404로 동의어 없는 CID는 여전히 제외된다.</p>
+
+      <details class="sm-fold" style="margin:0 0 16px;">
+        <summary><strong><code>ensemble_score</code>가 의미하는 것</strong> (클릭하여 펼치기)</summary>
+        <div class="muted" style="margin-top:10px; line-height:1.6;">
+          <p style="margin:0 0 10px;">원본 랭킹 CSV(<code>metabric_native_ensemble_ranking_no_lincs.csv</code>)의 각 행은 하나의 <strong>(<code>sample_id</code>, <code>canonical_drug_id</code>) 쌍</strong>에 대해 세 최종 모델이 낸 <strong>회귀 예측값</strong>을 담는다: <code>pred_xgb</code>, <code>pred_residualmlp</code>, <code>pred_gcn</code>. 이들은 METABRIC-native 피처로 각각 XGBoost·ResidualMLP·GCN을 돌린 점수다.</p>
+          <p style="margin:0 0 10px;"><strong><code>ensemble_score</code></strong>는 그 쌍에 대해 위 세 값을 고정 가중치로 합친 <strong>단일 실수</strong>다. 산출 스크립트(<code>build_final_ensemble_ranking.py</code>와 동일한 결)는 다음과 같다:</p>
+          <p style="margin:0 0 10px;"><code>ensemble_score = 0.5 × pred_xgb + 0.3 × pred_residualmlp + 0.2 × pred_gcn</code></p>
+          <p style="margin:0;"><strong>해석:</strong> “한 쌍에 대해 세 모델이 얼마나 강하게 반응(높은 예측)을 주는가”를 <strong>ML 쪽에 50%, DL 30%, Graph 20%</strong> 비중으로 섞은 <strong>앙상블 회귀 점수</strong>다. <strong>확률·p-value가 아니며</strong>, 단위는 각 모델 출력과 같은 스케일(학습 타깃 <code>label_regression</code>에 대한 모델 예측)에 맞춰진다. 전역 <code>rank</code>는 모든 쌍을 이 점수 <strong>내림차순</strong>으로 정렬해 붙인 순위다. 본 §2.1 표의 <code>ensemble_score</code>는 각 약물에 대해 <strong>그 약물이 등장하는 행들 중 가장 좋은(가장 높은) 쌍의 점수</strong>를 쓴 것으로, shortlist 행은 <code>fda_top30_shortlist.csv</code>와 동일하다.</p>
+        </div>
+      </details>
+
+      <h3 style="font-size:1rem;margin:0 0 8px;">고유 약물 <strong>전체 4개</strong> (<code>best_pair_rank</code> = 필터 집합 내 최소 <code>rank</code>)</h3>
+      <table class="shortlist-table">
+        <tr><th>fda_drug_rank</th><th>CID</th><th>PubChem Title</th><th>best_pair_rank</th><th><code>ensemble_score</code></th></tr>
+        <tr><td>1</td><td><code>1046</code></td><td class="chem-name">Pyrazinamide</td><td>14</td><td>12.6558</td></tr>
+        <tr><td>2</td><td><code>1053</code></td><td class="chem-name">Pyridoxamine 5'-phosphate</td><td>655</td><td>4.2010</td></tr>
+        <tr><td>3</td><td><code>1054</code></td><td class="chem-name">Pyridoxine</td><td>662</td><td>4.1194</td></tr>
+        <tr><td>4</td><td><code>1051</code></td><td class="chem-name">Pyridoxal 5'-phosphate</td><td>781</td><td>2.7800</td></tr>
+      </table>
+
+      <details class="sm-fold" style="margin-top:12px;">
+        <summary>주석: 필터에서 제외된 고유 CID 46개 (50−4) — 클릭하여 목록</summary>
+        <p class="muted" style="margin:10px 0 8px;">Drugs@FDA 동의어 미매칭, PubChem 404, 또는 매칭 후 <code>DEFAULT_THERAPEUTIC_EXCLUDE_CIDS</code>에 해당.</p>
+        <ul class="tight muted">
+          <li><strong>PubChem 동의어 404(8개):</strong> <code>1006, 1013, 1019, 1020, 1022, 1025, 1036, 1037</code></li>
+          <li><strong>동의어는 있으나 Drugs@FDA 토큰과 미매칭(27개):</strong> <code>1001, 1003, 1005, 1007, 1008, 1009, 1010, 1011, 1012, 1014, 1016, 1024, 1026, 1028, 1029, 1033, 1034, 1038, 1039, 1042, 1043, 1048, 1050, 1052, 1057, 1058, 1059</code></li>
+          <li><strong>Drugs@FDA 매칭 후 치료제 제외 목록으로 제거(11개):</strong> <code>1004, 1015, 1017, 1018, 1021, 1023, 1030, 1031, 1032, 1047, 1049</code></li>
+        </ul>
+      </details>
+    </section>
+
+    <section id="section-2-2-fda-universe-ranking">
+      <h2>2.2) FDA drug universe 기반 native 랭킹 (재추론)</h2>
+      <div class="policy-fda">
+        <strong>의도:</strong> 화학 공간 50약에 <strong>사후 FDA 필터(§2.1)</strong>를 얹으면 후보가 과소해지는 문제를 피하기 위해, <strong>Drugs@FDA(+선택 DrugBank) 유니버스</strong>를 먼저 잡고 동일 pair FE·동결 앙상블로 <strong>다시 랭킹</strong>한다. 본 스냅샷은 유니버스 구축을 <code>--max-universe-drugs 15</code>로 제한한 <strong>데모 규모</strong>(15고유 CID)이며, 전체 승인 성분으로 확장 시 <code>run_fda_only_metabric_ranking.py</code> 또는 S3 연동 전체 FE를 쓴다.
+      </div>
+      <p class="muted" style="margin:0 0 10px;">
+        <strong>폴더:</strong> <code>results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe/</code><br />
+        <strong>스크립트:</strong> <code>run_fda_only_metabric_ranking.py</code> (전체 FE) · 백필: <code>backfill_fda_only_ranking_from_native.py</code> (native 랭킹에 없는 쌍은 pred 평균으로 impute — 본 표는 이 경로)<br />
+        <strong>산출:</strong> <code>fda_only_ranking.csv</code> · <code>fda_top30_shortlist.csv</code> · <code>fda_approved_drug_table.parquet</code>
+      </p>
+      <p class="muted" style="margin:0 0 14px;"><strong>규모:</strong> 40샘플 × 15약 = 600쌍. 앙상블 점수는 §2.1과 동일 가중치; <strong>백필 시</strong> 관측되지 않은 (샘플,약) 쌍은 native 2000행의 pred 평균으로 채워져 동순위가 많을 수 있다.</p>
+
+      <h3 style="font-size:1rem;margin:0 0 8px;">유니버스 랭킹 <strong>상위 10약</strong> (<code>fda_drug_rank</code> · PubChem Title · <code>best_pair_rank</code> · SwissADME 대응 RDKit LogP/TPSA)</h3>
+      <table class="shortlist-table">
+        <tr><th>rank</th><th>CID</th><th>Title</th><th>best_pair_rank</th><th><code>ensemble</code></th><th>LogP*</th><th>TPSA*</th></tr>
+        <tr><td>1</td><td><code>176</code></td><td class="chem-name">Acetic Acid</td><td>1</td><td>1.5995</td><td>0.09</td><td>37.3</td></tr>
+        <tr><td>2</td><td><code>1989</code></td><td class="chem-name">Acetohexamide</td><td>2</td><td>1.5995</td><td>2.21</td><td>92.3</td></tr>
+        <tr><td>3</td><td><code>2082</code></td><td class="chem-name">Albendazole</td><td>3</td><td>1.5995</td><td>3.24</td><td>67.0</td></tr>
+        <tr><td>4</td><td><code>2083</code></td><td class="chem-name">Salbutamol</td><td>4</td><td>1.5995</td><td>1.31</td><td>72.7</td></tr>
+        <tr><td>5</td><td><code>6060</code></td><td class="chem-name">Acetylcholine Chloride</td><td>5</td><td>1.5995</td><td>−2.74</td><td>26.3</td></tr>
+        <tr><td>6</td><td><code>12035</code></td><td class="chem-name">N-Acetyl-L-Cysteine</td><td>6</td><td>1.5995</td><td>−0.49</td><td>66.4</td></tr>
+        <tr><td>7</td><td><code>15664</code></td><td class="chem-name">5,5'-Dimethyl-2,2'-bipyridyl</td><td>7</td><td>1.5995</td><td>2.76</td><td>25.8</td></tr>
+        <tr><td>8</td><td><code>24144</code></td><td class="chem-name">Acrisorcin</td><td>8</td><td>1.5995</td><td>6.19</td><td>79.4</td></tr>
+        <tr><td>9</td><td><code>39859</code></td><td class="chem-name">Albuterol Sulfate</td><td>9</td><td>1.5995</td><td>1.96</td><td>220.0</td></tr>
+        <tr><td>10</td><td><code>60164</code></td><td class="chem-name">Adapalene</td><td>10</td><td>1.5995</td><td>6.68</td><td>46.5</td></tr>
+      </table>
+      <p class="muted" style="margin:8px 0 0;font-size:0.82rem;">* <code>swissadme_proxy_logp</code>, <code>swissadme_proxy_tpsa</code> — SwissADME 웹이 아니라 RDKit 기술자로 동일 패널을 대체(스크립트 <code>evaluate_fda_shortlist_direct_admet.py</code>).</p>
+
+      <!--
+        FDA universe shortlist ranks 11–15 (동일 스냅샷 direct_admet_results.csv 기준). 전체 30위까지 늘리려면 유니버스 cap 해제 후 재실행.
+        <table class="shortlist-table">
+          <tr><th>rank</th><th>CID</th><th>Title</th><th>best_pair_rank</th><th>ensemble</th><th>LogP*</th><th>TPSA*</th><th>hard_fail</th></tr>
+          <tr><td>11</td><td>60871</td><td>Adefovir Dipivoxil</td><td>11</td><td>1.5995</td><td>2.70</td><td>167.0</td><td>—</td></tr>
+          <tr><td>12</td><td>702</td><td>Ethanol</td><td>13</td><td>1.5995</td><td>0.00</td><td>20.2</td><td>—</td></tr>
+          <tr><td>13</td><td>1983</td><td>Acetaminophen</td><td>14</td><td>1.5995</td><td>1.35</td><td>49.3</td><td>—</td></tr>
+          <tr><td>14</td><td>1986</td><td>Acetazolamide</td><td>15</td><td>1.5995</td><td>−0.86</td><td>115.0</td><td>—</td></tr>
+          <tr><td>15</td><td>1990</td><td>Acetohydroxamic Acid</td><td>17</td><td>1.5995</td><td>−0.49</td><td>49.3</td><td>—</td></tr>
+        </table>
+      -->
+    </section>
+
+    <section id="section-2-3-direct-admet">
+      <h2>2.3) Direct ADMET · hard/soft gate · Top10</h2>
+      <p class="muted" style="margin:0 0 10px;">
+        <strong>입력:</strong> <code>fda_only_universe/fda_top30_shortlist.csv</code><br />
+        <strong>스크립트:</strong> <code>ml/pilot_sagemaker/evaluate_fda_shortlist_direct_admet.py</code><br />
+        <strong>산출:</strong> <code>direct_admet_results.csv</code> · <code>admet_combined_summary.csv</code> · <code>final_top10_fda_drugs.csv</code>
+      </p>
+      <p class="muted" style="margin:0 0 12px;">
+        <strong>SwissADME / ADMETlab:</strong> 공식 배치 API 미연동. RDKit 기술자를 <code>swissadme_proxy_*</code>로 기록하고, ADMETlab 전체 DMPNN은 포털(<a href="https://admetlab3.scbdd.com/" style="color:#9bc2ff;">ADMETlab 3.0</a>)에서 보완한다.<br />
+        <strong>Proxy ADMET:</strong> TCGA 경로 <code>final_shortlist.csv</code>에 동일 CID가 있으면 <code>proxy_tcga_admet_pass</code> 조인.<br />
+        <strong>Hard filter:</strong> hERG 프록시(LogP≥5 ∧ TPSA≤75), 구조 경고 SMARTS 누적≥2(간독성 프록시).<br />
+        <strong>Soft:</strong> 정규화 <code>ensemble_score</code> − Lipophil penalty − alert penalty → <code>soft_composite_score</code>.
+      </p>
+      <h3 style="font-size:1rem;margin:0 0 8px;">최종 <strong>Top10</strong> (<code>final_top10_fda_drugs.csv</code>)</h3>
+      <table class="shortlist-table">
+        <tr><th>final</th><th>CID</th><th>Title</th><th>SMILES (trunc.)</th><th>soft_rank</th><th>LogP*</th><th>hERG†</th><th>hep†</th></tr>
+        <tr><td>1</td><td><code>176</code></td><td class="chem-name">Acetic Acid</td><td class="chem-name">CC(=O)O</td><td>1</td><td>0.09</td><td>pass</td><td>pass</td></tr>
+        <tr><td>2</td><td><code>1989</code></td><td class="chem-name">Acetohexamide</td><td class="chem-name">CC(=O)C1=CC=C…</td><td>2</td><td>2.21</td><td>pass</td><td>pass</td></tr>
+        <tr><td>3</td><td><code>2083</code></td><td class="chem-name">Salbutamol</td><td class="chem-name">CC(C)(C)NCC…</td><td>3</td><td>1.31</td><td>pass</td><td>pass</td></tr>
+        <tr><td>4</td><td><code>6060</code></td><td class="chem-name">Acetylcholine Chloride</td><td class="chem-name">CC(=O)OCC[N+]…</td><td>4</td><td>−2.74</td><td>pass</td><td>pass</td></tr>
+        <tr><td>5</td><td><code>12035</code></td><td class="chem-name">N-Acetyl-L-Cysteine</td><td class="chem-name">CC(=O)NC(CS)…</td><td>5</td><td>−0.49</td><td>pass</td><td>pass</td></tr>
+        <tr><td>6</td><td><code>15664</code></td><td class="chem-name">5,5'-Dimethyl-2,2'-bipyridyl</td><td class="chem-name">CC1=CN=C…</td><td>6</td><td>2.76</td><td>pass</td><td>pass</td></tr>
+        <tr><td>7</td><td><code>39859</code></td><td class="chem-name">Albuterol Sulfate</td><td class="chem-name">CC(C)(C)NCC…(salt)</td><td>7</td><td>1.96</td><td>pass</td><td>pass</td></tr>
+        <tr><td>8</td><td><code>702</code></td><td class="chem-name">Ethanol</td><td class="chem-name">CCO</td><td>8</td><td>0.00</td><td>pass</td><td>pass</td></tr>
+        <tr><td>9</td><td><code>1983</code></td><td class="chem-name">Acetaminophen</td><td class="chem-name">CC(=O)NC1=CC=C…</td><td>9</td><td>1.35</td><td>pass</td><td>pass</td></tr>
+        <tr><td>10</td><td><code>1986</code></td><td class="chem-name">Acetazolamide</td><td class="chem-name">CC(=O)NC1=NN=C…</td><td>10</td><td>−0.86</td><td>pass</td><td>pass</td></tr>
+      </table>
+      <p class="muted" style="margin:8px 0 0;font-size:0.82rem;">† hard_fail 플래그가 True이면 soft 랭킹에서 제외. 본 스냅샷에서 Adapalene(CID 60164)은 hERG 프록시에 걸려 Top10에서 제외됨.</p>
+    </section>
+
+    <section>
+      <h2>3) Survival-linked clinical relevance — 모델별 수치 (n=40, top-K=10)</h2>
+      <div class="caution-label" style="margin:0 0 14px; border-color: rgba(56, 189, 248, 0.55); background: rgba(14, 165, 233, 0.1); color: #e0f2fe;">
+        <h3 style="color:#7dd3fc;margin-top:0;">§3의 top-10 ≠ §2.1 FDA 상위 10약 · FDA 필터 미적용</h3>
+        <p style="margin:0 0 10px;">이 절의 수치·KM 플롯은 <strong>이전과 동일한 산출</strong>이다. 입력은 <strong>전체</strong> <code>metabric_native_ensemble_ranking_no_lincs.csv</code>(약 <strong>50고유 약물</strong>이 등장하는 native 평가 풀)이며, <code>fda_filtered_ranking.csv</code> / §2.1 FDA shortlist를 쓰지 <strong>않았다</strong>.</p>
+        <p style="margin:0 0 10px;">모델마다 top-K=10 약물 집합을 이렇게 고른다: 각 샘플에서 해당 모델 점수 열(<code>pred_xgb</code> 등)로 약물을 순위 매긴 뒤, 약물별 <strong>표본 간 평균 순위</strong>가 가장 좋은(낮은) 10개 CID — <code>run_metabric_survival_validation.py</code>의 <code>_top_drugs_by_model</code>. 따라서 <strong>XGB / ResidualMLP / GCN / Ensemble 행마다 top-10 목록이 서로 다르다</strong>.</p>
+        <p style="margin:0;"><strong>§2.1</strong>의 “FDA 필터 후 글로벌 랭킹 상위 약”(동일 <code>ensemble_score</code> 기준이라도 <strong>다른 질문·다른 약물 집합</strong>)과 <strong>일치하지 않는다</strong>. 예: Ensemble 생존 분석용 top-10에는 1025·1048·1039·1052 등이 들어가고, §2.1 Drugs@FDA+치료제 필터 후에는 <strong>고유 약 4개</strong>(1046·1053·1054·1051)만 남는다. FDA 정책에 맞춘 생존 탐색을 하려면 스크립트를 §2.1 약물 집합(또는 <code>fda_filtered_ranking.csv</code>)으로 다시 돌려야 한다.</p>
+      </div>
+      <p class="muted" style="margin:0 0 10px;"><strong>실제 METABRIC OS 축.</strong> 출처: <code>…/metabric_survival_validation/metabric_survival_validation_summary.csv</code> · 리포트 <code>metabric_survival_validation_report.json</code>(<code>per_model_analyses[].top_drug_ids</code>). 위에서 정한 <strong>모델별</strong> top-10 약물 집합에 대해, 샘플별 <strong>해당 모델 예측의 평균</strong>으로 high/low(중앙값 분할)를 정의하고 OS와 비교. <strong>약물 반응 라벨 검증이 아님</strong>.</p>
       <table>
         <tr><th>model top set</th><th>log-rank <em>p</em></th><th>Cox HR (high vs low)</th><th>Cox <em>p</em></th><th>해석 요지</th></tr>
         <tr><td>XGB <code>pred_xgb</code></td><td>0.036</td><td>2.55</td><td>0.036</td><td>이 서브셋·정의 하에서 high 점수군의 위험(hazard)이 더 높게 추정됨(탐색). XGB는 샘플 내 약물별 예측이 동일한 경우가 많아 사실상 “샘플별 XGB 점수” 분할에 가까울 수 있음.</td></tr>
@@ -105,12 +343,12 @@
       <p class="muted" style="margin-top:10px;"><strong>모델 비교 요약:</strong> 동일 파이프라인·동일 <em>n</em>에서 log-rank <em>p</em>가 가장 작은 것은 <strong class="ok">XGB top set</strong>이었습니다. 다만 표본·다중비교·분할 정의에 민감하므로 <strong>확증 연구 없이 순위만 강조하지 말 것</strong>.</p>
 
       <div class="caution-label">
-        <h3>주의!!! 라벨 정의와 모델 우위 (§2 표 해석)</h3>
+        <h3>주의!!! 라벨 정의와 모델 우위 (§3 표 해석)</h3>
         <p style="margin:0;">위 표는 <strong>생존(survival)과 강하게 정렬된 METABRIC 쪽 입력·라벨 체계</strong>에서 나온 결과로 읽는 것이 타당합니다. 그 설정에서는 임상 유사(clinical-like) 신호에 민감한 <strong>XGB</strong>가 상대적으로 유리한 log-rank·Cox 수치를 받은 것으로 해석할 수 있습니다.</p>
         <ul>
           <li>현재 파이프라인에 결합된 METABRIC 경로에는 <strong>약물 반응(drug response) 형태의 정식 외부 라벨이 충분히 있지 않았고</strong>, 대신 <strong>생존 연계 값이 강하게 실린 데이터</strong>가 들어갔다고 볼 수 있어, <strong>Survival-linked 지표가 상대적으로 높게 관측</strong>될 여지가 있습니다.</li>
           <li><strong>임상 종점·라벨 정의가 바뀌면</strong> (동일 아키텍처라도) <strong>모델 간 상대 우위가 달라질 수 있다</strong>는 점만 기억할 것 — 본 대시보드는 추가 실험 로드맵을 약속하지 않습니다.</li>
-          <li><strong>§2 생존 연계 분석</strong>은 <strong>§3–§5 proxy 보조 분석</strong>과 질문이 다릅니다(OS 탐색 vs 투영·게이트·랭킹 맥락). 섞어서 “최종 승자 모델”로 단정하지 말 것.</li>
+          <li><strong>§3 생존 연계 분석</strong>은 <strong>§4–§6 proxy 보조 분석</strong> 및 <strong>§2 shortlist</strong>(TCGA 경로·<strong>필터 전</strong>)·<strong>§2.1</strong>(METABRIC native·Drugs@FDA·치료제 필터)와 질문이 다릅니다(OS 탐색 vs 후보 ID vs 투영·게이트). 특히 §3 top-10 약물은 <strong>FDA 필터 전 native 풀</strong>에서 <strong>모델별 평균 within-sample rank</strong>로 뽑힌 집합이라 <strong>§2.1 필터 후 약물 집합과 동일하지 않음</strong> — §3 상단 박스 참고. 섞어서 “최종 승자 모델”로 단정하지 말 것.</li>
         </ul>
       </div>
 
@@ -135,11 +373,11 @@
       </div>
     </section>
 
-    <!-- PROXY DATA 블록: §3 — METABRIC-like 투영 정렬(2648 pairs). 실제 코호트-native drug response 검증 아님. -->
+    <!-- PROXY DATA 블록: §4 — METABRIC-like 투영 정렬(2648 pairs). 실제 코호트-native drug response 검증 아님. -->
     <section>
       <div class="proxy-scope">
-        <p class="proxy-banner">【PROXY DATA】 아래부터 §3 전체 — sample pair 투영·METABRIC-like 라벨. 실제 METABRIC 임상 라벨 전체를 그대로 쓴 검증이 아닙니다.</p>
-        <h2>3) METABRIC-like proxy validation — 모델별 수치 (2648 pairs)</h2>
+        <p class="proxy-banner">【PROXY DATA】 아래부터 §4 전체 — sample pair 투영·METABRIC-like 라벨. 실제 METABRIC 임상 라벨 전체를 그대로 쓴 검증이 아닙니다.</p>
+        <h2>4) METABRIC-like proxy validation — 모델별 수치 (2648 pairs)</h2>
         <p class="muted" style="margin:0 0 10px;">출처: <code>results/features_nextflow_team4/fe_re_batch_runs/20260402/sagemaker_dual_validation/metabric_validation_summary.csv</code>. Top100 unique drug의 모델 점수를 외부 sample pair에 투영한 평가(<strong>METABRIC-like</strong> 코호트). <span class="warn">신뢰도 C(프록시)</span> — SageMaker 대시보드 §4.5와 동일 전제.</p>
         <table>
           <tr><th>model</th><th>n_pairs</th><th>RMSE</th><th>MAE</th><th>Spearman</th></tr>
@@ -157,20 +395,20 @@
       </div>
     </section>
 
-    <!-- PROXY DATA 블록: §4 — no-LINCS native 랭킹은 외부 추론 정책·피처 결합 맥락; drug response 정답 라벨과 동일하지 않을 수 있음. -->
+    <!-- PROXY DATA 블록: §5 — no-LINCS native 랭킹은 외부 추론 정책·피처 결합 맥락; drug response 정답 라벨과 동일하지 않을 수 있음. -->
     <section>
       <div class="proxy-scope">
-        <p class="proxy-banner">【PROXY DATA】 아래부터 §4 전체 — 코호트-native 피처·랭킹 정책 맥락. “약물 반응 정답” 외부 검증으로 단정하지 않습니다.</p>
-        <h2>4) METABRIC-native cohort (no-LINCS) — 공식 external inference 랭킹</h2>
-        <p class="muted">운영 기준 랭킹: <code>…/native_pair_features_run/metabric_native_ensemble_ranking_no_lincs.csv</code> (피처: <code>metabric_native_pair_features_no_lincs.parquet</code>). with-LINCS native 랭킹은 비교·감사용. 상세는 <a href="dl_experiment_dashboard_20260331.html#metabric-native-external-policy" style="color:#fde047;">DL 대시보드 §0b</a>.</p>
+        <p class="proxy-banner">【PROXY DATA】 아래부터 §5 전체 — 코호트-native 피처·랭킹 정책 맥락. “약물 반응 정답” 외부 검증으로 단정하지 않습니다.</p>
+        <h2>5) METABRIC-native cohort (no-LINCS) — 공식 external inference 랭킹</h2>
+        <p class="muted">운영 기준 랭킹: <code>…/native_pair_features_run/metabric_native_ensemble_ranking_no_lincs.csv</code> (피처: <code>metabric_native_pair_features_no_lincs.parquet</code>). with-LINCS native 랭킹은 비교·감사용. 상세는 <a href="dl_experiment_dashboard_20260331.html#metabric-native-external-policy" style="color:#fde047;">DL 대시보드 §0b</a>. 동일 랭킹에 Drugs@FDA·치료제 필터를 적용한 drug 목록은 <a href="#section-2-1-fda-ndc-native" style="color:#6ee7b7;">§2.1</a>. <code>ensemble_score</code> 정의는 <a href="#section-2-1-fda-ndc-native" style="color:#6ee7b7;">§2.1</a> 상단 펼치기 블록 참고.</p>
       </div>
     </section>
 
-    <!-- PROXY DATA 블록: §5 — ADMET score-based proxy rule. 분자 ADMET 직접 조인 아님. -->
+    <!-- PROXY DATA 블록: §6 — ADMET score-based proxy rule. 분자 ADMET 직접 조인 아님. -->
     <section>
       <div class="proxy-scope">
-        <p class="proxy-banner">【PROXY DATA】 아래부터 §5 전체 — score-based ADMET proxy 게이트. 분자 구조 직접 ADMET가 아닙니다.</p>
-        <h2>5) ADMET 게이트 (proxy rule 기반)</h2>
+        <p class="proxy-banner">【PROXY DATA】 아래부터 §6 전체 — score-based ADMET proxy 게이트. 분자 구조 직접 ADMET가 아닙니다.</p>
+        <h2>6) ADMET 게이트 (proxy rule 기반)</h2>
         <p class="muted" style="margin:0 0 10px;">이번 post-analysis 파이프라인에서 Top100 후보에 대해 <strong>score-based proxy rule</strong>로 1차 스크리닝을 적용했습니다. <strong>분자 구조에 직접 join된 ADMET 테이블이 없을 때</strong>의 임시 게이트이며, 임상·합성 전에는 <strong>direct molecular ADMET</strong>가 필요합니다.</p>
         <table>
           <tr><th>항목</th><th>수치</th><th>의미</th></tr>
@@ -184,8 +422,8 @@
     </section>
 
     <section>
-      <h2>6) 한눈에 보는 파이프라인 위치</h2>
-      <p class="muted" style="margin:0;">① SageMaker 3모델 학습·로컬 앙상블 → ② <strong>Survival-linked relevance</strong>(실제 OS, <strong>§2</strong>) → ③ METABRIC-like <strong>proxy</strong> 정렬 평가(<strong>§3</strong>) → ④ METABRIC-native no-LINCS 랭킹 맥락(<strong>§4</strong>) → ⑤ ADMET proxy 게이트·shortlist(<strong>§5</strong>, SageMaker §4.3과 동일 흐름). <strong>§3</strong>은 “proxy 라벨과의 일치”, <strong>§2</strong>는 “OS와의 탐색적 연관”이라 질문이 다릅니다.</p>
+      <h2>7) 한눈에 보는 파이프라인 위치</h2>
+      <p class="muted" style="margin:0;">① SageMaker 3모델 학습·로컬 앙상블 → ② TCGA 경로 연구용 <strong>shortlist Top30</strong>(<strong>§2</strong>, <strong>필터 전</strong>) → ②.1 METABRIC-native 공식 랭킹 + <strong>Drugs@FDA·치료제 필터 shortlist</strong>(<strong>§2.1</strong>) → ③ <strong>Survival-linked</strong>(실제 OS, <strong>§3</strong>) → ④ METABRIC-like <strong>proxy</strong>(<strong>§4</strong>) → ⑤ METABRIC-native no-LINCS 랭킹 파일(<strong>§5</strong>) → ⑥ ADMET proxy·shortlist CSV(<strong>§6</strong>, SageMaker §4.3). <strong>§4</strong>는 “proxy 라벨과의 일치”, <strong>§3</strong>은 “OS와의 탐색적 연관”이라 질문이 다릅니다.</p>
     </section>
   </div>
 </body>

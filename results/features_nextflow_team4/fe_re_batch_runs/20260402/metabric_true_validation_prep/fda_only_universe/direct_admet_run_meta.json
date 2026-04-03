@@ -1,0 +1,11 @@
+{
+  "rdkit_available": true,
+  "n_shortlist_input": 15,
+  "n_after_hard_filter": 14,
+  "n_final_top": 10,
+  "outputs": {
+    "direct_admet_results": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe/direct_admet_results.csv",
+    "admet_combined_summary": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe/admet_combined_summary.csv",
+    "final_top10_fda_drugs": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe/final_top10_fda_drugs.csv"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "ranking_csv": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_ensemble_ranking_no_lincs.csv",
+  "source": "drugsfda",
+  "combine": null,
+  "n_input_rows": 2000,
+  "n_filtered_rows": 160,
+  "n_unique_drugs_input": 50,
+  "n_unique_drugs_filtered": 4,
+  "shortlist_k": 30,
+  "shortlist_n": 4,
+  "filter_definition": "Drugs@FDA active ingredients (PubChem synonym relaxed), n_tokens=2849",
+  "default_exclude_cids_applied": true,
+  "n_exclude_cids": 11,
+  "outputs": {
+    "filtered": "results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/fda_filtered_ranking.csv",
+    "shortlist": "results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/fda_top30_shortlist.csv"
+  }
+}
