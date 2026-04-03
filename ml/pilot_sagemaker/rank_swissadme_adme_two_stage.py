@@ -325,7 +325,7 @@ def main() -> None:
     report = {
         "pipeline": {
             "stage1": "SwissADME physicochemical / drug-likeness (this script)",
-            "stage2": "ADMETlab toxicity & metabolism — use admetlab_stage2_queue.csv; final list = pass both + model score",
+            "stage2": "ADMETlab toxicity & metabolism — run ml/pilot_sagemaker/run_admetlab_stage2_queue.py on admetlab_stage2_queue.csv",
         },
         "input_csv": str(inp),
         "n_input": int(len(df)),

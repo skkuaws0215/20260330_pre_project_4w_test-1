@@ -1,0 +1,62 @@
+{
+  "admetlab_input_audit": {
+    "n_files": 9,
+    "n_rows_total": 9,
+    "n_unique_canonical": 8,
+    "n_dropped_duplicate_rows": 1,
+    "per_file": [
+      {
+        "file": "ADMETlab3_result (1).csv",
+        "n_rows": 1
+      },
+      {
+        "file": "ADMETlab3_result (2).csv",
+        "n_rows": 1
+      },
+      {
+        "file": "ADMETlab3_result (3).csv",
+        "n_rows": 1
+      },
+      {
+        "file": "ADMETlab3_result (4).csv",
+        "n_rows": 1
+      },
+      {
+        "file": "ADMETlab3_result (5).csv",
+        "n_rows": 1
+      },
+      {
+        "file": "ADMETlab3_result (6).csv",
+        "n_rows": 1
+      },
+      {
+        "file": "ADMETlab3_result (7).csv",
+        "n_rows": 1
+      },
+      {
+        "file": "ADMETlab3_result (8).csv",
+        "n_rows": 1
+      },
+      {
+        "file": "ADMETlab3_result.csv",
+        "n_rows": 1
+      }
+    ]
+  },
+  "queue": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe/admetlab_stage2_queue.csv",
+  "n_queue": 8,
+  "hard_fail_cutoff_ge": 0.7,
+  "n_admetlab_hard_fail": 5,
+  "n_hard_pass_ranked": 3,
+  "weights": {
+    "z_ensemble": 1.0,
+    "z_swiss_adme_final": 1.0,
+    "w_admet_z": 1.0,
+    "cyp_demote_per_extra_inhibitor": 0.15
+  },
+  "outputs": {
+    "admetlab_web_merged_dedup.csv": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe/admetlab_web_merged_dedup.csv",
+    "admetlab_web_queue_merged_full.csv": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe/admetlab_web_queue_merged_full.csv",
+    "admetlab_web_final_ranked_hardpass.csv": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe/admetlab_web_final_ranked_hardpass.csv"
+  }
+}

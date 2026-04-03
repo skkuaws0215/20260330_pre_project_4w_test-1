@@ -27,12 +27,12 @@
 <body>
   <div class="hero">
     <h1>DL Experiment Dashboard</h1>
-    <p>ML / DL / Graph 각 군에서 대표 모델을 고르기 위한 단계별 기록. <strong>로컬 검증·문서화 + SageMaker 최종 3종 실행은 완료</strong>이며, <strong>METABRIC cohort-native external inference</strong>의 <strong>공식 랭킹은 no-LINCS 산출물</strong>(<code>metabric_native_ensemble_ranking_no_lincs.csv</code>)로 확정했습니다. with-LINCS native 랭킹·train-row 재사용 기반 지표는 비교·감사·이전 단계 참고용입니다. <strong>차이 ≈ 0인 이유·레거시 역할·Top30/Top10·direct ADMET·향후 LINCS full retrain 메모</strong>는 아래 <strong>§0b</strong>에 정리했습니다. <strong>FDA(NDC) 필터·native shortlist·TCGA 사전 shortlist(§2)</strong>는 <a href="metabric_admet_survival_dashboard_20260402_v2.html" style="color:#9bc2ff;">METABRIC·ADMET·Survival 대시보드 (20260402 v2)</a> (<strong>§2·§2.1</strong>)에서 다룹니다.</p>
+    <p>ML / DL / Graph 각 군에서 대표 모델을 고르기 위한 단계별 기록. <strong>로컬 검증·문서화 + SageMaker 최종 3종 실행은 완료</strong>이며, <strong>METABRIC cohort-native external inference</strong>의 <strong>공식 랭킹은 no-LINCS 산출물</strong>(<code>metabric_native_ensemble_ranking_no_lincs.csv</code>)로 확정했습니다. with-LINCS native 랭킹·train-row 재사용 기반 지표는 비교·감사·이전 단계 참고용입니다. <strong>no-LINCS 정책·FDA shortlist·RDKit direct ADMET(§2.3)·SwissADME 웹 1차 ADME(§2.4)·생존·proxy</strong>는 <a href="metabric_admet_survival_dashboard_20260402_v2.html" style="color:#9bc2ff;">METABRIC·ADMET·Survival 대시보드 (20260402 v2)</a>의 <strong><a href="metabric_admet_survival_dashboard_20260402_v2.html#section-metabric-native-external-policy" style="color:#9bc2ff;">§2.3b</a></strong>·<strong><a href="metabric_admet_survival_dashboard_20260402_v2.html#section-2-4-swissadme-web-adme" style="color:#9bc2ff;">§2.4</a></strong> 및 §2·§3–§6에서 다룹니다.</p>
     <p class="muted" style="margin-top:10px;font-size:0.88rem;">로컬: 저장소 루트에서 <code>python3 serve_dashboards.py</code> → 브라우저가 <code>index.html</code>을 엽니다. (반드시 루트에서 실행; 다른 폴더에서 <code>http.server</code>를 켜면 이 파일이 안 뜹니다.) GitHub Pages 사용 시 저장소 Settings → Pages → GitHub Actions 활성화 후 <code>https://&lt;user&gt;.github.io/&lt;repo&gt;/</code> 목차로 접속.</p>
-    <div class="badge">Snapshot · 20260402_v8 · METABRIC-native external inference 정책(no-LINCS) 반영 · SwissADME 1차 ADME (FDA Top15) 반영</div>
-    <a class="nav-btn" href="#metabric-native-external-policy" style="border-color:#6ea8fe;color:#9bc2ff;">§0b METABRIC-native 정책으로 이동</a>
-    <a class="nav-btn" href="#swissadme-fda-adme-stage1" style="border-color:#f7c266;color:#f7c266;">§0c SwissADME 1차 ADME</a>
-    <a class="nav-btn" href="metabric_admet_survival_dashboard_20260402_v2.html#section-2-1-fda-ndc-native" style="border-color:#42d59f;color:#42d59f;">METABRIC 대시보드 §2.1 FDA shortlist</a>
+    <div class="badge">Snapshot · 20260402_v8 · METABRIC/FDA/SwissADME 맥락은 METABRIC 대시보드 §2–§2.4 참고</div>
+    <a class="nav-btn" href="metabric_admet_survival_dashboard_20260402_v2.html#section-metabric-native-external-policy" style="border-color:#6ea8fe;color:#9bc2ff;">METABRIC §2.3b no-LINCS</a>
+    <a class="nav-btn" href="metabric_admet_survival_dashboard_20260402_v2.html#section-2-4-swissadme-web-adme" style="border-color:#f7c266;color:#f7c266;">METABRIC §2.4 SwissADME</a>
+    <a class="nav-btn" href="metabric_admet_survival_dashboard_20260402_v2.html#section-2-1-fda-ndc-native" style="border-color:#42d59f;color:#42d59f;">METABRIC §2.1 FDA shortlist</a>
     <a class="nav-btn" href="newfe_quality_dashboard_20260331.html">Back to New FE Quality Dashboard</a>
     <a class="nav-btn" href="graph_experiment_dashboard_20260402.html">Go to Graph Experiment Dashboard</a>
     <a class="nav-btn" href="sagemaker_experiment_dashboard_20260403.html">SageMaker 통합 대시보드 (20260403)</a>
@@ -43,7 +43,7 @@
       <h2>0) 군별 대표 확정 · 최종 3모델 (SageMaker 완료)</h2>
       <p class="muted"><strong>확정 대표:</strong> ML <strong>XGBoost</strong> (tuned) · DL <strong>ResidualMLP</strong> · Graph <strong>GCN</strong>.</p>
       <p class="muted" style="margin-top:10px;"><strong>Graph 정책 요약:</strong> <strong>Graph representative: GCN 유지.</strong> Spearman mean 기준 <strong>drug-group CV</strong>에서 GCN이 GraphSAGE보다 앞섬. Round1 <strong>행 단위 5-fold</strong>에서는 GraphSAGE가 잠정 1위였으나 <strong>optimistic bias</strong> 가능 → <strong>temporary candidate</strong>만 기록. <strong>GCN 경량 튜닝 완료</strong>(동일 drug-group CV, A–D): 내부 best는 <strong>D</strong>이나 A 대비 Spearman 약 <strong>+0.0054</strong> → 팀 기준 <strong>≥ +0.01</strong>에 <strong>미달</strong> → <strong>no meaningful improvement over baseline threshold</strong> → <strong>baseline GCN(A) retained</strong> as final graph-family representative. <strong>구성 E는 이번 단계 보류.</strong> 상세: Graph 대시보드 §8, <code>gcn_tuning_summary.json</code>.</p>
-      <p class="muted" style="margin-top:10px;"><strong>현재 단계(로컬, 완료):</strong> 20260402 dual validation 기준으로 ensemble 가중치를 재조정(<code>XGB 0.5 / MLP 0.4 / GCN 0.1</code>)하여 <code>final_ensemble_ranking_v2.csv</code> 생성 → <strong>METABRIC external validation</strong>(train-row 재사용 등, <code>metabric_validation_summary.csv</code>) → <strong>ADMET filtering은 direct molecular lookup이 아닌 proxy rule-based screening</strong>(<code>admet_filter_log.json</code>) → <strong>Top 30 shortlist</strong>(<code>final_shortlist.csv</code>). <strong>별도:</strong> cohort 피처를 METABRIC에서 직접 만든 <strong>native FE + ensemble</strong> 경로가 있으며, <strong>공식 external inference 랭킹은 no-LINCS native 파일</strong>로 운영합니다 — 근거·파일 경로·with-LINCS 레거시·비교가 0인 이유는 <a href="#metabric-native-external-policy" style="color:#9bc2ff;">§0b</a> 및 README 동명 절 참고. <strong>TCGA shortlist·FDA(NDC) native shortlist·생존·proxy</strong> 통합 서술은 <a href="metabric_admet_survival_dashboard_20260402_v2.html" style="color:#9bc2ff;">METABRIC·ADMET·Survival 대시보드 (v2)</a>를 따릅니다.</p>
+      <p class="muted" style="margin-top:10px;"><strong>현재 단계(로컬, 완료):</strong> 20260402 dual validation 기준으로 ensemble 가중치를 재조정(<code>XGB 0.5 / MLP 0.4 / GCN 0.1</code>)하여 <code>final_ensemble_ranking_v2.csv</code> 생성 → <strong>METABRIC external validation</strong>(train-row 재사용 등, <code>metabric_validation_summary.csv</code>) → <strong>ADMET filtering은 direct molecular lookup이 아닌 proxy rule-based screening</strong>(<code>admet_filter_log.json</code>) → <strong>Top 30 shortlist</strong>(<code>final_shortlist.csv</code>). <strong>별도:</strong> cohort 피처를 METABRIC에서 직접 만든 <strong>native FE + ensemble</strong> 경로가 있으며, <strong>공식 external inference 랭킹은 no-LINCS native 파일</strong>로 운영합니다 — 근거·파일 경로·with-LINCS 레거시·비교가 0인 이유는 <a href="metabric_admet_survival_dashboard_20260402_v2.html#section-metabric-native-external-policy" style="color:#9bc2ff;">METABRIC 대시보드 §2.3b</a> 및 README 참고. <strong>TCGA shortlist·FDA(NDC) native shortlist·RDKit ADMET(§2.3)·SwissADME(§2.4)·생존·proxy</strong> 통합 서술은 <a href="metabric_admet_survival_dashboard_20260402_v2.html" style="color:#9bc2ff;">METABRIC·ADMET·Survival 대시보드 (v2)</a>를 따릅니다.</p>
       <p class="muted" style="margin-top:8px;"><strong>요약 수치:</strong> METABRIC evaluation pairs <strong>2648</strong> · ADMET passed <strong>53 / 100</strong> · Final shortlist <strong>30</strong>.</p>
       <p class="muted" style="margin-top:8px;"><strong>결과 해석:</strong> 외부(METABRIC-like)에서는 GCN의 Spearman이 가장 높았고(0.4045), 내부 TCGA/CV NDCG@20 상위(XGB/ResidualMLP)와 외부 순위 일관성 차이가 확인되었습니다. 상세 방법/비교표는 SageMaker 통합 대시보드 <code>§4.4</code>에 정리했습니다.</p>
       <table style="margin-top:10px;">
@@ -86,36 +86,6 @@
         </tr>
       </table>
       <p class="muted" style="margin-top:10px;">공통: 시드·전처리·join 키는 로컬 실험과 동일하게 고정하고, SageMaker 실행 파라미터(인스턴스, 데이터 S3 URI, 하이퍼파라미터)를 job 정의에 명시합니다.</p>
-    </section>
-
-    <section id="metabric-native-external-policy">
-      <h2>0b) METABRIC-native external inference 정책 (no-LINCS 확정 · 20260402)</h2>
-      <ul class="muted">
-        <li><strong>공식 랭킹:</strong> <code>results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_ensemble_ranking_no_lincs.csv</code> — 입력 <code>metabric_native_pair_features_no_lincs.parquet</code> (<code>build_metabric_native_pair_features.py --omit-lincs-features</code>).</li>
-        <li><strong>레거시:</strong> LINCS가 parquet에 포함된 native 랭킹(<code>metabric_native_ensemble_ranking.csv</code> 등)은 비교·감사용만.</li>
-        <li><strong>with-LINCS vs no-LINCS 비교 차이 ≈ 0인 이유:</strong> (1) XGBoost 번들 <code>feature_columns</code>에 LINCS 없음. (2) ResidualMLP/GCN은 <code>build_final_ensemble_ranking.py</code>에서 체크포인트에 있으나 테이블에 없는 LINCS 열을 <strong>0으로 채움</strong> — with-LINCS FE에서도 LINCS 값이 사실상 0이면 no-LINCS와 동일 입력 → 동일 랭킹 가능.</li>
-        <li><strong>다음 단계:</strong> no-LINCS 랭킹 유지 → <strong>FDA(NDC) 필터·shortlist</strong>(<a href="metabric_admet_survival_dashboard_20260402_v2.html#section-2-1-fda-ndc-native" style="color:#9bc2ff;">METABRIC 대시보드 §2.1</a>, <code>build_fda_metabric_shortlist.py</code>) → 필요 시 <strong>direct molecular ADMET</strong>.</li>
-        <li><strong>후속 실험 트랙(메모):</strong> LINCS를 모델 입력에 포함하도록 XGB/MLP/GCN <strong>full retraining</strong> — 운영 정책과 분리.</li>
-        <li><strong>요약 JSON:</strong> 동일 폴더의 <code>metabric_native_inference_summary.json</code> (<code>external_inference_policy</code>), 비교 실행 시 <code>metabric_native_ranking_comparison_summary.json</code>.</li>
-      </ul>
-    </section>
-
-    <section id="swissadme-fda-adme-stage1">
-      <h2>0c) FDA native shortlist · SwissADME 1차 ADME → ADMETlab 2차 (독성/대사)</h2>
-      <p class="muted"><strong>흐름:</strong> (1) SwissADME 웹 배치로 물성·약물성 1차 컷. (2) 통과분은 <code>admetlab_stage2_queue.csv</code>로 ADMETlab 배치(2차: 독성·대사). (3) 최종 운영 후보는 <strong>두 단계 모두 통과</strong>한 약물을 모델 <code>ensemble_score</code>와 함께 종합 정렬.</p>
-      <p class="muted" style="margin-top:8px;"><strong>스크립트:</strong> <code>ml/pilot_sagemaker/rank_swissadme_adme_two_stage.py</code> · 입력 <code>swissadme_web_merged_n15.csv</code> · 산출 <code>swissadme_adme_*.csv</code>, <code>swissadme_adme_report.json</code>, <code>admetlab_stage2_queue.csv</code> (경로: <code>.../metabric_true_validation_prep/fda_only_universe/</code>).</p>
-      <p class="muted" style="margin-top:8px;"><strong>Hard filter (제거):</strong> Lipinski violations ≥ 2 · GI absorption = Low · PAINS alert &gt; 0 · Brenk alerts ≥ 2.</p>
-      <p class="muted" style="margin-top:8px;"><strong>Soft score:</strong> WLOGP·TPSA·P-gp·BBB(비-CNS 시 Yes 페널티)·F(oral) 보너스 후 <code>adme_final_score = ensemble − 0.2×penalty_total + 0.1×bioavailability_bonus</code>.</p>
-      <p class="muted" style="margin-top:8px;"><strong>스냅샷 (입력 15종):</strong> Hard 통과 <strong>8</strong>종 · Soft 순위 상위는 전원(8종)이며 상위 2 tie는 Acetohexamide·Albendazole (<code>adme_final_score</code> ≈ 1.70).</p>
-      <table style="margin-top:12px;">
-        <tr><th>soft_rank</th><th>CID</th><th>drug</th><th>adme_final_score</th><th>penalty_total</th><th>비고</th></tr>
-        <tr><td>1–2 (tie)</td><td>1989</td><td>Acetohexamide</td><td>1.700</td><td>0</td><td>Soft 페널티 없음</td></tr>
-        <tr><td>1–2 (tie)</td><td>2082</td><td>Albendazole</td><td>1.700</td><td>0</td><td>Soft 페널티 없음</td></tr>
-        <tr><td>3–7</td><td>176, 2083, 12035, 1983, 15664</td><td>(각 1.500)</td><td>1.500</td><td>1</td><td>WLOGP 또는 BBB(비-CNS) 페널티</td></tr>
-        <tr><td>8</td><td>60164</td><td>Adapalene</td><td>1.300</td><td>2</td><td>WLOGP &gt; 5 → +2</td></tr>
-      </table>
-      <p class="muted" style="margin-top:10px;"><strong>Hard 제거 7종 요약:</strong> Ethanol·Acetazolamide·Acetylcholine·Albuterol Sulfate·Adefovir Dipivoxil (GI Low 등) · Acetohydroxamic (Brenk≥2) · Acrisorcin (PAINS) — 상세는 <code>swissadme_adme_report.json</code>의 <code>hard_fail_by_cid</code>.</p>
-      <p class="muted" style="margin-top:8px;"><strong>통과 8종 ADME 패턴:</strong> GI 모두 High · 평균 WLOGP ≈ 2.17 · TPSA 평균 ≈ 66 · BBB Yes 2종(비-CNS 페널티 반영) · P-gp substrate Yes 0종. 전체 표는 <code>swissadme_adme_hard_pass.csv</code> / <code>swissadme_adme_soft_top10.csv</code>.</p>
     </section>
 
     <section>

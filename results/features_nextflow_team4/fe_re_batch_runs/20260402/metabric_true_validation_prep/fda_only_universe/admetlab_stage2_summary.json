@@ -1,0 +1,31 @@
+{
+  "queue": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe/admetlab_stage2_queue.csv",
+  "out_dir": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe",
+  "engine": "admet-ai",
+  "admetlab_api_note": "ADMETlab 3.0 https://admetlab3.scbdd.com/api/single/admet returned HTTP 500 (KeyError BSEP in server stack) when tested — use web export + --engine manual-csv if you need ADMETlab-branded numbers.",
+  "h_ht_mapping": "H_HT column uses ClinTox (TDC clinical trial toxicity probability) when engine=admet-ai; replace with true ADMETlab H-HT via --engine manual-csv.",
+  "hard_fail_rules": {
+    "hERG_ge": 0.7,
+    "H_HT_ge": 0.7,
+    "DILI_ge": 0.7,
+    "AMES_ge": 0.7
+  },
+  "soft_penalty_rules": {
+    "multi_cyp_inhibitor": ">=2 of {CYP1A2_Veith,CYP2C19_Veith,CYP2C9_Veith,CYP2D6_Veith,CYP3A4_Veith} with prob>=0.5",
+    "clearance_microsome_az_lt": 5.0,
+    "fu_percent_unbound_lt": 5.0,
+    "fu_derived_from_PPBR_AZ": "Fu_percent_unbound = 100 - PPBR_AZ (TDC: plasma protein binding rate %)"
+  },
+  "counts": {
+    "n_queue": 8,
+    "n_stage2_evaluated": 8,
+    "n_stage2_hard_fail": 4,
+    "n_stage2_pass": 4,
+    "n_stage2_soft_penalty": 4
+  },
+  "outputs": {
+    "admetlab_stage2_results.csv": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe/admetlab_stage2_results.csv",
+    "admetlab_stage2_summary.json": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe/admetlab_stage2_summary.json",
+    "final_fda_top_candidates.csv": "/Users/skku_aws2_14/20260330_pre_project_4w_test-1/20260330_pre_project_4w_test-1/results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/fda_only_universe/final_fda_top_candidates.csv"
+  }
+}

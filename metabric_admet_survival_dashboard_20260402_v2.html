@@ -85,15 +85,18 @@
 <body>
   <div class="hero">
     <h1>METABRIC · ADMET · Survival-linked clinical relevance</h1>
-    <p><strong>외부 코호트 관점 정리 대시보드 (20260402 v2).</strong> <strong>운영 정책:</strong> 후보는 <strong>FDA 승인 의약품만</strong> 허용(§2 상단 박스). <strong>§2</strong>는 TCGA 학습 경로 <code>final_shortlist.csv</code> 기준 <strong>필터 적용 전</strong> 스냅샷·감사용. <strong>§2.1</strong>은 화학 공간 50약 풀에 대한 Drugs@FDA·치료제 제외 <strong>사후 필터</strong> shortlist. <strong>§2.2</strong>는 <strong>FDA drug universe</strong>를 먼저 정한 뒤 동일 FE·앙상블로 다시 랭킹한 경로(스냅샷은 <code>fda_only_universe/</code>). <strong>§2.3</strong>은 해당 Top30에 대한 <strong>direct ADMET</strong>(RDKit 프록시 + TCGA proxy 조인) 및 Top10 선정. <strong>§3</strong> 생존(OS), <strong>§4–§6</strong> proxy 보조 분석.</p>
+    <p><strong>외부 코호트 관점 정리 대시보드 (20260402 v2).</strong> <strong>운영 정책:</strong> 후보는 <strong>FDA 승인 의약품만</strong> 허용(§2 상단 박스). <strong>§2</strong>는 TCGA 학습 경로 <code>final_shortlist.csv</code> 기준 <strong>필터 적용 전</strong> 스냅샷·감사용. <strong>§2.1</strong>은 화학 공간 50약 풀에 대한 Drugs@FDA·치료제 제외 <strong>사후 필터</strong> shortlist. <strong>§2.2</strong>는 <strong>FDA drug universe</strong>를 먼저 정한 뒤 동일 FE·앙상블로 다시 랭킹한 경로(스냅샷은 <code>fda_only_universe/</code>). <strong>§2.3</strong>은 해당 Top30에 대한 <strong>direct ADMET</strong>(RDKit 프록시 + TCGA proxy 조인) 및 Top10 선정. <strong>§2.3b</strong>는 공식 <strong>no-LINCS native external inference</strong> 정책 요약. <strong>§2.4</strong>는 §2.3에 이어 <strong>SwissADME 웹 배치</strong>로 얻은 표를 병합·스크립트 처리한 <strong>1차 분자 ADME</strong>(Hard/Soft) 및 ADMETlab 2차 큐. <strong>§2.5</strong>는 ADMETlab 3.0 <strong>웹 반자동 배치 CSV</strong>를 병합한 <strong>2차 독성·대사 스냅샷</strong>(hard ≥0.7 컷 + METABRIC·Swiss z-score 통합 랭킹). <strong>§3</strong> 생존(OS), <strong>§4–§6</strong> proxy 보조 분석.</p>
     <p class="muted" style="margin-top:10px;font-size:0.88rem;">로컬: 저장소 루트에서 <code>python3 serve_dashboards.py</code> 후 <code>/metabric_admet_survival_dashboard_20260402_v2.html</code> 로 접속.</p>
-    <div class="badge">Snapshot · 20260402 v2 · §2.1=사후 FDA 필터 · §2.2=FDA universe 랭킹 · §2.3=direct ADMET Top10 · §3 생존 · §4–6 proxy</div>
+    <div class="badge">Snapshot · 20260402 v2 · §2.1–2.2 FDA · §2.3 RDKit ADMET · §2.3b no-LINCS · §2.4 SwissADME · §2.5 ADMETlab 웹 2차 · §3 생존 · §4–6 proxy</div>
     <a class="nav-btn" href="index.html">Index</a>
     <a class="nav-btn" href="#section-2-1-fda-ndc-native" style="border-color:#42d59f;color:#6ee7b7;">§2.1 FDA·native shortlist</a>
     <a class="nav-btn" href="#section-2-2-fda-universe-ranking" style="border-color:#5eead4;color:#5eead4;">§2.2 FDA universe 랭킹</a>
     <a class="nav-btn" href="#section-2-3-direct-admet" style="border-color:#fcd34d;color:#fcd34d;">§2.3 direct ADMET</a>
+    <a class="nav-btn" href="#section-metabric-native-external-policy" style="border-color:#93c5fd;color:#93c5fd;">§2.3b no-LINCS 정책</a>
+    <a class="nav-btn" href="#section-2-4-swissadme-web-adme" style="border-color:#fbbf24;color:#fbbf24;">§2.4 SwissADME</a>
+    <a class="nav-btn" href="#section-2-5-admetlab-web-stage2" style="border-color:#a78bfa;color:#c4b5fd;">§2.5 ADMETlab 웹</a>
     <a class="nav-btn" href="sagemaker_experiment_dashboard_20260403.html">SageMaker 통합 대시보드</a>
-    <a class="nav-btn" href="dl_experiment_dashboard_20260331.html">DL 대시보드 (§0b native 정책)</a>
+    <a class="nav-btn" href="dl_experiment_dashboard_20260331.html">DL Experiment Dashboard</a>
   </div>
 
   <div class="container">
@@ -207,7 +210,7 @@
     <section id="section-2-1-fda-ndc-native">
       <h2>2.1) METABRIC native (no-LINCS) 랭킹 · Drugs@FDA 성분 + 치료제 필터 &amp; drug shortlist</h2>
       <div class="policy-fda">
-        <strong>운영 정책과의 관계:</strong> 본 절은 <strong>공식 external inference 랭킹</strong>(§5·DL 대시보드 §0b와 동일 파일)을 <strong>재계산하지 않고</strong>, openFDA 벌크 <code>drug-drugsfda-*.json.zip</code>의 제품 <code>active_ingredients[].name</code>에서 뽑은 <strong>성분 토큰 집합</strong>과 PubChem CID <strong>동의어</strong>를 맞춘다(기본 <code>--drugsfda-match relaxed</code>: 길이≥8 부분문자열, NDC 전체 목록보다 좁음). 이어서 스크립트에 고정된 <strong>비치료제 CID 제외 목록</strong>(인산·글리콜·프로판올·피리딘·대사체 등)을 빼 <strong>NDC 시절보다 과대포함이 덜한</strong> 후보 집합을 만든다. <strong>DrugBank <code>approved</code></strong>와 교집합·합집합은 <code>--source drugbank+drugsfda</code>와 DrugBank XML(또는 승인 ID JSON)이 있을 때 사용한다.
+        <strong>운영 정책과의 관계:</strong> 본 절은 <strong>공식 external inference 랭킹</strong>(§5·<a href="#section-metabric-native-external-policy" style="color:#6ee7b7;">§2.3b</a>와 동일 파일)을 <strong>재계산하지 않고</strong>, openFDA 벌크 <code>drug-drugsfda-*.json.zip</code>의 제품 <code>active_ingredients[].name</code>에서 뽑은 <strong>성분 토큰 집합</strong>과 PubChem CID <strong>동의어</strong>를 맞춘다(기본 <code>--drugsfda-match relaxed</code>: 길이≥8 부분문자열, NDC 전체 목록보다 좁음). 이어서 스크립트에 고정된 <strong>비치료제 CID 제외 목록</strong>(인산·글리콜·프로판올·피리딘·대사체 등)을 빼 <strong>NDC 시절보다 과대포함이 덜한</strong> 후보 집합을 만든다. <strong>DrugBank <code>approved</code></strong>와 교집합·합집합은 <code>--source drugbank+drugsfda</code>와 DrugBank XML(또는 승인 ID JSON)이 있을 때 사용한다.
       </div>
       <p class="muted" style="margin:0 0 10px;">
         <strong>입력:</strong>
@@ -318,6 +321,252 @@
       <p class="muted" style="margin:8px 0 0;font-size:0.82rem;">† hard_fail 플래그가 True이면 soft 랭킹에서 제외. 본 스냅샷에서 Adapalene(CID 60164)은 hERG 프록시에 걸려 Top10에서 제외됨.</p>
     </section>
 
+    <!-- §2.3b: 공식 external inference 정책(no-LINCS) — §2.3 RDKit 프록시 직후, §2.4 SwissADME 웹 배치 앞 -->
+    <section id="section-metabric-native-external-policy">
+      <h2>2.3b) METABRIC-native external inference 정책 (no-LINCS 확정 · 20260402)</h2>
+      <p class="muted" style="margin:0 0 10px;">본 절은 코호트-native 피처·랭킹의 <strong>운영 기준 파일</strong>을 고정합니다. <strong>§2.3</strong> direct ADMET(RDKit 프록시) 다음에 오는 <strong>§2.4 SwissADME</strong> 웹 배치·반자동 산출과 같은 내러티브 흐름 안에서, no-LINCS 랭킹·레거시·JSON 경로를 한곳에 묶기 위해 이 위치(§2.3 직후)에 둡니다.</p>
+      <ul class="muted tight">
+        <li><strong>공식 랭킹:</strong> <code>results/features_nextflow_team4/fe_re_batch_runs/20260402/metabric_true_validation_prep/native_pair_features_run/metabric_native_ensemble_ranking_no_lincs.csv</code> — 입력 <code>metabric_native_pair_features_no_lincs.parquet</code> (<code>build_metabric_native_pair_features.py --omit-lincs-features</code>).</li>
+        <li><strong>레거시:</strong> LINCS가 parquet에 포함된 native 랭킹(<code>metabric_native_ensemble_ranking.csv</code> 등)은 비교·감사용만.</li>
+        <li><strong>with-LINCS vs no-LINCS 비교 차이 ≈ 0인 이유:</strong> (1) XGBoost 번들 <code>feature_columns</code>에 LINCS 없음. (2) ResidualMLP/GCN은 <code>build_final_ensemble_ranking.py</code>에서 체크포인트에 있으나 테이블에 없는 LINCS 열을 <strong>0으로 채움</strong> — with-LINCS FE에서도 LINCS 값이 사실상 0이면 no-LINCS와 동일 입력 → 동일 랭킹 가능.</li>
+        <li><strong>다음 단계:</strong> no-LINCS 랭킹 유지 → <strong><a href="#section-2-1-fda-ndc-native" style="color:#6ee7b7;">§2.1</a></strong> FDA(NDC) 필터·shortlist (<code>build_fda_metabric_shortlist.py</code>) → <strong><a href="#section-2-3-direct-admet" style="color:#fcd34d;">§2.3</a></strong> RDKit direct ADMET → <strong><a href="#section-2-4-swissadme-web-adme" style="color:#fbbf24;">§2.4</a></strong> SwissADME 웹 1차 ADMET → <strong><a href="#section-2-5-admetlab-web-stage2" style="color:#c4b5fd;">§2.5</a></strong> ADMETlab 웹 2차 병합·랭킹.</li>
+        <li><strong>후속 실험 트랙(메모):</strong> LINCS를 모델 입력에 포함하도록 XGB/MLP/GCN <strong>full retraining</strong> — 운영 정책과 분리.</li>
+        <li><strong>요약 JSON:</strong> 동일 폴더의 <code>metabric_native_inference_summary.json</code> (<code>external_inference_policy</code>), 비교 실행 시 <code>metabric_native_ranking_comparison_summary.json</code>.</li>
+      </ul>
+    </section>
+
+    <!-- §2.4: SwissADME 웹 결과 + rank_swissadme_adme_two_stage.py — §2.3(RDKit proxy ADMET)의 보완·반자동 분자 측정 -->
+    <section id="section-2-4-swissadme-web-adme">
+      <h2>2.4) SwissADME 웹 배치 · 1차 ADME Hard/Soft · ADMETlab 2차 큐</h2>
+      <p class="muted" style="margin:0 0 10px;">
+        <strong>§2.3과의 관계:</strong> §2.3은 <code>evaluate_fda_shortlist_direct_admet.py</code>의 <strong>RDKit 프록시</strong>(<code>swissadme_proxy_*</code>)·TCGA proxy 조인 기반 Top10이다. 본 §2.4는 동일 FDA universe shortlist에서 <strong>SwissADME 웹사이트에 SMILES를 붙여 배치 실행</strong>한 뒤 다운로드한 CSV를 <code>merge_swissadme_web_results.py</code>로 메타와 병합하고, <code>rank_swissadme_adme_two_stage.py</code>로 <strong>별도 규칙</strong>(Lipinski·GI·PAINS·Brenk Hard + WLOGP/TPSA 등 Soft)을 적용한 <strong>반자동 1차 분자 ADME</strong> 스냅샷이다. 두 절의 컷오프·알고리즘이 다르므로 결과를 혼동하지 말 것.
+      </p>
+      <p class="muted" style="margin:0 0 10px;"><strong>흐름:</strong> (1) SwissADME 웹 배치로 물성·약물성 <strong>1차 컷</strong>. (2) 통과분은 <code>admetlab_stage2_queue.csv</code>로 ADMETlab <strong>2차</strong>(독성·대사). (3) 최종 운영 후보는 <strong>두 단계 모두 통과</strong>한 약물을 모델 <code>ensemble_score</code>와 함께 종합 정렬.</p>
+      <p class="muted" style="margin:0 0 12px;"><strong>산출 경로:</strong> <code>results/…/metabric_true_validation_prep/fda_only_universe/</code> — <code>rank_swissadme_adme_two_stage.py</code> · 입력 <code>swissadme_web_merged_n15.csv</code> (15종 = Top30 고유 CID 중 SwissADME 입력 가능 분자 스냅샷).</p>
+
+      <h3>2.4-1) Hard filter 규칙 (한 줄이라도 해당 시 제외)</h3>
+      <table>
+        <tr><th>규칙</th><th>제거 조건</th><th>정의·해석</th></tr>
+        <tr>
+          <td>Lipinski</td>
+          <td><code>Lipinski #violations</code> ≥ 2</td>
+          <td class="muted">SwissADME가 산출한 Ro5 위반 개수. 2 이상이면 “약물 유사성” 관점에서 1차에서 제외.</td>
+        </tr>
+        <tr>
+          <td>GI 흡수</td>
+          <td><code>GI absorption</code> = Low</td>
+          <td class="muted">SwissADME 이진 분류형 예측. Low는 경구 흡수 예측이 불리함을 뜻하며, 본 파이프선에서는 Hard 컷.</td>
+        </tr>
+        <tr>
+          <td>PAINS</td>
+          <td><code>PAINS #alerts</code> &gt; 0</td>
+          <td class="muted">Pan-assay interference 계열 부정적 패턴. 1개라도 뜨면 페이크 히트·특이 결합 리스크로 제외.</td>
+        </tr>
+        <tr>
+          <td>Brenk</td>
+          <td><code>Brenk #alerts</code> ≥ 2</td>
+          <td class="muted">Brenk et al. 부적절 부분구조 알림. 2건 이상이면 리드/약물화 관점 경고가 누적된 것으로 보고 제외.</td>
+        </tr>
+      </table>
+
+      <h3>2.4-2) Soft penalty / bonus → <code>penalty_total</code>, <code>bioavailability_bonus</code></h3>
+      <table>
+        <tr><th>항목</th><th>페널티(점수)</th><th>정의·해석</th></tr>
+        <tr>
+          <td>WLOGP</td>
+          <td>구간 [1, 4] → 0 · (&lt;1 또는 &gt;4) → +1 · &gt;5 → +2</td>
+          <td class="muted">SwissADME 표의 <code>WLOGP</code>(Wildman–Crippen 유형 logP). 지나치게 소수성/친수성은 흡수·분포 리스크로 가중. (&gt;5는 +2로 단독 적용.)</td>
+        </tr>
+        <tr>
+          <td>TPSA</td>
+          <td>[20, 140] → 0 · 그 외 → +1</td>
+          <td class="muted"><code>TPSA</code>(Å²) 극단은 세포막 통과·용해도 트레이드오프가 커질 수 있음을 단순 페널티로 반영.</td>
+        </tr>
+        <tr>
+          <td>P-gp 기질</td>
+          <td>Yes → +1</td>
+          <td class="muted"><code>Pgp substrate</code>=Yes면 장·뇌 장벽 등 efflux 가능성 증가로 +1.</td>
+        </tr>
+        <tr>
+          <td>BBB</td>
+          <td>비-CNS 타깃 전제에서 Yes → +1</td>
+          <td class="muted"><code>BBB permeant</code>=Yes는 CNS 노출 가능성. 비-CNS 적응증 가정 시 중추 부작용·조직 선택성 리스크로 +1. CNS 타깃이면 스크립트 <code>--cns-target</code>으로 해제.</td>
+        </tr>
+        <tr>
+          <td>Bioavailability bonus</td>
+          <td><code>Bioavailability Score</code> ≥ 0.55 → bonus=1, 아니면 0</td>
+          <td class="muted">SwissADME 종합 경구 이용도 지표. 최종 점수에만 +0.1×bonus로 반영(아래 식).</td>
+        </tr>
+      </table>
+
+      <h3>2.4-3) 최종 점수 식</h3>
+      <p class="muted"><code>adme_final_score = ensemble_score − 0.2 × penalty_total + 0.1 × bioavailability_bonus</code></p>
+      <ul class="muted tight">
+        <li><strong>ensemble_score:</strong> FDA native shortlist(§2.2 경로) 기준 XGB/MLP/GCN 앙상블 점수.</li>
+        <li><strong>0.2×penalty_total:</strong> Soft 항목 합에 대한 감점 가중치(튜닝 가능).</li>
+        <li><strong>0.1×bioavailability_bonus:</strong> 경구 이용도 보너스 최대 +0.1.</li>
+      </ul>
+
+      <h3>2.4-4) 전체 15종 — Hard 결과 및 SwissADME 원시 수치(요약)</h3>
+      <table style="font-size:0.82rem;">
+        <tr>
+          <th>CID</th><th>약물</th><th>Hard</th><th>제거/통과 사유 요약</th>
+          <th>Lip_v</th><th>GI</th><th>PAINS</th><th>Brenk</th>
+          <th>WLOGP</th><th>TPSA</th><th>F(oral)</th><th>BBB</th><th>Pgp</th>
+        </tr>
+        <tr><td>176</td><td>Acetic Acid</td><td class="ok">PASS</td><td>Hard 통과 · Soft: WLOGP&lt;1 페널티</td><td>0</td><td>High</td><td>0</td><td>0</td><td>0.09</td><td>37.3</td><td>0.85</td><td>No</td><td>No</td></tr>
+        <tr><td>702</td><td>Ethanol</td><td>—</td><td>GI Low</td><td>0</td><td>Low</td><td>0</td><td>0</td><td>−0.0</td><td>20.2</td><td>0.55</td><td>No</td><td>No</td></tr>
+        <tr><td>1983</td><td>Acetaminophen</td><td class="ok">PASS</td><td>Hard 통과 · Soft: BBB Yes(비-CNS)</td><td>0</td><td>High</td><td>0</td><td>1</td><td>1.16</td><td>49.3</td><td>0.55</td><td>Yes</td><td>No</td></tr>
+        <tr><td>1989</td><td>Acetohexamide</td><td class="ok">PASS</td><td>Hard 통과 · Soft 없음</td><td>0</td><td>High</td><td>0</td><td>0</td><td>3.29</td><td>100.7</td><td>0.55</td><td>No</td><td>No</td></tr>
+        <tr><td>1990</td><td>Acetohydroxamic Acid</td><td>—</td><td>Brenk ≥ 2</td><td>0</td><td>High</td><td>0</td><td>2</td><td>−0.49</td><td>49.3</td><td>0.55</td><td>No</td><td>No</td></tr>
+        <tr><td>1986</td><td>Acetazolamide</td><td>—</td><td>GI Low</td><td>0</td><td>Low</td><td>0</td><td>1</td><td>0.03</td><td>151.7</td><td>0.55</td><td>No</td><td>No</td></tr>
+        <tr><td>2082</td><td>Albendazole</td><td class="ok">PASS</td><td>Hard 통과 · Soft 없음</td><td>0</td><td>High</td><td>0</td><td>0</td><td>3.05</td><td>92.3</td><td>0.55</td><td>No</td><td>No</td></tr>
+        <tr><td>2083</td><td>Salbutamol</td><td class="ok">PASS</td><td>Hard 통과 · Soft: WLOGP&lt;1</td><td>0</td><td>High</td><td>0</td><td>0</td><td>0.83</td><td>72.7</td><td>0.55</td><td>No</td><td>No</td></tr>
+        <tr><td>39859</td><td>Albuterol Sulfate</td><td>—</td><td>Lipinski≥2 · GI Low</td><td>3</td><td>Low</td><td>0</td><td>1</td><td>2.09</td><td>228.4</td><td>0.17</td><td>No</td><td>Yes</td></tr>
+        <tr><td>6060</td><td>Acetylcholine Cl</td><td>—</td><td>GI Low</td><td>0</td><td>Low</td><td>0</td><td>1</td><td>−2.74</td><td>26.3</td><td>0.55</td><td>No</td><td>Yes</td></tr>
+        <tr><td>15664</td><td>5,5′-Dimethyl-2,2′-bipyridyl</td><td class="ok">PASS</td><td>Hard 통과 · Soft: BBB Yes</td><td>0</td><td>High</td><td>0</td><td>0</td><td>2.76</td><td>25.8</td><td>0.55</td><td>Yes</td><td>No</td></tr>
+        <tr><td>60164</td><td>Adapalene</td><td class="ok">PASS</td><td>Hard 통과 · Soft: WLOGP&gt;5 (+2)</td><td>1</td><td>High</td><td>0</td><td>0</td><td>6.68</td><td>46.5</td><td>0.85</td><td>No</td><td>No</td></tr>
+        <tr><td>60871</td><td>Adefovir Dipivoxil</td><td>—</td><td>GI Low · Brenk ≥ 2</td><td>1</td><td>Low</td><td>0</td><td>2</td><td>2.63</td><td>170.9</td><td>0.55</td><td>No</td><td>Yes</td></tr>
+        <tr><td>12035</td><td>N-Acetyl-L-Cysteine</td><td class="ok">PASS</td><td>Hard 통과 · Soft: WLOGP&lt;1</td><td>0</td><td>High</td><td>0</td><td>1</td><td>−0.49</td><td>105.2</td><td>0.56</td><td>No</td><td>No</td></tr>
+        <tr><td>24144</td><td>Acrisorcin</td><td>—</td><td>PAINS &gt; 0</td><td>0</td><td>High</td><td>1</td><td>1</td><td>6.20</td><td>79.4</td><td>0.55</td><td>No</td><td>No</td></tr>
+      </table>
+      <p class="muted" style="margin-top:8px;font-size:0.85rem;"><strong>열 약어:</strong> <code>Lip_v</code>=Lipinski #violations · <code>F(oral)</code>=Bioavailability Score · SwissADME 배치 출력 스냅샷(소수 반올림).</p>
+
+      <h3>2.4-5) Hard 통과 8종 — Soft 랭킹 (Top 10 슬롯, 실제 8행)</h3>
+      <table style="font-size:0.86rem;">
+        <tr>
+          <th>순위</th><th>CID</th><th>약물</th>
+          <th>ensemble</th><th>p_W</th><th>p_T</th><th>p_Pgp</th><th>p_BBB</th><th>penΣ</th><th>F_bonus</th><th>adme_final</th>
+        </tr>
+        <tr><td>1</td><td>1989</td><td>Acetohexamide</td><td>1.600</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td class="ok"><strong>1.700</strong></td></tr>
+        <tr><td>2</td><td>2082</td><td>Albendazole</td><td>1.600</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td class="ok"><strong>1.700</strong></td></tr>
+        <tr><td>3</td><td>176</td><td>Acetic Acid</td><td>1.600</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>1</td><td>1.500</td></tr>
+        <tr><td>4</td><td>2083</td><td>Salbutamol</td><td>1.600</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>1</td><td>1.500</td></tr>
+        <tr><td>5</td><td>12035</td><td>N-Acetyl-L-Cysteine</td><td>1.600</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>1</td><td>1.500</td></tr>
+        <tr><td>6</td><td>1983</td><td>Acetaminophen</td><td>1.600</td><td>0</td><td>0</td><td>0</td><td>1</td><td>1</td><td>1</td><td>1.500</td></tr>
+        <tr><td>7</td><td>15664</td><td>5,5′-Dimethyl-2,2′-bipyridyl</td><td>1.600</td><td>0</td><td>0</td><td>0</td><td>1</td><td>1</td><td>1</td><td>1.500</td></tr>
+        <tr><td>8</td><td>60164</td><td>Adapalene</td><td>1.600</td><td>2</td><td>0</td><td>0</td><td>0</td><td>2</td><td>1</td><td>1.300</td></tr>
+      </table>
+      <p class="muted" style="margin-top:8px;font-size:0.85rem;"><strong>열 정의:</strong> <code>ensemble</code>=ensemble_score(표시용 반올림) · <code>p_W</code>~<code>p_BBB</code>=Soft 페널티 · <code>penΣ</code>=penalty_total · <code>F_bonus</code>=bioavailability_bonus · <code>adme_final</code>=위 식.</p>
+
+      <h3>2.4-6) Hard 탈락 7종</h3>
+      <table style="font-size:0.88rem;">
+        <tr><th>CID</th><th>약물</th><th>hard_fail_reasons</th><th>해석</th></tr>
+        <tr><td>1990</td><td>Acetohydroxamic Acid</td><td>Brenk_alerts&gt;=2</td><td class="muted">Brenk 알림 2건 이상</td></tr>
+        <tr><td>24144</td><td>Acrisorcin</td><td>PAINS_alerts&gt;0</td><td class="muted">PAINS 1건 이상</td></tr>
+        <tr><td>702</td><td>Ethanol</td><td>GI_absorption_Low</td><td class="muted">경구 흡수 Low</td></tr>
+        <tr><td>1986</td><td>Acetazolamide</td><td>GI_absorption_Low</td><td class="muted">동일</td></tr>
+        <tr><td>6060</td><td>Acetylcholine Chloride</td><td>GI_absorption_Low</td><td class="muted">동일</td></tr>
+        <tr><td>60871</td><td>Adefovir Dipivoxil</td><td>GI_absorption_Low; Brenk_alerts&gt;=2</td><td class="muted">복합</td></tr>
+        <tr><td>39859</td><td>Albuterol Sulfate</td><td>Lipinski_violations&gt;=3; GI_absorption_Low</td><td class="muted">Ro5 위반 3 + GI Low</td></tr>
+      </table>
+
+      <h3>2.4-7) 통과 8종 — ADME 프로파일 요약</h3>
+      <table>
+        <tr><th>지표</th><th>값 (통과 8종)</th><th>해석</th></tr>
+        <tr><td>WLOGP</td><td>평균 ≈ 2.17 (min −0.49, max 6.68)</td><td class="muted">중간 소수성 중심; 극단은 Soft 페널티.</td></tr>
+        <tr><td>TPSA</td><td>평균 ≈ 66 (min 25.8, max 105.2)</td><td class="muted">중간 TPSA 구간.</td></tr>
+        <tr><td>Bioavailability Score</td><td>평균 ≈ 0.63 (0.55~0.85)</td><td class="muted">8종 모두 ≥0.55 → bonus=1.</td></tr>
+        <tr><td>GI absorption</td><td>High 8/8</td><td class="muted">Hard 통과와 일치.</td></tr>
+        <tr><td>BBB permeant Yes</td><td>2/8</td><td class="muted">비-CNS 페널티 반영.</td></tr>
+        <tr><td>Pgp substrate Yes</td><td>0/8</td><td class="muted">통과군에서 P-gp Soft 페널티 없음.</td></tr>
+      </table>
+
+      <p class="muted" style="margin-top:12px;"><strong>파일:</strong> <code>swissadme_adme_all_decisions.csv</code> · <code>swissadme_adme_hard_pass.csv</code> · <code>swissadme_adme_soft_top10.csv</code> · <code>swissadme_adme_report.json</code> · <code>admetlab_stage2_queue.csv</code></p>
+      <details class="sm-fold">
+        <summary>주석: 용어 출처 및 한계</summary>
+        <ul class="muted tight" style="margin:0;">
+          <li>SwissADME 수치는 <strong>in silico 예측</strong>이며 실제 PK/독성을 대체하지 않습니다.</li>
+          <li><strong>ensemble_score</strong>는 §2.2 랭킹 맥락의 모델 점수로, ADME 지표와 단위·스케일이 다릅니다.</li>
+          <li>ADMETlab 3.0 웹 배치 2차 결과·hard 컷·METABRIC+Swiss 통합 랭킹은 <a href="#section-2-5-admetlab-web-stage2" style="color:#c4b5fd;">§2.5</a> 및 <code>merge_admetlab_web_exports_and_rank.py</code> 산출물을 본다.</li>
+        </ul>
+      </details>
+    </section>
+
+    <!--
+      === §2.5 ADMETlab 웹 2차 스냅샷 — 결과값 주석 (저장소 산출물과 동기) ===
+      스크립트: ml/pilot_sagemaker/merge_admetlab_web_exports_and_rank.py
+      입력: Downloads ADMETlab3_result.csv … (8).csv 총 9파일(행 9) → RDKit canonical 로 dedup 후 고유 8종.
+      중복: ADMETlab3_result (5).csv 와 (6).csv 가 동일 SMILES·taskId (5,5'-dimethyl-2,2'-bipyridyl) → 1행 drop.
+      큐: admetlab_stage2_queue.csv 8종 전부 매칭 (Acetaminophen 은 (8).csv, CC(=O)Nc1ccc(O)cc1).
+
+      Hard filter: hERG, H-HT, DILI, Ames 중 하나라도 확률 >= 0.7 → hard_fail (ADMETlab 3.0 export 열 그대로).
+      Soft rank: final_rank_score = z(ensemble_score) + z(adme_final_score_after_soft) + 1.0*z(admet_favorable_raw)
+                 − 0.15*max(0, n_cyp_inhibitor_ge_0.5 − 1).
+                 admet_favorable_raw = mean(clip(0.7−p,0,0.7) for 4 tox) + Fu·CL tail bonuses (스크립트 정의).
+
+      건수: n_queue=8, n_admetlab_hard_fail=5, n_hard_pass_ranked=3.
+
+      Hard 탈락 5종 (사유):
+        Acetohexamide      — DILI=1.0000 (hERG 0.0054, H-HT 0.6319, Ames 0.0003)
+        Albendazole        — H_HT 0.8060, DILI 0.999988, Ames 0.7134
+        N-Acetyl-L-Cysteine — Ames 0.8120
+        5,5'-Dimethyl-2,2'-bipyridyl — H_HT 0.7637, Ames 0.8258
+        Adapalene          — H_HT 0.9055, DILI 0.9193
+
+      Hard 통과 3종 (final_rank_score 내림차순):
+        1 Salbutamol      final_rank_score≈1.1465 — hERG 0.1043, H-HT 0.3250, DILI 0.0007, Ames 0.3284, Fu%≈80.96, CL_eff≈7.25
+        2 Acetic Acid     final_rank_score≈1.0152 — hERG 0.0246, H-HT 0.3889, DILI 0.5210, Ames 0.2307, Fu%≈98.57, CL_eff≈0.94
+        3 Acetaminophen   final_rank_score≈0.4566 — hERG 0.0702, H-HT 0.6348, DILI 0.6195, Ames 0.5502, Fu%≈65.64, CL_eff≈8.90
+
+      산출 CSV/JSON (fda_only_universe/):
+        admetlab_web_merged_dedup.csv
+        admetlab_web_queue_merged_full.csv
+        admetlab_web_final_ranked_hardpass.csv
+        admetlab_web_merge_rank_summary.json
+    -->
+    <section id="section-2-5-admetlab-web-stage2">
+      <h2>2.5) ADMETlab 3.0 웹 배치 · 2차 독성/대사 · hard 컷 + METABRIC·Swiss 통합 랭킹</h2>
+      <p class="muted" style="margin:0 0 10px;">
+        <strong>§2.4와의 관계:</strong> §2.4 SwissADME Hard 통과 8종이 <code>admetlab_stage2_queue.csv</code>에 올라간 뒤, 사용자가 <a href="https://admetlab3.scbdd.com/" style="color:#9bc2ff;">ADMETlab 3.0</a> 포털에서 SMILES별로 배치 실행·다운로드한 CSV(총 9파일)를 저장소 스크립트로 병합한 스냅샷이다. 공개 REST API는 불안정하여 <strong>웹 반자동 산출</strong>이 본 절의 근거가 된다.
+      </p>
+      <div class="policy-fda" style="border-color: rgba(167, 139, 250, 0.55); border-left-color: #a78bfa; background: rgba(139, 92, 246, 0.12); color: #ede9fe;">
+        <strong>입력·dedup:</strong> 9개 CSV 행 → RDKit canonical SMILES 기준 <strong>고유 8종</strong>(<code>(5)</code>·<code>(6)</code> 파일은 동일 분자로 1행 제거). 큐 8종과 전부 join 성공(아세트아미노펜은 <code>ADMETlab3_result (8).csv</code>, <code>CC(=O)Nc1ccc(O)cc1</code>).<br />
+        <strong>Hard filter:</strong> <code>hERG</code>, <code>H-HT</code>, <code>DILI</code>, <code>Ames</code> 중 <strong>하나라도 ≥ 0.7</strong>이면 2차 hard 탈락.<br />
+        <strong>Soft 랭킹 (hard 통과분):</strong> <code>z(ensemble_score) + z(adme_final_score_after_soft) + z(admet_favorable_raw)</code> − CYP inhibitor 다중 페널티(<code>merge_admetlab_web_exports_and_rank.py</code> 기본: 추가 억제 isoform당 0.15). <code>admet_favorable_raw</code>는 4종 독성 확률을 0.7 기준으로 낮을수록 가산하고, Fu·clearance 꼬리 보너스를 더한 값이다.
+      </div>
+
+      <h3>2.5-1) 스냅샷 요약</h3>
+      <table class="shortlist-table">
+        <tr><th>항목</th><th>값</th></tr>
+        <tr><td>큐 행 수</td><td>8</td></tr>
+        <tr><td>ADMETlab 파일 수 / 총 행 / dedup 후</td><td>9 / 9 / <strong>8</strong></td></tr>
+        <tr><td>Hard 탈락 (≥0.7)</td><td><strong>5</strong></td></tr>
+        <tr><td>Hard 통과·랭킹됨</td><td><strong>3</strong></td></tr>
+        <tr><td>스크립트</td><td><code>ml/pilot_sagemaker/merge_admetlab_web_exports_and_rank.py</code></td></tr>
+        <tr><td>폴더</td><td><code>results/…/fda_only_universe/</code></td></tr>
+      </table>
+
+      <h3>2.5-2) Hard 탈락 5종 (ADMETlab 확률)</h3>
+      <table class="shortlist-table" style="font-size:0.84rem;">
+        <tr><th>약물</th><th>hERG</th><th>H-HT</th><th>DILI</th><th>Ames</th><th>사유(≥0.7)</th></tr>
+        <tr><td class="chem-name">Acetohexamide</td><td>0.005</td><td>0.632</td><td class="warn"><strong>1.000</strong></td><td>0.000</td><td>DILI</td></tr>
+        <tr><td class="chem-name">Albendazole</td><td>0.283</td><td class="warn"><strong>0.806</strong></td><td class="warn"><strong>1.000</strong></td><td class="warn"><strong>0.713</strong></td><td>H-HT; DILI; Ames</td></tr>
+        <tr><td class="chem-name">N-Acetyl-L-Cysteine</td><td>0.002</td><td>0.540</td><td>0.606</td><td class="warn"><strong>0.812</strong></td><td>Ames</td></tr>
+        <tr><td class="chem-name">5,5′-Dimethyl-2,2′-bipyridyl</td><td>0.302</td><td class="warn"><strong>0.764</strong></td><td>0.609</td><td class="warn"><strong>0.826</strong></td><td>H-HT; Ames</td></tr>
+        <tr><td class="chem-name">Adapalene</td><td>0.614</td><td class="warn"><strong>0.905</strong></td><td class="warn"><strong>0.919</strong></td><td>0.399</td><td>H-HT; DILI</td></tr>
+      </table>
+
+      <h3>2.5-3) Hard 통과 3종 — 통합 랭킹</h3>
+      <p class="muted" style="margin:0 0 8px;">동일 코호트 내 <code>ensemble_score</code>·Swiss <code>adme_final_score_after_soft</code>는 동률이 많아, ADMETlab 기반 <code>admet_favorable_raw</code>와 z-score가 순위를 가른다.</p>
+      <table class="shortlist-table" style="font-size:0.86rem;">
+        <tr><th>순위</th><th>약물</th><th><code>final_rank_score</code></th><th>hERG</th><th>H-HT</th><th>DILI</th><th>Ames</th><th>Fu %</th><th>CL_eff*</th></tr>
+        <tr><td>1</td><td class="chem-name">Salbutamol</td><td class="ok">1.147</td><td>0.104</td><td>0.325</td><td>0.001</td><td>0.328</td><td>80.96</td><td>7.25</td></tr>
+        <tr><td>2</td><td class="chem-name">Acetic acid</td><td>1.015</td><td>0.025</td><td>0.389</td><td>0.521</td><td>0.231</td><td>98.57</td><td>0.94</td></tr>
+        <tr><td>3</td><td class="chem-name">Acetaminophen</td><td>0.457</td><td>0.070</td><td>0.635</td><td>0.619</td><td>0.550</td><td>65.64</td><td>8.90</td></tr>
+      </table>
+      <p class="muted" style="margin:8px 0 0;font-size:0.82rem;">* <code>CL_eff</code> = 비어 있지 않은 쪽으로 <code>cl-int</code> 우선, 없으면 <code>cl-plasma</code>(ADMETlab 표기 그대로).</p>
+
+      <h3>2.5-4) 산출 파일</h3>
+      <ul class="muted tight">
+        <li><code>admetlab_web_merged_dedup.csv</code> — ADMETlab 행 dedup</li>
+        <li><code>admetlab_web_queue_merged_full.csv</code> — 큐 + ADMETlab 전 열 + hard/soft 지표</li>
+        <li><code>admetlab_web_final_ranked_hardpass.csv</code> — hard 통과만 최종 점수 순</li>
+        <li><code>admetlab_web_merge_rank_summary.json</code> — 건수·가중치 메타</li>
+      </ul>
+      <p class="muted" style="margin-top:10px;">표·수치는 위 HTML 주석 블록에 원시 반올림 전 값을 병기해 두었으며, 재실행 시 스크립트 출력과 맞추면 된다.</p>
+    </section>
+
     <section>
       <h2>3) Survival-linked clinical relevance — 모델별 수치 (n=40, top-K=10)</h2>
       <div class="caution-label" style="margin:0 0 14px; border-color: rgba(56, 189, 248, 0.55); background: rgba(14, 165, 233, 0.1); color: #e0f2fe;">
@@ -400,7 +649,7 @@
       <div class="proxy-scope">
         <p class="proxy-banner">【PROXY DATA】 아래부터 §5 전체 — 코호트-native 피처·랭킹 정책 맥락. “약물 반응 정답” 외부 검증으로 단정하지 않습니다.</p>
         <h2>5) METABRIC-native cohort (no-LINCS) — 공식 external inference 랭킹</h2>
-        <p class="muted">운영 기준 랭킹: <code>…/native_pair_features_run/metabric_native_ensemble_ranking_no_lincs.csv</code> (피처: <code>metabric_native_pair_features_no_lincs.parquet</code>). with-LINCS native 랭킹은 비교·감사용. 상세는 <a href="dl_experiment_dashboard_20260331.html#metabric-native-external-policy" style="color:#fde047;">DL 대시보드 §0b</a>. 동일 랭킹에 Drugs@FDA·치료제 필터를 적용한 drug 목록은 <a href="#section-2-1-fda-ndc-native" style="color:#6ee7b7;">§2.1</a>. <code>ensemble_score</code> 정의는 <a href="#section-2-1-fda-ndc-native" style="color:#6ee7b7;">§2.1</a> 상단 펼치기 블록 참고.</p>
+        <p class="muted">운영 기준 랭킹: <code>…/native_pair_features_run/metabric_native_ensemble_ranking_no_lincs.csv</code> (피처: <code>metabric_native_pair_features_no_lincs.parquet</code>). with-LINCS native 랭킹은 비교·감사용. 정책·근거 요약은 본 페이지 <a href="#section-metabric-native-external-policy" style="color:#fde047;">§2.3b</a>. SwissADME 웹 1차 ADME 표는 <a href="#section-2-4-swissadme-web-adme" style="color:#fbbf24;">§2.4</a>. ADMETlab 3.0 웹 배치 2차·통합 랭킹은 <a href="#section-2-5-admetlab-web-stage2" style="color:#c4b5fd;">§2.5</a>. 동일 랭킹에 Drugs@FDA·치료제 필터를 적용한 drug 목록은 <a href="#section-2-1-fda-ndc-native" style="color:#6ee7b7;">§2.1</a>. <code>ensemble_score</code> 정의는 <a href="#section-2-1-fda-ndc-native" style="color:#6ee7b7;">§2.1</a> 상단 펼치기 블록 참고.</p>
       </div>
     </section>
 
@@ -423,7 +672,7 @@
 
     <section>
       <h2>7) 한눈에 보는 파이프라인 위치</h2>
-      <p class="muted" style="margin:0;">① SageMaker 3모델 학습·로컬 앙상블 → ② TCGA 경로 연구용 <strong>shortlist Top30</strong>(<strong>§2</strong>, <strong>필터 전</strong>) → ②.1 METABRIC-native 공식 랭킹 + <strong>Drugs@FDA·치료제 필터 shortlist</strong>(<strong>§2.1</strong>) → ③ <strong>Survival-linked</strong>(실제 OS, <strong>§3</strong>) → ④ METABRIC-like <strong>proxy</strong>(<strong>§4</strong>) → ⑤ METABRIC-native no-LINCS 랭킹 파일(<strong>§5</strong>) → ⑥ ADMET proxy·shortlist CSV(<strong>§6</strong>, SageMaker §4.3). <strong>§4</strong>는 “proxy 라벨과의 일치”, <strong>§3</strong>은 “OS와의 탐색적 연관”이라 질문이 다릅니다.</p>
+      <p class="muted" style="margin:0;">① SageMaker 3모델 학습·로컬 앙상블 → ② TCGA 경로 연구용 <strong>shortlist Top30</strong>(<strong>§2</strong>, <strong>필터 전</strong>) → ②.1 METABRIC-native 공식 랭킹 + <strong>Drugs@FDA·치료제 필터 shortlist</strong>(<strong>§2.1</strong>) → ②.2 FDA universe 재랭킹(<strong>§2.2</strong>) → ②.3 RDKit direct ADMET Top10(<strong>§2.3</strong>) → ②.3b no-LINCS 정책(<strong>§2.3b</strong>) → ②.4 SwissADME 웹 1차 ADME·ADMETlab 큐(<strong>§2.4</strong>) → ②.5 ADMETlab 웹 2차 병합·hard 컷·통합 랭킹(<strong>§2.5</strong>) → ③ <strong>Survival-linked</strong>(실제 OS, <strong>§3</strong>) → ④ METABRIC-like <strong>proxy</strong>(<strong>§4</strong>) → ⑤ METABRIC-native 랭킹·정책 맥락(<strong>§5</strong>) → ⑥ ADMET proxy·shortlist CSV(<strong>§6</strong>, SageMaker §4.3). <strong>§4</strong>는 “proxy 라벨과의 일치”, <strong>§3</strong>은 “OS와의 탐색적 연관”이라 질문이 다릅니다.</p>
     </section>
   </div>
 </body>
