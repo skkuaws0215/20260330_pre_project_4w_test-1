@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>유방암 환자 제공 가능성 — 팀 논의용 대시보드 · 20260403 v1</title>
+  <style>
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f0f12; color: #e8eaef; line-height: 1.55; }
+    .hero { padding: 44px 26px; border-bottom: 1px solid rgba(255,255,255,0.1); background: linear-gradient(118deg, #2a1535, #1e2a4a 45%, #152a30); }
+    .hero h1 { margin: 0 0 10px; font-size: 1.85rem; line-height: 1.25; }
+    .hero p { margin: 0; color: #b8c0d4; max-width: 58rem; }
+    .badge { display: inline-block; margin-top: 14px; margin-right: 8px; padding: 5px 12px; border: 1px solid #e879a9; border-radius: 999px; color: #fbcfe8; font-size: 0.8rem; }
+    .badge-sec { border-color: #7dd3fc; color: #bae6fd; }
+    .nav-btn { display: inline-block; margin-top: 12px; margin-left: 6px; border: 1px solid #6ea8fe; border-radius: 999px; color: #9bc2ff; padding: 5px 12px; font-size: 0.82rem; text-decoration: none; }
+    .container { max-width: 1040px; margin: 0 auto; padding: 24px; }
+    section { margin: 20px 0; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 20px 22px; background: rgba(255,255,255,0.025); }
+    h2 { margin: 0 0 12px; font-size: 1.2rem; color: #f1f5f9; }
+    h3 { font-size: 1rem; margin: 14px 0 8px; color: #cbd5e1; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { text-align: left; padding: 10px 9px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.88rem; vertical-align: top; }
+    th { background: rgba(236, 72, 153, 0.12); color: #fce7f3; }
+    .muted { color: #94a3b8; font-size: 0.9rem; }
+    .no { color: #f87171; font-weight: 700; }
+    .partial { color: #fbbf24; font-weight: 600; }
+    .note { color: #a5b4fc; font-weight: 600; }
+    code { background: rgba(255,255,255,0.08); border-radius: 6px; padding: 2px 6px; font-size: 0.82rem; }
+    .disclaimer { margin: 16px 0 0; max-width: 58rem; padding: 14px 16px; border-radius: 12px; border: 2px solid rgba(248, 113, 113, 0.55); border-left: 5px solid #f87171; background: rgba(127, 29, 29, 0.2); color: #fecaca; font-size: 0.9rem; line-height: 1.55; }
+    .disclaimer strong { color: #fca5a5; }
+    ul.tight { margin: 8px 0; padding-left: 1.2rem; color: #cbd5e1; }
+    ul.tight li { margin: 8px 0; }
+    footer { text-align: center; padding: 28px; color: #64748b; font-size: 0.82rem; }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>유방암 환자에게 「제공할 수 있는 약물」인가 — 팀 논의용</h1>
+    <p>in silico 재처방 파이프라인에서 <strong>SwissADME + ADMETlab 2차까지 통과한 3종</strong>을 두고, <strong>임상·윤리 관점에서 무엇을 주장할 수 있는지</strong> 정리한 문서이다. <strong>의료 행위·처방 지침이 아니다.</strong></p>
+    <div>
+      <span class="badge">Snapshot · 20260403 · v1</span>
+      <span class="badge badge-sec">Team4 · 논의 전용</span>
+      <span class="badge badge-sec">BRCA / drug repurposing 맥락</span>
+    </div>
+    <div class="disclaimer">
+      <strong>법적·의학적 고지:</strong> 본 HTML은 팀 내부 회의 자료일 뿐이며, 진단·치료·처방을 대체하지 않는다. 환자에게의 약물 제공·권유는 반드시 <strong>면허 의료진·기관 IRB/규정</strong>에 따른다.
+    </div>
+    <div style="margin-top:14px;">
+      <a class="nav-btn" href="index.html">Index</a>
+      <a class="nav-btn" href="ai_drug_discovery_pre_project_v1_dashboard.html">Pre-project 요약 대시보드</a>
+      <a class="nav-btn" href="metabric_admet_survival_dashboard_20260402_v2.html">METABRIC·ADMET v2</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <section>
+      <h2>1) 논의 질문 (회의 안건)</h2>
+      <p class="muted" style="margin:0;">모델·ADMET 스크린을 거쳐 상위에 남은 분자를 <strong>유방암 환자에게 치료 목적으로 제공할 수 있다</strong>고 말할 수 있는가? 아니면 <strong>연구 후보만 해당</strong>하며, 임상 단계·적응증·안전성 논의가 별도로 필요한가?</p>
+    </section>
+
+    <section>
+      <h2>2) 대상 3종의 출처 (데이터 맥락)</h2>
+      <ul class="tight">
+        <li>학습·랭킹은 주로 TCGA 계열 반응 proxy 등 <strong>in silico·전임상 맥락</strong>.</li>
+        <li>1차 SwissADME Hard / 2차 ADMETlab Hard( hERG·H-HT·DILI·Ames &lt; 0.7 등 ) 통과 후 남은 <strong>3개 분자</strong>.</li>
+        <li>근거 파일: <code>fe_re_batch_runs/20260402/…/fda_only_universe/admetlab_web_final_ranked_hardpass.csv</code></li>
+      </ul>
+      <table style="margin-top:14px;">
+        <tr><th>순위</th><th>CID</th><th>스냅샷명</th><th>성분(요약)</th></tr>
+        <tr><td>1</td><td>2083</td><td>Salbutamol</td><td>β2 기관지확장제 (알부테롤)</td></tr>
+        <tr><td>2</td><td>176</td><td>Acetic acid</td><td>초산 (제형·농도 의존)</td></tr>
+        <tr><td>3</td><td>1983</td><td>Acetaminophen</td><td>해열·진통 (아세트아미노펜)</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>3) 「유방암 환자 제공」에 대한 검토 (팀 논의용 표)</h2>
+      <p class="muted" style="margin:0 0 10px;">열 「BC 치료 제공」은 <strong>항암·질병 수정 치료로서 환자에게 제공</strong>이라는 질문에 대한 데이터·문헌 관점의 초안이다. <strong>O / X가 아니라 회의에서 합의할 문구</strong>로 쓴다.</p>
+      <table>
+        <tr>
+          <th>성분</th>
+          <th>유방암 표적 치료로서 제공</th>
+          <th>보조·대증(의사 판단 하)</th>
+          <th>이 스냅샷만으로 임상 권고 가능?</th>
+          <th>팀 논의 포인트</th>
+        </tr>
+        <tr>
+          <td><strong>살부타몰</strong><br /><span class="muted">Salbutamol</span></td>
+          <td class="no">아니오</td>
+          <td class="partial">호흡 질환 병용 시 기존 처방 맥락만 (항암과 무관)</td>
+          <td class="no">불가</td>
+          <td class="muted">재처방 점수 ≠ 유방암 적응증. 오프라벨 연구가 있어도 본 파이프로 입증되지 않음.</td>
+        </tr>
+        <tr>
+          <td><strong>초산</strong><br /><span class="muted">Acetic acid</span></td>
+          <td class="no">아니오</td>
+          <td class="partial">특정 희석 외용·이과 제제 등 (전신 항암 아님)</td>
+          <td class="no">불가</td>
+          <td class="muted">화학 공간·필터 산물 가능성. 순물질·고농도는 부식·독성.</td>
+        </tr>
+        <tr>
+          <td><strong>아세트아미노펜</strong><br /><span class="muted">Acetaminophen</span></td>
+          <td class="no">아니오 (항암제 아님)</td>
+          <td class="note">통증·발열 <strong>대증</strong>은 임상에서 흔히 의사 지휘 하 사용</td>
+          <td class="no">불가 (본 CSV는 후보 순위일 뿐)</td>
+          <td class="muted">간독성, 항암제·병용약 상호작용, 최대 용량은 반드시 의료진 확인.</td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>4) 팀에서 맞출 문장 (초안)</h2>
+      <ul class="tight">
+        <li><strong>합의안 A:</strong> 「본 3종은 <strong>유방암 치료용 약물 후보 리스트가 아니며</strong>, in silico·ADMET 2단계 스크리닝 결과일 뿐이다.」</li>
+        <li><strong>합의안 B:</strong> 「임상 연구로 이어지려면 <strong>적응증·모델·코호트·IRB·오프라벨 정책</strong>을 별도 문서로 정의한다.」</li>
+        <li><strong>합의안 C:</strong> 「대외·환자 대면 자료에는 <strong>처방·구매를 유도하는 표현을 넣지 않는다.</strong>」</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>5) 결론 요약 (v1 스냅샷)</h2>
+      <p class="muted" style="margin:0;">이 파이프라인 산출물만으로 <strong>「유방암 환자에게 치료 목적으로 제공할 약」</strong>이라고 단정하기는 <strong>적절하지 않다</strong>. 아세트아미노펜은 <strong>항암이 아닌 대증</strong>으로만 의미가 있고, 나머지 2종은 <strong>유방암 표준 치료와 연결되지 않는다</strong>. 팀 회의에서는 표 3절·4절 문장을 확정하고, 필요 시 <strong>임상·윤리 검토자</strong> 코멘트란을 다음 버전(v2)에 추가한다.</p>
+    </section>
+  </div>
+
+  <footer>
+    breast_cancer_team_discussion_dashboard_20260403_v1.html — 팀 논의용 · 2026-04-03 · v1<br />
+    수정 시 파일명 예: <code>…_20260403_v2.html</code> 또는 날짜 갱신
+  </footer>
+</body>
+</html>
